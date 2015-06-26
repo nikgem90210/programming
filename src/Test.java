@@ -5,7 +5,7 @@ public class Test {
 	public static void main(String[] args) {
 		
 		Screen.print();
-		System.out.println();
+		
 	}
 	
 	
