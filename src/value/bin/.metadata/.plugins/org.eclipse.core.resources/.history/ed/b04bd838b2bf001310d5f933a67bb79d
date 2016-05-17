@@ -1,0 +1,232 @@
+<%@ taglib uri="http://java.sun.com/jsp/jstl/core" prefix="c"%>
+<%@ taglib uri="http://java.sun.com/jsp/jstl/fmt" prefix="fmt"%>
+<%@ taglib prefix="s" uri="http://www.springframework.org/tags"%>
+<%@ taglib uri="http://java.sun.com/jsp/jstl/functions" prefix="fn"%>
+<%@ taglib uri="http://bsbportal.com/functions" prefix="bsbfn"%>
+<%@ taglib uri="http://bsbportal.com/functions/tti" prefix="tti" %>
+
+<%-- <c:set var="path" value="${pageContext.request.contextPath}/stars"/>
+<c:set var="specId" value="1"/>
+<c:set var="m" value="${modules.VIDEO_DETAIL}"/>
+<c:set var="m1" value="${modules.PAGINATION}"/>
+<c:set var="m3" value="${modules.RELATED_VIDEOS}"/>
+<c:set var="mId1" value="${moduleDescIds.VIDEO_LINK}" />
+<c:set var="mId2" value="${moduleDescIds.VID_LINK}" />
+
+<c:set var="more" value="${moduleDescIds.VIEW_MOREPHOTOS_LINK}"/>
+
+
+<jsp:include page="header.jsp"/>
+
+<table width="100%" border="0" cellspacing="0" cellpadding="10" class="rv_heading">
+	<tr>
+		<c:set var="bcm" value="${modules.BREADCRUMB}" />
+		<c:set var="bcmStarLink" value="${moduleDescIds.STARNAME_LINK}" />
+		<c:set var="bcmVidLink" value="${moduleDescIds.VIDEO_VIEW_ALL_LINK}" />
+        
+        <c:set var="url" value="${bsbfn:encode(starmetadata.name)}.html"/>
+        <td>
+        	<a style="color:#ffffff;font-weight:normal;" href="${bsbfn:createRdUrl(pageContext.request,header,pageId,uuid,circle,specId,bcm,bcmStarLink,server,path,url)}">
+        		<tti:textOrImage text="${bsbfn:getTransliteratedTextWithType(pageContext.request,starmetadata.name,2)}" style="b" size="12" bgColor="#646464"/>&nbsp;&nbsp;|&nbsp;
+        	</a>
+			
+			<c:set var="url" value="${bsbfn:encode(fn:toLowerCase(starmetadata.name))}/videos.html"/>
+			<a style="color:#ffffff" href="${bsbfn:createRdUrl(pageContext.request,header,pageId,uuid,circle,specId,bcm,bcmVidLink,server,path,url)}">
+				<strong><s:message code="label.videos" var="messageText"/><tti:textOrImage text="${messageText}" size="12" style="b" bgColor="#646464"/></strong>
+			</a>
+		</td>
+	</tr>
+</table>
+
+<jsp:include page="../../videos/smart/detail.jsp">
+	<jsp:param value="${relatedVideos}" name="video"/>
+	<jsp:param value="../css/video-detail-smart20140220.css" name="stylesheet"/>
+</jsp:include> --%>
+<c:set var="path" value="${pageContext.request.contextPath}/elections"/>
+<c:set var="specId" value="1"/>
+<c:set var="m" value="${modules.VIDEO}"/>
+<c:set var="mId" value="${moduleDescIds.VIDEO_LINK}"/>
+<s:message code="label.videos" var="videomoduletitle" scope="request"/>
+
+<%--<jsp:include page="../../videos/smart/related.jsp">
+	<jsp:param value="${relatedVideos}" name="videos"/>
+	<jsp:param value="2" name="nCols"/>
+	<jsp:param value="1" name="maxRows"/>
+	<jsp:param value="" name="urlPart"/>
+	<jsp:param value="80" name="thumbnailWidth"/>
+	<jsp:param value="60" name="thumbnailHeight"/>
+	<jsp:param value="${config.watermarkImageUrl}" name="watermarkImage"/>
+	<jsp:param value="30" name="watermarkImageXPos"/>
+	<jsp:param value="20" name="watermarkImageYPos"/>
+	<jsp:param value="20" name="watermarkImageTransparency"/>
+	<jsp:param value="true" name="viewAllEnabled"/>
+	<jsp:param value="../css/video-detail-smart20140220.css" name="stylesheet"/>
+</jsp:include> --%>
+
+
+<%@ page pageEncoding="UTF-8"%>
+
+<c:set var="videos" value="${relatedVideos}" />
+<c:set var="nCols" value="2" />
+<c:set var="maxRows" value="1" />
+<c:set var="urlPart" value="" />
+<c:set var="thumbnailWidth" value="80" />
+<c:set var="thumbnailHeight" value="60" />
+<c:set var="watermarkImage" value="${config.watermarkImageUrl}" />
+<c:set var="watermarkImageXPos" value="30" />
+<c:set var="watermarkImageYPos" value="20" />
+<c:set var="watermarkImageTransparency" value="20" />
+<c:set var="viewAllEnabled" value="true" />
+<c:set var="stylesheet" value="../css/video-detail-smart20140220.css" />
+
+
+<c:choose>
+	<c:when test="${empty stylesheet}">
+		<link rel="stylesheet" type="text/css"
+			href="/videos/css/style_smart_20140203.css">
+	</c:when>
+	<c:otherwise>
+		<link rel="stylesheet" type="text/css" href="${stylesheet}">
+	</c:otherwise>
+</c:choose>
+
+<c:choose>
+	<c:when test="${empty title}">
+	   <c:choose>
+	       <c:when test ="${empty videomoduletitle}">
+	           <c:set var="heading">
+	               <s:message code="top.menu.download_videos"/>
+	           </c:set>
+	       </c:when>
+	       <c:otherwise>
+	           <c:set var="heading" value="${videomoduletitle}"/>
+	       </c:otherwise>
+	   </c:choose>		
+	</c:when>
+	<c:otherwise>
+		<c:set var="heading" value="${title}" />
+	</c:otherwise>
+</c:choose>
+
+<c:if test="${not empty relatedVideos}">
+	<div class="rv_module">
+	
+		<table width="100%" border="0" cellspacing="0" cellpadding="0" class="rv_heading">
+		 	<tbody><tr>
+		    	<td>
+		    		<c:choose>
+		    		
+		    			<c:when test="${fn:length(relatedVideos) gt (param.maxRows * param.nCols)}">
+		    			<c:set var="m" value="${modules.VIEW_ALL}" />
+	<c:set var="mId" value="${moduleDescIds.VIDEO_VIEW_ALL_LINK}" />
+	<c:set var="rurl" value="${param.urlPart}/videos.html" />
+	<div class="item-header">
+	<a
+				href="${bsbfn:createRdUrl(pageContext.request,header,pageId,uuid,circle,specId,m,mId,server,path,rurl)}">
+	<tti:textOrImage text="${heading}" style="b" transparent="true" fontColor="black"/></a></div>
+			
+	</c:when>
+	<c:otherwise>
+	<div class="item-header"><tti:textOrImage text="${heading}" style="b" transparent="true" fontColor="black"/></div>
+	</c:otherwise>
+		    		
+		    		</c:choose>
+		    		
+		    	</td>
+				
+				<c:if test="${showViewAllInTheHeader}">
+					<td align="right">
+							<jsp:include page="viewAll.jsp" />
+					</td>
+				</c:if>
+		  	</tr>
+		</tbody></table>
+	
+		<!-- <div class="rv_module"> -->
+			<table width="100%" border="0" cellspacing="0" cellpadding="0" class="rv_listing_grid">
+
+				<c:choose>
+					<c:when test="${fn:length(relatedVideos)%nCols == 0}">
+						<c:set var="nRows" value="${fn:length(relatedVideos)/nCols}" />
+					</c:when>
+					<c:otherwise>
+						<c:set var="nRows"
+							value="${((fn:length(relatedVideos) - (fn:length(relatedVideos) mod nCols))  /  nCols) + 1}" />
+					</c:otherwise>
+				</c:choose>
+
+				<c:set var="nRows" value="${bsbfn:min(maxRows, nRows)}" />
+
+				<c:set var="m" value="${modules.RELATED_VIDEOS}" />
+				<c:set var="mId" value="${moduleDescIds.VIDEO_LINK}" />
+
+				<c:forEach var="rowIndex" begin="0" end="${nRows-1}" step="1"
+					varStatus="status">
+
+					<tr>
+						<c:forEach var="colIndex" begin="0" end="${nCols-1}"
+							step="1" varStatus="status">
+
+							<c:set var="video"
+								value="${relatedVideos[rowIndex*nCols + colIndex]}" />
+
+							<td width="${100/nCols}%" valign="top" align="center"
+									class="vp_photo">
+								<c:if test="${not empty video}">
+									
+								 	<c:set var="thumbUrl"
+										value="${config.icsBaseUrl}${bsbfn:getWatermarkedImageUrl(video.getThumbnailImageUrl(),140,100,watermarkImage,62,45,watermarkImageTransparency)}" />
+										
+									<c:set var="videoDetailUrl"
+										value="${urlPart}/video.html?id=${video.getId()}" />
+									<c:if test="${not empty bu}">
+									   <c:set var="videoDetailUrl" value="${videoDetailUrl}&bu=${bu}"/>
+									</c:if>	
+									<div class="item">
+					                	<div class="videosBlock">
+					                        <a href="${ bsbfn:createRdUrl(pageContext.request,header,pageId,uuid,circle,specId,m,mId,server,path,videoDetailUrl)}">
+					                            <div class="videoThumb">
+					                                <img src="${thumbUrl}" alt="-" class="thumbImg" />
+					                                <div class="overlayBar">
+					                                    <img src="${static_file_path}/elections/images/videoIcon2.png" alt="" class="videoIcon">
+					                                    <div class="videoDuration"><tti:textOrImage text="${video.durationMin} ${bsbfn:getTranslatedText(pageContext.request,'minutes')}" size="12"/></div>
+					                                </div>
+					                            </div>
+					                            Caption will come here
+					                        </a>
+					                     </div>
+					                </div>
+									<div class="rv_thumb">
+										
+										<div class="categories-td">
+										<a href="${ bsbfn:createRdUrl(pageContext.request,header,pageId,uuid,circle,specId,m,mId,server,path,videoDetailUrl)}">
+											<img src="${thumbUrl}" alt="-" />
+										</a>
+										</div>
+										
+										<div class="rv_thumb_title" >
+											<a href="${ bsbfn:createRdUrl(pageContext.request,header,pageId,uuid,circle,specId,m,mId,server,path,videoDetailUrl)}">
+												
+												<c:set var="truncateLength" value="35" />
+												<c:if test="${not empty maxVideoTitleLength}">
+													<c:set var="truncateLength" value="${maxVideoTitleLength}" />
+												</c:if>
+												
+												<c:set var="truncatedText" value="${bsbfn:truncateText(video.getTitle(), truncateLength, false)}" />
+												<p class="photo-text"> <tti:textOrImage text="${truncatedText}" width="100" size="12" style="b" fontColor="black" bgColor="white" transparent="false"/></p>
+											</a>
+										</div>
+									</div>
+								</c:if>
+							</td>
+						</c:forEach>
+					</tr>
+				</c:forEach>
+			</table>
+		<!-- </div> -->
+	</div>
+</c:if>
+
+
+
+

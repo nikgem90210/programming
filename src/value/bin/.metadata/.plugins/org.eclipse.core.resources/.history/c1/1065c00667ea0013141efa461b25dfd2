@@ -1,0 +1,61 @@
+<%@ page contentType="text/html;charset=UTF-8" language="java" %>
+<%@ taglib uri="http://java.sun.com/jsp/jstl/core" prefix="c" %>
+<%@ taglib uri="http://java.sun.com/jsp/jstl/fmt" prefix="fmt" %>
+<%@ taglib prefix="s" uri="http://www.springframework.org/tags" %>
+<%@ taglib uri="http://java.sun.com/jsp/jstl/functions" prefix="fn" %>
+<%@ taglib uri="http://bsbportal.com/functions" prefix="bsbfn" %>
+<%@ taglib uri="http://bsbportal.com/functions/tti" prefix="tti" %>
+
+<c:if test="${seriesStandings != null && seriesStandings.size() > 0 }">
+<div class="heading" style="margin-bottom:5px; margin-top:${marginTop}px"> 
+<tti:textOrImage text="${bsbfn:getTranslatedText(pageContext.request,series.seriesName) }" size="12"/>
+</div>
+<c:forEach var="series" items="${seriesStandings}">
+<div style="margin:5px;" >
+<tti:textOrImage text="${bsbfn:getTransliteratedText(pageContext.request,series.stage)}" size="12"/>
+</div>
+<div class="score-data"> 
+                <table width="100%" cellpadding="0" cellspacing="0" class=" score-data-table">
+                  <tbody>
+                    <tr>
+                      <td width="40%" class="head"><span><s:message code="label.teams" var="messageText"/><tti:textOrImage text="${messageText}" size="12"/></span></td>
+                      <td width="10%" align="center" class="head">P</td>
+                      <td width="10%" align="center" class="head"><span>W</span></td>
+                      <td width="10%" align="center" class="head"><span>L</span></td>
+                      <td width="10%" align="center" class="head"><span>T</span></td>
+                      <td width="10%" align="center" class="head">NRR</td>
+                      <td width="10%" align="center" class="head"><span>Pts</span></td>
+                    </tr>
+                    <c:forEach var="teamRank" items="${series.teamPoints}" varStatus="rowCounter">
+                        <c:forEach var="team" items="${teamList}">
+                        <c:if test="${team.teamInfo.teamId eq teamRank.teamId}">
+                        <c:set var="currentTeam" value="${team }"/>
+                        </c:if>
+                        </c:forEach>
+                        <c:choose>
+                        <c:when test="${rowCounter.count % 2 == 0 }">
+                        	<tr class="score-data-row">
+                        </c:when>
+                        <c:otherwise>
+                        	<tr>
+                        </c:otherwise>
+                        </c:choose>
+                            <td>
+                           <c:set var="teamlink" value="${server}${pageContext.request.contextPath}/cricket/team/${bsbfn:urlEncode(teamRank.teamName)}.html"/>
+							<c:set var="teamUrl" value="${bsbfn:createRdUrlWithId(pageContext.request,pageId,modules.TEAM_LIST,moduleDescIds.TEAM_INFO,teamlink,'teamlink' ,1,'teamlink')}"/> 
+                            <a href="${teamUrl }"><tti:textOrImage text="${bsbfn:getTransliteratedText(pageContext.request,currentTeam.teamInfo.teamShortName)}" size="12"/></a>
+                            </td>
+                            <td align="center" >${teamRank.played}</td>
+                            <td align="center" >${teamRank.won}</td>
+                            <td align="center" >${teamRank.lost}</td>
+                            <td align="center" >${teamRank.tied}</td>
+                            <td align="center">${teamRank.netRunRate}</td>
+                            <td align="center">${teamRank.points}</td>
+                        </tr>
+                    </c:forEach>
+
+                  </tbody>
+                </table>
+</div>
+</c:forEach>
+</c:if>

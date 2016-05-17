@@ -1,0 +1,180 @@
+<%@ page contentType="text/html;charset=UTF-8" language="java"%>
+<%@ taglib uri="http://java.sun.com/jsp/jstl/core" prefix="c"%>
+<%@ taglib uri="http://java.sun.com/jsp/jstl/fmt" prefix="fmt"%>
+<%@ taglib prefix="s" uri="http://www.springframework.org/tags"%>
+<%@ taglib uri="http://java.sun.com/jsp/jstl/functions" prefix="fn"%>
+<%@ taglib uri="http://bsbportal.com/functions" prefix="bsbfn"%>
+<%@ taglib uri="http://bsbportal.com/functions/tti" prefix="tti" %>
+<jsp:include page="header.jsp" />
+
+<c:set var="path" value="${pageContext.request.contextPath}/stars" />
+<c:set var="specId" value="3" />
+<c:set var="m" value="${modules.PHOTO_THUMBS}" />
+<c:set var="mId" value="${moduleDescIds.IMAGE_LINK}" />
+<c:set var="m2" value="${modules.HEADER}" />
+<c:set var="mId2" value="${moduleDescIds.TITLE_LINK}" />
+
+<c:set value="true" var="starmetadataNotNull"/>
+<c:if test="${empty starmetadata}">
+	<c:set value="false" var="starmetadataNotNull"/>
+</c:if>
+
+<c:if test="${starmetadataNotNull}">
+	<table width="100%" border="0" cellspacing="0">
+		<tr>
+			<td align="left" valign="top" class="celebName">
+					<c:set var="url" value="${bsbfn:encode(fn:toLowerCase(starmetadata.name))}.html" />
+					<a href="#"> </a> 
+					<a href="${bsbfn:createRdUrl(pageContext.request,header,pageId,uuid,circle,specId,m2,mId2,server,path,url)}">
+						<strong><tti:textOrImage text="${bsbfn:getTransliteratedTextWithType(pageContext.request,starmetadata.name,2)}" size="12" style="b"/></strong>
+					</a>
+		        	<c:set var="galleryUrl" value="${bsbfn:encode(fn:toLowerCase(starmetadata.name))}/gallery.html?p=1"/>
+			</td>
+		</tr>
+	</table>
+</c:if>
+
+<h2 class="ttl">
+			<c:if test="${!starmetadataNotNull}">
+                <c:set var="galleryUrl" value="/gallery/${galleryid}.html?p=1"/>
+            </c:if>
+            <img src="http://54.197.253.14:8080/stars/images/icon_ttl_middle_next.gif">
+            <span class="title_bg"><a href="${bsbfn:createRdUrl(pageContext.request,header,pageId,uuid,circle,specId,m2,mId2,server,path,galleryUrl)}"><s:message code="label.gallery" var="messageText"/><tti:textOrImage text="${messageText}" size="12" style="b"/></a>
+            <a href="#" class="small-text">(${fn:length(photos)})</a>
+            </span>
+    </h2>
+
+
+<div class="photo-module">
+	
+	
+	<c:set var="numRows" value="${fn:length(photos)/2}" />
+	<table width="99%" border="0" cellspacing="0" cellpadding="5">
+		<c:forEach var="rowIndex" begin="0" end="${numRows-1}" step="1"
+			varStatus="status">
+			<c:set var="photo0" value="${photos[rowIndex*2]}" />
+			<c:set var="photo1" value="${photos[rowIndex*2+1]}" />
+			
+			<c:choose>
+				<c:when test="${starmetadataNotNull}">
+					<c:set var="p0Source" value="${bsbfn:encode(fn:toLowerCase(starmetadata.name))}/photo.html?i=${rowIndex*2+pager.startIndex}&_ap=1" />
+					<c:set var="p1Source" value="${bsbfn:encode(fn:toLowerCase(starmetadata.name))}/photo.html?i=${rowIndex*2+1+pager.startIndex}&_ap=1" />
+				</c:when>
+				<c:otherwise>
+					<c:set var="p0Source" value="/photo/${galleryid}.html?i=${rowIndex*2+pager.startIndex}&_ap=1" />
+					<c:set var="p1Source" value="/photo/${galleryid}.html?i=${rowIndex*2+1+pager.startIndex}&_ap=1" />
+				</c:otherwise>
+			</c:choose>
+			
+			<tr>
+				<td width="33%" align="center"><a
+					href="${bsbfn:createRdUrl(pageContext.request,header,pageId,uuid,circle,specId,m,mId,server,path,p0Source)}">
+						<img
+						src="${config.icsBaseUrl}${bsbfn:getResizedImageUrl(photo0,50,50)}" />
+
+				</a></td>
+				<td width="33%" align="center"><a
+					href="${bsbfn:createRdUrl(pageContext.request,header,pageId,uuid,circle,specId,m,mId,server,path,p1Source)}">
+						<img
+						src="${config.icsBaseUrl}${bsbfn:getResizedImageUrl(photo1,50,50)}" />
+				</a></td>
+			</tr>
+
+		</c:forEach>
+
+	</table>
+</div>
+<table width="100%" border="0" class="view-all" cellspacing="5"
+       cellpadding="0">
+    <tr>
+    
+    	<c:choose>
+			<c:when test="${starmetadataNotNull}">
+	            <c:set var="prevurl" value="${bsbfn:encode(fn:toLowerCase(starmetadata.name))}/gallery.html?p=${pager.previousPageNumber}" />
+	            <c:set var="nexturl" value="${bsbfn:encode(fn:toLowerCase(starmetadata.name))}/gallery.html?p=${pager.nextPageNumber}" />
+			</c:when>
+			<c:otherwise>
+				<c:set var="prevurl" value="/gallery/${galleryid}.html?p=${pager.previousPageNumber}" />
+	            <c:set var="nexturl" value="/gallery/${galleryid}.html?p=${pager.nextPageNumber}" />
+			</c:otherwise>
+		</c:choose>
+    
+        <c:if test="${pager.hasPrevPage && pager.previousPageNumber > 0}">
+            <td width="20%" align="center" class="dark-grey-btn">
+            	<a href="${bsbfn:createRdUrl(pageContext.request,header,pageId,uuid,circle,specId,modules.PAGINATION,moduleDescIds.PAGINATION_PRV,server,path,prevurl)}" style="color: #fff;">
+            		<s:message code="label.prev" var="messageText"/><tti:textOrImage bgColor="#646464" fontColor="white" text="${messageText}" />
+            	</a>
+            </td>
+        </c:if>
+        
+        <c:if test="${pager.hasNextPage}">
+            <td width="20%" align="center" class="dark-grey-btn">
+            	<a href="${bsbfn:createRdUrl(pageContext.request,header,pageId,uuid,circle,specId,modules.PAGINATION,moduleDescIds.PAGINATION_NXT,server,path,nexturl)}" style="color: #fff;">
+            		<s:message code="label.next" var="messageText"/><tti:textOrImage bgColor="#646464" fontColor="white" text="${messageText}" />
+            	</a>
+            </td>
+        </c:if>
+    </tr>
+</table>
+<br />
+
+<c:if test="${starmetadataNotNull}">
+	<c:if test="${language == 'en' }">
+	<jsp:include page="qrious.jsp"/>
+	</c:if>
+    
+    <h2 class="ttl">
+            <img src="http://54.197.253.14:8080/stars/images/icon_ttl_middle_next.gif">
+            <span class="title_bg"><s:message code="label.quick_links" var="messageText"/><tti:textOrImage bgColor="#646464" fontColor="white" text="${messageText}" size="12" style="b"/></span>
+    </h2>
+    
+	<c:set var="m" value="${modules.QUICK_LINKS}" />
+	<c:set var="mId" value="${moduleDescIds.TITLE_LINK}" />
+	<c:set var="url"
+		value="${bsbfn:encode(fn:toLowerCase(starmetadata.name))}/about.html" />
+	<div class="listing-text">
+		<a
+			href="${bsbfn:createRdUrl(pageContext.request,header,pageId,uuid,circle,specId,m,mId,server,path,url)}">
+			<c:choose>
+			<c:when test="${language == 'en' }">
+			<s:message code="label.about" var="messageText"/><tti:textOrImage text="${messageText} ${bsbfn:getTransliteratedTextWithType(pageContext.request,starmetadata.name,2)}" />
+			</c:when>
+			<c:otherwise>
+			<s:message code="label.about" var="messageText"/><tti:textOrImage text="${bsbfn:getTransliteratedTextWithType(pageContext.request,starmetadata.name,2)} ${messageText}" />
+			</c:otherwise>
+			</c:choose>
+            <img src="http://54.197.253.14:8080/stars/images/arrow2.png" width="4" align="right" />
+			</a>
+			
+	</div>
+	<c:if test="${fn:length(starmetadata.movies) > 0}">
+		<c:set var="url"
+			value="${bsbfn:encode(fn:toLowerCase(starmetadata.name))}/movies.html" />
+		<div class="listing-text">
+			<a
+				href="${bsbfn:createRdUrl(pageContext.request,header,pageId,uuid,circle,specId,m,mId,server,path,url)}"><s:message code="label.movies" var="messageText"/><tti:textOrImage text="${messageText}" />
+              <img src="http://54.197.253.14:8080/stars/images/arrow2.png" width="4" align="right" />  
+                </a>
+		</div>
+	</c:if>
+	<c:set var="url"
+		value="${bsbfn:encode(fn:toLowerCase(starmetadata.name))}/awards.html" />
+	<div class="listing-text">
+		<a
+			href="${bsbfn:createRdUrl(pageContext.request,header,pageId,uuid,circle,specId,m,mId,server,path,url)}"><s:message code="label.awards" var="messageText"/>
+		<s:message code="label.nominations" var="messageText1"/><tti:textOrImage text="${messageText} & ${messageText1}" />
+        <img src="http://54.197.253.14:8080/stars/images/arrow2.png" width="4" align="right" />
+        </a>
+	</div>
+</c:if>
+
+<c:choose>
+	<c:when test="${starmetadataNotNull}">
+		<jsp:include page="footer.jsp"/>
+	</c:when>
+	<c:otherwise>
+		<jsp:include page="footer.jsp">
+			<jsp:param value="false" name="showothers"/>
+		</jsp:include>
+	</c:otherwise>
+</c:choose>

@@ -1,0 +1,158 @@
+<%@ page contentType="text/html;charset=UTF-8" language="java" %>
+<%@ taglib uri="http://java.sun.com/jsp/jstl/core" prefix="c" %>
+<%@ taglib uri="http://java.sun.com/jsp/jstl/fmt" prefix="fmt" %>
+<%@ taglib prefix="s" uri="http://www.springframework.org/tags" %>
+<%@ taglib uri="http://bsbportal.com/functions" prefix="bsbfn" %>
+<%@ taglib uri="http://java.sun.com/jsp/jstl/functions" prefix="fn" %>
+<%@ taglib uri="http://bsbportal.com/functions/tti" prefix="tti" %>
+<c:set var="m" value="${modules.MATCH_SUMMARY}"/>
+<c:set var="matchInfo" value="${matchDetails }"/>
+<c:set var="team1" value="${matchInfo.team1.teamInfo}" scope="request"/>
+<c:set var="team2" value="${matchInfo.team2.teamInfo}" scope="request"/>
+<c:set var="inngs" value="${matchInfo.getInnings()}"/>
+<c:set var="inning" value="${inngs[matchInfo.currentInning - 1] }" />
+
+<div class="smallticker">
+                	
+              <div class="miniscore">
+              <div class="miniscore-title">
+              <a href="${liveurl }" >
+              
+			  	
+			  		<tti:textOrImage bgColor="#0099cc" fontColor="white" text="${bsbfn:getTranslatedTextAfterSplitting(pageContext.request,matchDetails.seriesName,\",\")}, ${bsbfn:getTranslatedText(pageContext.request,matchDetails.matchNumber)}" width="-80"/>
+                	</a>
+			  	
+			  	</div>
+				<div class="miniscore-content">
+					<%-- <c:set var="imgUrl" value="${server}${pageContext.request.contextPath}/cricket/${team1.flagUrl}"/>
+                   <a href="${url}"> <img height="25px" style="border:1px solid #c5f0fe;" src="${bsbfn:getCompleteResizedImageUrl(true,imgUrl,25,25) }"> </a> --%>
+             		<c:set var="inng1link" value="${server}${pageContext.request.contextPath}/cricket/${currentMatch}/${param.inngurl}.html?inng=${firstScoreInng }&_ap=1"/>
+        	<c:set var="url" value="${bsbfn:createRdUrlWithId(pageContext.request,pageId,modules.SCOREBOARD,moduleDescIds.DETAIL_SCORE_LINK,inng1link,'inng1link' ,1,'inng1link')}"/>
+             		
+             		
+                    <a href="${url}" class="team-name" style="color:#fff; ">
+	                    <s:message code="label.team.small.${fn:toLowerCase(team1.teamShortName)}" var="messageText"/>
+	                    <tti:textOrImage bgColor="#0099cc" fontColor="white" text="${messageText}" size="12"/>
+	                </a>
+	                <span style="color:#fff; font-size:small">vs</span>
+	                      
+	                <c:set var="inng2link" value="${server}${pageContext.request.contextPath}/cricket/${currentMatch}/${param.inngurl}.html?inng=${secondScoreInng }&_ap=1"/>
+        		<c:set var="url" value="${bsbfn:createRdUrlWithId(pageContext.request,pageId,modules.SCOREBOARD,moduleDescIds.DETAIL_SCORE_LINK,inng2link,'inng2link' ,1,'inng2link')}"/>
+        		<c:if test="${matchDetails.currentInning > 1}">
+        			<c:set var="url" value="${bsbfn:createRdUrlWithId(pageContext.request,pageId,modules.SCOREBOARD,moduleDescIds.DETAIL_SCORE_LINK,inng2link,'inng2link' ,2,'inng2link')}"/>
+        		</c:if>
+                   <%-- <a href="${url }" >
+                   <c:set var="t2imgUrl" value="${server}${pageContext.request.contextPath}/cricket/${team2.flagUrl}"/> 
+                   <img height="25px" style="border:1px solid #c5f0fe;" src="${bsbfn:getCompleteResizedImageUrl(true,t2imgUrl,25,25) }"></a> --%>
+                	
+                    <a href="${url }" class="team-name" style="color:#fff;"><s:message code="label.team.small.${fn:toLowerCase(team2.teamShortName)}" var="messageText"/><tti:textOrImage bgColor="#0099cc" fontColor="white" text="${messageText}" size="12"/></a>
+	                
+	                
+	                <c:if test="${matchDetails.matchStatusCategory eq 'IN_PROGRESS'}">
+						<span class="live-btn" >LIVE</span>
+					</c:if>
+					<br />
+				
+				<td>
+	<c:set var="livelink" value="${server}${pageContext.request.contextPath}/cricket/${matchInfo.matchId}/score.html?_ap=1"/>
+	<c:set var="liveurl" value="${bsbfn:createRdUrlWithId(pageContext.request,pageId,modules.SCOREBOARD,moduleDescIds.DETAIL_SCORE_LINK,livelink,'livelink' ,1,'livelink')}"/>
+	<c:set var="liveScoreLink" value="${server}${pageContext.request.contextPath}/cricket/${matchInfo.matchId}/live.html?_ap=1"/>
+	<c:set var="liveScoreUrl" value="${bsbfn:createRdUrlWithId(pageContext.request,pageId,modules.SCOREBOARD,moduleDescIds.LIVE_SCORE_LINK,liveScoreLink,'liveScoreLink' ,1,'liveScoreLink')}"/>
+	<c:set var="inning" value="${inngs[matchInfo.currentInning - 1] }" />
+ 	<a href="${liveurl }" class="run-rate">
+ 	<c:if test="${inning.currentRun != null }">
+  	<div style="font-size:large;">
+  	<s:message code="label.team.small.${fn:toLowerCase(inning.battingTeam.teamShortName)}" var="messageText"/>
+  	<tti:textOrImage text="${messageText}" size="12"/> <b>
+  	<tti:textOrImage text="${inning.currentRun}/${inning.currentWicket }" size="12"/> </b>
+  	<tti:textOrImage text="(${inning.currentOver}" size="12"/> <s:message code="label.ovrs" var="messageText"/><tti:textOrImage text="${messageText})" size="12"/></div>
+  	</c:if>
+  	
+  		<c:choose>
+				<c:when test="${fn:length(matchInfo.winningTeamId) > 0}">
+					<c:choose>
+							<c:when>
+            					<s:message code="label.team.${fn:toLowerCase(bsbfn:getFirstWordFromStr(matchInfo.matchResultStr))}" var="messageText"/> 
+            					<tti:textOrImage text="${messageText}" size="12"/>
+            					 <tti:textOrImage text="${bsbfn:getTransliteratedText(pageContext.request,matchInfo.winningStatus)}" size="12"/>
+            					 <s:message code="label.wintext" var="messageText"/> <tti:textOrImage text="${messageText}" size="12"/> 
+            				</c:when>
+            		</c:choose>
+				
+            		
+            	</c:when>
+            	<c:otherwise>
+            		<c:choose>
+ 
+                         <c:when test="${fn:length(matchInfo.currentEquation) > 0}">
+                                                 <span>
+ 
+                                                 <tti:textOrImage text="${bsbfn:getTransliteratedText(pageContext.request,matchInfo.currentEquation)}" width="-180"/>
+                                                 </span>
+                         </c:when>
+                         <c:otherwise>
+                            <c:if test="${fn:length(matchInfo.currentStatusStr)>0 }">
+                                               <span>
+                                               <tti:textOrImage text="${bsbfn:getTransliteratedText(pageContext.request,matchInfo.getShortCurrentStatusStr())}" width="-180"/>
+                                               </span>
+                            </c:if>
+                        </c:otherwise>
+                    </c:choose>
+            		
+            	</c:otherwise>
+    	</c:choose>
+  	
+  		</a> 
+</td>	                
+
+				<!-- score will come here -->
+
+				 	
+              
+             	
+     	
+
+
+<%--        <div>
+        <c:choose>
+						<c:when test="${fn:length(matchInfo.winningTeamId) > 0}">
+            				<br/>
+            				<a href="${liveurl }" class="team2-total">
+            			<c:choose>
+							<c:when test="${language == 'en'}">
+            					<s:message code="label.team.${fn:toLowerCase(bsbfn:getFirstWordFromStr(matchInfo.matchResultStr))}" /> <s:message code="label.wintext"/> ${bsbfn:getTransliteratedText(pageContext.request,matchInfo.winningStatus)} 
+            				</c:when>
+            				<c:otherwise>
+            					<s:message code="label.team.${fn:toLowerCase(bsbfn:getFirstWordFromStr(matchInfo.matchResultStr))}" var="messageText"/><tti:textOrImage style="b" bgColor="#0099cc" fontColor="white"  text="${messageText}" size="12"/> 
+            					
+            					<tti:textOrImage style="b" bgColor="#0099cc" fontColor="white" text="${bsbfn:getTransliteratedText(pageContext.request,matchInfo.winningStatus)}" size="12"/>
+            					<s:message code="label.wintext" var="messageText"/><tti:textOrImage style="b" bgColor="#0099cc" fontColor="white" text="${messageText}" size="12"/>
+            				</c:otherwise>
+            			</c:choose>
+            				</a>
+            			</c:when>
+            			<c:otherwise>
+                                        <c:choose>
+                                         
+            				<c:when test="${fn:length(matchInfo.currentEquation) > 0}">
+ 								<br/><a href="${liveurl }" class="team2-total">
+ 								
+ 								<tti:textOrImage bgColor="#0099cc" fontColor="white"  text="${bsbfn:getTransliteratedText(pageContext.request,matchInfo.currentEquation)}" width="-80"/>
+ 								</a> 
+ 							</c:when>
+                                         <c:otherwise>
+                                          <c:if test="${fn:length(matchInfo.currentStatusStr)>0 }">
+                                               <span>
+                                               <tti:textOrImage text="${bsbfn:getTransliteratedText(pageContext.request,matchInfo.getShortCurrentStatusStr())}" width="-180"/>
+                                               </span>
+                                          </c:if>
+                                         </c:otherwise>
+                                       </c:choose>
+            			</c:otherwise>
+    				</c:choose>
+    				
+    				
+    				</div> 
+ --%>    				</div>  	
+</div>
+        </div>

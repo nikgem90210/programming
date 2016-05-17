@@ -1,0 +1,37 @@
+<%@ taglib uri="http://bsbportal.com/functions" prefix="bsbfn"%>
+<%@ taglib uri="http://java.sun.com/jsp/jstl/core" prefix="c"%>
+
+<jsp:include page="header.jsp"></jsp:include>
+
+<div class="moduleBlock">
+    	<div class="moduleContent">
+        
+          <table class="polls-result">
+          	<tr>
+            	<td colspan="2"><h3>${question}</h3></td>
+            </tr>
+            <c:forEach var="choice" items="${stats.keySet()}" varStatus="rowCounter">
+            <tr>
+              <td><span class="name">${choice }</span><span class="percentage"> - ${stats.get(choice)}</span>
+              <p class="second" style="width:${stats.get(choice)*100/count}%"></p></td>
+			</tr>
+			</c:forEach>
+          </table>
+            
+        </div>
+</div>
+<jsp:include page="footer.jsp"></jsp:include>
+<style>
+.pollPercentage{
+background-color: #109600;
+}
+.polls-result td{ vertical-align:middle;}
+.polls-result h3{font-size:18px; color:#000; margin-bottom:10px;}
+.polls-result td img{ margin-right:5px;}
+.polls-result td span.percentage{ color:#000000; font-weight:bold;}
+.polls-result td p{ color:#303030; height:10px; }
+.polls-result td p.first{ background-color:#109600; }
+.polls-result td p.second{ background-color:#0065BA; }
+.polls-result td p.third{ background-color:#C61500; }
+.polls-result td p.fourth{ background-color:#9F9F9F; }
+</style>

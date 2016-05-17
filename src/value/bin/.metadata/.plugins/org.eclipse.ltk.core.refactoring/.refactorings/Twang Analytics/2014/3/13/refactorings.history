@@ -1,0 +1,3 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<session version="1.0">&#x0A;<refactoring comment="Rename resource &apos;Twang Analytics/panel.html&apos; to &apos;panel.jsp&apos;" description="Rename resource &apos;panel.html&apos;" flags="7" id="org.eclipse.ltk.core.refactoring.rename.resource" input="panel.html" name="panel.jsp" stamp="1395730965108" updateReferences="true"/>&#x0A;<refactoring comment="Rename resource &apos;Twang Analytics/panel.jsp&apos; to &apos;panel.html&apos;" description="Rename resource &apos;panel.jsp&apos;" flags="7" id="org.eclipse.ltk.core.refactoring.rename.resource" input="panel.jsp" name="panel.html" stamp="1395731518750" updateReferences="true"/>
+</session>

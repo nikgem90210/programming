@@ -1,0 +1,1253 @@
+package com.bsb.portal.fe.controller;
+
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+import java.util.Random;
+import java.util.Set;
+
+import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpServletResponse;
+
+import org.apache.commons.lang3.StringUtils;
+import org.json.simple.JSONArray;
+import org.json.simple.JSONObject;
+import org.json.simple.JSONValue;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Controller;
+import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestMethod;
+import org.springframework.web.bind.annotation.RequestParam;
+import org.springframework.web.bind.annotation.ResponseBody;
+import org.springframework.web.servlet.ModelAndView;
+
+import com.bsb.portal.common.Device.DeviceGroup;
+import com.bsb.portal.common.NewsComparator;
+import com.bsb.portal.common.Pair;
+import com.bsb.portal.constants.AnalyticsConstants;
+import com.bsb.portal.constants.PiwikConstants;
+import com.bsb.portal.context.PortalContext;
+import com.bsb.portal.dto.Article;
+import com.bsb.portal.dto.BannerMetadata;
+import com.bsb.portal.dto.Category;
+import com.bsb.portal.dto.GalleryData;
+import com.bsb.portal.dto.Pager;
+import com.bsb.portal.dto.PhotoAlbum;
+import com.bsb.portal.dto.PhotoMetaData;
+import com.bsb.portal.dto.Poll;
+import com.bsb.portal.dto.PollQuestion;
+import com.bsb.portal.dto.QriousMetaData;
+import com.bsb.portal.dto.StarProfileMetaData;
+import com.bsb.portal.dto.Video;
+import com.bsb.portal.fe.analytics.ElectionAnalytics;
+import com.bsb.portal.fe.analytics.ElectionAnalytics.ElectionSourcePage;
+import com.bsb.portal.fe.delivery.DeliveryConstants;
+import com.bsb.portal.fe.delivery.model.NewsItemModel;
+import com.bsb.portal.fe.delivery.util.DeliveryUtil;
+import com.bsb.portal.fe.services.CmsService;
+import com.bsb.portal.fe.services.ConfigurationService;
+import com.bsb.portal.fe.services.ElectionService;
+import com.bsb.portal.fe.services.ICricketService;
+import com.bsb.portal.fe.services.MicrositeService;
+import com.bsb.portal.fe.services.NewsServiceNew;
+import com.bsb.portal.fe.services.PhotoService;
+import com.bsb.portal.fe.services.QriousService;
+import com.bsb.portal.fe.services.StarService;
+import com.bsb.portal.fe.services.VideoService;
+import com.bsb.portal.fe.utils.PagingUtils;
+import com.bsb.portal.utils.ResponseWrapper;
+import com.bsb.portal.utils.api.CollectionUtilities;
+import com.bsb.portal.utils.api.RequestUtils;
+import com.bsb.portal.utils.api.Utils;
+
+@Controller
+@RequestMapping(value = "/elections")
+public class ElectionController extends BasePhotoController {
+
+	private static Logger logger = LoggerFactory.getLogger(MicrositeController.class);
+
+	@Autowired
+	private ICricketService cricketService;
+
+	@Autowired
+	private CmsService cmsService;
+
+	@Autowired
+	private NewsServiceNew newsService;
+
+	@Autowired
+	private MicrositeService msService;
+
+	@Autowired
+	private ConfigurationService configService;
+
+	@Autowired
+	private VideoService videoService;
+
+	@Autowired
+	private PhotoService photoService;
+
+	@Autowired
+	private ElectionService electionService;
+
+	@Autowired
+	private StarService starService;
+
+	@Autowired
+	private QriousService qriousService;
+
+	@Autowired
+	private ElectionAnalytics electionAnalytics;
+
+	private final String QRIOUS_SRCH_TITLE = "";
+	private final String QRIOUS_SRCH_CAT = "Elections";
+	private static final int NUMB_GALLERY_PER_PAGE = 10;
+	private static final int NUMB_NEWS_PER_PAGE = 20;
+	private static final int NUMB_HEAVYWEIGHTS_PER_PAGE =10;
+	 public static final int NUM_RELATED_GALLERIES = 5;
+
+	@Override
+	protected String getSiteId() {
+		return AnalyticsConstants.CATEGORY_ELECTION;
+	}
+
+	@Override
+	protected Map<String, Object> getModel(HttpServletRequest request) {
+
+		Map<String, Object> model = super.getBaseModel(request);
+		model.put("_ap",request.getParameter("_ap"));
+		model.put("server",RequestUtils.getServer(request));
+		return model;
+	}
+
+	protected Map<String, Object> getModelWithPhotoDetails(HttpServletRequest request){
+		Map<String, Object> model = super.getModel(request);
+		model.remove("ticker");
+		model.put("server",RequestUtils.getServer(request));
+		return model;
+	}
+	private void addAnalytics(HttpServletRequest request,Map<String, Object> model, ElectionSourcePage pageId) {
+		electionAnalytics.setAnalytics(pageId.name(), request, model);
+	}
+
+	@RequestMapping(value = {"heavyweight/all"})
+	public ModelAndView getAllHeavyweights(HttpServletRequest request) {
+		Map<String, Object> model = getModel(request);
+		Set<String> politicianNames = starService.getPoliticianNames();
+
+		if(politicianNames == null || politicianNames.isEmpty())
+			return getElectionData(request);
+
+		Set<String> featuredPolitician = starService.getFeaturedPoliticianNames();
+		List<String> featuredStarsList = new ArrayList<>(featuredPolitician);
+		Collections.shuffle(featuredStarsList);
+		String pageNoParam = request.getParameter("p");
+		int offset= PagingUtils.getOffset(pageNoParam,NUMB_HEAVYWEIGHTS_PER_PAGE).intValue();
+		Pager pager=PagingUtils.getPager(featuredStarsList, offset,NUMB_HEAVYWEIGHTS_PER_PAGE);
+		if(pager.isHasNextPage()){
+			model.put("nextpageno", pager.getNextPageNumber());
+		}
+		if(pager.isHasPrevPage()){
+			model.put("prevpageno",pager.getPreviousPageNumber());
+		}
+		model.put("featuredStars",featuredStarsList.subList(pager.getStartIndex(), pager.getEndIndex()+1));
+		model.put("allstarmetadata", starService.getStarMetaDatas());
+
+		model.put("pgeid", "heavyweights");
+		ElectionAnalytics.ElectionSourcePage pageId = ElectionAnalytics.ElectionSourcePage.AHVWT;
+		addAnalytics(request, model, pageId);
+		return new ModelAndView("elections/allHeavyweight", model);
+
+	}
+	@RequestMapping(value = {"","/","/index","/main"})
+	public ModelAndView getElectionData(HttpServletRequest request) {
+		Map<String, Object> model = getModel(request);
+		model.put("newslist",electionService.getRelatedNews());
+		List<PhotoAlbum> photos = electionService.getGalleries();
+		
+		photos = photos.size()>=10 ? photos.subList(0, 10) : photos.subList(0, photos.size());
+
+		Map<DeviceGroup, List<Video>> videos = electionService.getRelatedVideos();
+		DeviceGroup deviceGroup = PortalContext.getDeviceContext().getDeviceGroup();
+
+		if(deviceGroup.getGroupId() != DeviceGroup.SUPER_SMART.getGroupId())
+			photos = photos.size()>=2 ? photos.subList(0, 2) : photos.subList(0, photos.size());
+
+			model.put("galleries",photos);
+
+			List<Video> relatedVideos = getRelatedVideos(deviceGroup, videos);
+
+			model.put("moduleSeq", electionService.getModuleSeq());
+
+			Set<String> politicianNames = starService.getPoliticianNames();
+			if(politicianNames != null && !politicianNames.isEmpty())
+			{
+				Set<String> featuredPolitician = starService.getFeaturedPoliticianNames();
+				List<String> featuredStarsList = new ArrayList<>(featuredPolitician);
+				Collections.shuffle(featuredStarsList);
+				if(deviceGroup.getGroupId() == DeviceGroup.MIDDLE.getGroupId()){
+					model.put("featuredStars", featuredStarsList.size() > 2 ? featuredStarsList.subList(0,2) : featuredStarsList);
+				}
+				else{
+					model.put("featuredStars", featuredStarsList.size() > 3 ? featuredStarsList.subList(0,3) : featuredStarsList);
+				}
+				model.put("allstarmetadata", starService.getStarMetaDatas());
+			}
+			List<QriousMetaData> qriousMetaDatas = qriousService.getQriousQuestions(QRIOUS_SRCH_TITLE, QRIOUS_SRCH_CAT);
+
+			model.put("language", PortalContext.getI18nContext().getLang());
+
+			model.put("qriousContent", qriousMetaDatas);
+
+			model.put("relatedVideos",relatedVideos);
+			model.put("pgeid", "index");
+			insertPoll(model);
+
+			putBannerData(model, deviceGroup);
+
+			ElectionAnalytics.ElectionSourcePage pageId = ElectionAnalytics.ElectionSourcePage.TTP;
+			addAnalytics(request, model, pageId);
+
+			return new ModelAndView("elections/main", model);
+
+	}
+
+	private void putBannerData(Map<String, Object> model, DeviceGroup deviceGroup) {
+
+		BannerMetadata banner_object = new BannerMetadata();
+
+		JSONObject jsonObject = null;
+		
+		if(deviceGroup.getGroupId() == DeviceGroup.MIDDLE.getGroupId()){
+			jsonObject = (JSONObject) electionService.getBannerDataArray().get("mid");
+		}
+		else {
+			jsonObject = (JSONObject) electionService.getBannerDataArray().get("smart");
+		}	
+
+		if(jsonObject != null) {
+			banner_object.setImageUrl((String) jsonObject.get("thumbnailUrl"));
+			banner_object.setUrl((String) jsonObject.get("url"));
+		}
+		
+		model.put("bannermetadata", banner_object);
+	}
+
+	private void insertPoll(Map<String, Object> model) {
+		Poll poll =electionService.getPoll();
+		if(poll == null || poll.getQuestions().size() == 0 )
+			return;
+
+		int pollQuesSize = poll.getQuestions().size();
+		PollQuestion ques = poll.getQuestions().get(pollQuesSize - 1);
+		model.put("question",ques.getTitle());
+		model.put("options",ques.getAnswers());
+		model.put("pid",poll.getPollId());
+		model.put("qid",ques.getId());
+
+	}
+	@RequestMapping(value = {"/pollDate"})
+	public ModelAndView getDatePollData(HttpServletRequest request) {
+		Map<String, Object> model = getModel(request);
+
+		String date = request.getParameter("date");
+		model.put("date", date);
+		ElectionAnalytics.ElectionSourcePage pageId = ElectionAnalytics.ElectionSourcePage.POLLSHE;
+		addAnalytics(request, model, pageId);
+		return new ModelAndView("elections/poll_date", model);
+	}
+
+
+	@RequestMapping(value = {"/vote"})
+	public ModelAndView processVote(HttpServletRequest request) {
+		Map<String, Object> model = getModel(request);
+		String quesId = request.getParameter("qid");
+		String pollId = request.getParameter("pid");
+		String uid = request.getParameter("uid");
+		String ansKey = request.getParameter("key");
+
+		electionService.addVote(quesId,pollId,uid,ansKey);
+		ElectionAnalytics.ElectionSourcePage pageId = ElectionAnalytics.ElectionSourcePage.POLLVOTE;
+		addAnalytics(request, model, pageId);
+		return showResultPage(request,model);
+	}
+
+
+	public ModelAndView showResultPage(HttpServletRequest request, Map<String, Object> model){
+
+		String quesId = request.getParameter("qid");
+		String pollId = request.getParameter("pid");
+		Poll poll = electionService.getPoll();
+		if(poll==null)
+			return getElectionData(request);
+		
+		Map<String,Integer> statusMap = electionService.getPollStats(quesId);
+		PollQuestion question = null;
+		for(PollQuestion ques :poll.getQuestions()){
+			if(ques.getId().equalsIgnoreCase(quesId))
+				question = ques;
+		}
+		model.put("question", question.getTitle());
+		Map<String,Integer> pollStatusMap = new HashMap<String,Integer>();
+		for (Pair<String, String> pair : question.getAnswers())
+			pollStatusMap.put(pair.getValue(), statusMap.get(pair.getKey()));
+
+//		Map<String,Long> statusMap = electionService.getPollStatsMap(quesId);
+//		Map<String,Integer> statusMap = electionService.getPollStats(quesId);
+		
+		model.put("stats", pollStatusMap);
+		int count=0;
+		for(String choice : statusMap.keySet())
+			count+=statusMap.get(choice);
+		model.put("count", count);
+
+		return new ModelAndView("elections/result", model);
+
+	}
+
+	@RequestMapping(value = {"/voteresult"})
+	public ModelAndView showResult(HttpServletRequest request) {
+		Map<String, Object> model = getModel(request);
+		ElectionAnalytics.ElectionSourcePage pageId = ElectionAnalytics.ElectionSourcePage.POLLRES;
+		addAnalytics(request, model, pageId);
+		return showResultPage(request,model);
+	}
+
+
+
+	private List<Video> getRelatedVideos(DeviceGroup deviceGroup, Map<DeviceGroup, List<Video>> rVidMap) {
+		if (rVidMap != null && rVidMap.get(deviceGroup) != null && !rVidMap.get(deviceGroup).isEmpty())
+			return rVidMap.get(deviceGroup);
+		return null;
+	}
+
+	private List<Video> getRelatedVideos(String deviceGroup, HttpServletRequest request, HttpServletResponse response, StarProfileMetaData polMetaData) {
+		logger.info("Election - Getting related videos for " + polMetaData.getName());
+		Map<String, List<Video>> rVidMap = polMetaData.getRelatedVideos();
+		if (rVidMap != null && rVidMap.get(deviceGroup) != null && !rVidMap.get(deviceGroup).isEmpty())
+			return rVidMap.get(deviceGroup);
+		return null;
+	}
+
+	@RequestMapping("/gallery/{galleryId}/{photoId}")
+	public ModelAndView getGallery(@PathVariable("galleryId") String galleryId, @PathVariable("photoId") String photoId,HttpServletRequest request,HttpServletResponse response) {
+		Map<String, Object> model = getModelWithPhotoDetails(request);
+		String lang = PortalContext.getI18nContext().getLang();
+
+		addPhotoAlbumSpecificLanguage(galleryId, photoId, model,lang);
+		addRelatedGalleriesSpecificLanguage (galleryId, photoId, model,lang);
+		boolean thankyoupage = false;
+		thankyoupage = photoId.equalsIgnoreCase("thanks");
+		ElectionSourcePage pageId;
+		if (!thankyoupage){
+			pageId = ElectionAnalytics.ElectionSourcePage.PTO;
+		}
+		else{
+			pageId = ElectionAnalytics.ElectionSourcePage.PTY;
+		}
+		addAnalytics(request, model, pageId);
+
+		if (!thankyoupage){
+			return new ModelAndView("elections/photo", model);
+		}
+		else{
+			return new ModelAndView("elections/thanks", model);
+		}
+	}
+
+	protected void addPhotoAlbumSpecificLanguage(String galleryId, String photoId, Map<String,Object> model,String lang) {
+		GalleryData galleryData = photoService.getGalleryData(lang);
+		PhotoAlbum gallery = galleryData.getGalleries().get(galleryId);
+
+		if (gallery == null || gallery.getGalleryId() == null)
+			return;
+		photoService.populateGalleryDetails(gallery);
+
+		String partnerName = gallery.getPartnerIdStr();
+
+		List<PhotoMetaData> photos = gallery.getPhotos();
+		model.put("gallery", gallery);
+
+		boolean thankyoupage = false;
+		thankyoupage = photoId.equalsIgnoreCase("thanks");
+		if (!thankyoupage) {
+			PhotoMetaData photoMetaData = null;
+			if (photoId == null || photoId.trim().equals("") || photoId.equals("0"))
+				photoMetaData = photos.get(0);
+			else {
+				boolean found = false;
+				for (int i = 0; i < photos.size(); i++) {
+					photoMetaData = photos.get(i);
+					if (photoMetaData.getId().equals(photoId)) {
+						found = true;
+						break;
+					}
+				}
+				if (!found)
+					photoMetaData = photos.get(0);
+
+			}
+			model.put("photo", photoMetaData);
+			model.put("photodescription",photoMetaData.getDescription());
+
+			model.put("partner", partnerName);
+
+		} 
+
+		Category category = categoryService.getCategory(gallery.getCategory().toString().toLowerCase());
+		model.put("category", category);
+		if(category!=null){
+			model.put("categoryid", category.getId());
+		}
+		model.put("searchkeywords", photoService.getSearchKeywords());
+		return;
+	}
+	protected void addRelatedGalleriesSpecificLanguage(String galleryId,String photoId, Map<String,Object> model,String lang) {
+		GalleryData galleryData = photoService.getGalleryData(lang);
+		PhotoAlbum gallery = galleryData.getGalleries().get(galleryId);
+		if (gallery == null || gallery.getGalleryId() == null)
+			return;
+		List<PhotoAlbum> otherGalleries = getGalleriesOtherThan(gallery);
+		boolean thankyoupage = false;
+		thankyoupage = photoId.equalsIgnoreCase("thanks");
+
+		if(thankyoupage)
+		{
+			List<PhotoMetaData> photoMetaDatas = new ArrayList<PhotoMetaData>();
+			for (int i = 0; i < otherGalleries.size(); i++) {
+				PhotoAlbum photoAlbum = otherGalleries.get(i);
+				photoService.populateGalleryDetails(photoAlbum);
+				if(photoAlbum.getPhotos() == null || photoAlbum.getPhotos().size() <= 2)
+					continue;
+				photoMetaDatas.add(photoAlbum.getPhotos().get(0));
+				if(i==6)
+					break;
+			}
+			model.put("photos",photoMetaDatas);
+			int numRows = photoMetaDatas.size() / 2;
+			if(photoMetaDatas.size() == 1){
+				numRows = 1;
+			}
+			model.put("numRows",numRows);
+
+		}
+		if(otherGalleries!=null && otherGalleries.size()>0){
+
+			int size = otherGalleries.size();
+			int max = 2;
+			if(max > size){
+				max = size;
+			}
+
+			int range = 10;
+			if(size > range)
+			{
+				int number1 = Utils.getRandomNumber((range-2));
+				otherGalleries = otherGalleries.subList(number1, number1 + 2);
+			}
+			else
+				otherGalleries = otherGalleries.subList(0, size);
+
+			model.put("otherGalleries", otherGalleries);
+		}
+		else{
+			model.put("otherGalleries", new ArrayList<PhotoAlbum>());
+		}
+		return;
+	}
+	@RequestMapping("/gallery/{galleryId}")
+	public ModelAndView getGallery(@PathVariable("galleryId") String galleryId, HttpServletRequest request) {
+		GalleryData galleryData = photoService.getGalleryData();
+
+		PhotoAlbum album = galleryData.getGalleries().get(galleryId);
+		if (album == null)
+			album = galleryData.getCategoryGalleryMap().get("9");//entertainment
+
+		photoService.populateGalleryDetails(album);
+
+		if(album == null)
+		{
+			logger.warn("Couldnot find album with gallery id : "+galleryId);
+			return getGalleries(request);
+		}
+		List<PhotoMetaData> photos = album.getPhotos();
+
+		Map<String, Object> model = getModel(request);
+		String pageNoParam = request.getParameter("p");
+		int offset = PagingUtils.getOffset(pageNoParam, 12).intValue();
+		Pager pager = PagingUtils.getPager(photos, offset, 12);
+		if (pager.isHasNextPage()) {
+			model.put("nextpageno", pager.getNextPageNumber());
+		}
+		if (pager.isHasPrevPage()) {
+			model.put("prevpageno", pager.getPreviousPageNumber());
+		}
+
+		int numRows = album.getPhotos().subList(pager.getStartIndex(),pager.getEndIndex()+1).size() / 2;
+		if (numRows > 6)
+			numRows = 6;
+
+		model.put("photos", photos.subList(pager.getStartIndex(),pager.getEndIndex()+1)	);
+		model.put("numRows", numRows);
+		model.put("gallery", album);
+		Category category = categoryService.getCategory(album.getCategory());
+		model.put("category", category.toString().toLowerCase());
+		model.put("categoryid", category.getId());
+		model.put("searchkeywords", photoService.getSearchKeywords());
+
+		model.put("pgeid", "gallery-listing");
+		ElectionSourcePage pageId = ElectionAnalytics.ElectionSourcePage.GLIST;
+		addAnalytics(request, model, pageId);
+		return new ModelAndView("elections/gallery-list", model);
+	}
+	@RequestMapping("/galleries")
+	public ModelAndView getGalleries(HttpServletRequest request) {
+
+		Map<String, Object> model = getModel(request);
+		String pageNoParam = request.getParameter("p");
+
+		List<PhotoAlbum> electionGalleries = null;
+		electionGalleries = electionService.getGalleries();
+        int offset = (PagingUtils.getOffset(pageNoParam, NUMB_GALLERY_PER_PAGE)).intValue();
+        Pager pager = PagingUtils.getPager(electionGalleries, offset,NUMB_GALLERY_PER_PAGE);
+        if(pager.isHasNextPage()){
+        	model.put("nextpageno", pager.getNextPageNumber());
+        }
+        if(pager.isHasPrevPage()){
+        	model.put("prevpageno", pager.getPreviousPageNumber());
+        }
+		//List<PhotoAlbum> itemsForPage = getItemsForPage(electionGalleries, pageNoParam, NUMB_GALLERY_PER_PAGE, model);
+		
+		model.put("galleries",electionGalleries.subList(pager.getStartIndex(), pager.getEndIndex()+1));
+
+		model.put("pgeid", "galleries");
+		ElectionSourcePage pageId = ElectionAnalytics.ElectionSourcePage.GLST;
+		addAnalytics(request, model, pageId);
+		return new ModelAndView("elections/photo-list", model);
+	}
+	private <E extends Object> List<E> getItemsForPage(List<E> entireList, String pageNum, int itemsPerPage, Map<String, Object> model){
+		List<E> finalList = entireList;
+		int pageNo = getPageParam(pageNum);
+		int nextPageNo =  pageNo+1;
+		if(entireList == null){
+			return Collections.emptyList();
+		}
+		if(entireList.size() < itemsPerPage){
+			nextPageNo = 1;
+			return finalList;
+		}
+		int numbPages = entireList.size()/itemsPerPage;
+		if(pageNo > numbPages)
+		{
+			pageNo = numbPages -1;
+			nextPageNo = 1;
+			if(pageNo == 0){
+				pageNo = 1;
+			}
+		}
+		int itemStartIndex = (pageNo-1) * itemsPerPage;
+		int itemEndIndex =  pageNo * itemsPerPage;
+		finalList = entireList.subList(itemStartIndex,itemEndIndex);
+		model.put("nextpageno",""+nextPageNo);
+		return finalList;
+	}
+	private int getPageParam(String pageNum){
+		int pageNo = 1;
+		try {
+			if(pageNum != null){
+				pageNo = Integer.parseInt(pageNum.trim());
+			}
+		} catch (Throwable e) {
+			logger.warn("Invalid page param value : "+pageNum,e);
+		}
+		return pageNo;
+	}
+
+	@RequestMapping("/newslist")
+	public ModelAndView getNewsList(HttpServletRequest request) {
+
+		Map<String, Object> model = getModel(request);
+		model.put("pgeid", "newslist");
+
+		ElectionSourcePage pageId = ElectionAnalytics.ElectionSourcePage.NWL;
+		addAnalytics(request, model, pageId);
+
+		String pageNoParam = request.getParameter("p");
+
+		String lang = PortalContext.getI18nContext().getLang();
+
+		ResponseWrapper<List<NewsItemModel>> responseWrapper = null;
+
+		int offset = PagingUtils.getOffset(pageNoParam, NUMB_NEWS_PER_PAGE).intValue();
+
+		responseWrapper = newsService.search("election", 0, 20, offset, null, null, null, DeliveryUtil.getLocalNewsSite(),lang);
+		List<NewsItemModel> newsItemModelList = responseWrapper.getResult();
+		List<Article> newsList = Article.getArticles(newsItemModelList);
+
+		Pager pager = PagingUtils.getPager(responseWrapper, offset, NUMB_NEWS_PER_PAGE);
+		if (pager.isHasNextPage()) {
+			model.put("nextpageno", pager.getNextPageNumber());
+		}
+		if(pager.isHasPrevPage()){
+			model.put("prevpageno", pager.getPreviousPageNumber());
+		}
+		model.put("newslist", newsList);
+
+		return new ModelAndView("elections/news-list", model);
+	}
+	@RequestMapping("/news/{newsid}")
+	public ModelAndView getNewsDetails(@PathVariable("newsid") String newsid, HttpServletRequest request) {
+		Map<String, Object> model = getModel(request);
+		Article newsMetadata = Article.getArticle(newsService.getDetail(newsid, DeliveryUtil.getCricketNewsSite()).getResult());
+		model.put("news", newsMetadata);
+		model.put("pgeid", "news");
+		insertGallery(null, model,true);
+		ElectionSourcePage pageId = ElectionAnalytics.ElectionSourcePage.NWD;
+		addAnalytics(request, model, pageId);
+		return new ModelAndView("elections/news", model);
+	}
+
+	private void insertGallery(String searchString, Map<String, Object> model, boolean showRandom){
+		List<PhotoAlbum> galleries = null;
+		if(searchString == null)
+		{
+			galleries = electionService.getGalleries();
+		}
+		if(galleries!= null && galleries.size() > 1){
+			Random random = new Random();
+			int item1 = 0; //random.nextInt(galleries.size());
+			int item2 = 1; //random.nextInt(galleries.size());
+			if(showRandom)
+			{
+				int count =  (galleries.size() > 10) ? 10 : galleries.size();
+				item1 = random.nextInt(count);
+				item2 = random.nextInt(count);
+			}
+
+			if(item2 == item1)
+			{
+				while (true)
+				{
+					item2 = random.nextInt(galleries.size());
+					if(item2 != item1)
+						break;
+				}
+			}
+			List<PhotoAlbum> twoGalleries = new ArrayList<PhotoAlbum>();
+			twoGalleries.add(galleries.get(item1));
+			twoGalleries.add(galleries.get(item2));
+
+			model.put("galleries", twoGalleries);
+		}else if(galleries!= null && galleries.size() > 0){
+			model.put("galleries", galleries);
+		}
+
+	}
+
+	@RequestMapping("/videos")
+	public ModelAndView getElectionVideos(HttpServletRequest request, HttpServletResponse response) {
+
+
+		Map<String, Object> model = getModel(request);
+
+
+		int nVideosPerPage = 10;
+		String deviceGroup = RequestUtils.getDeviceGroup(request,response);
+		if(deviceGroup.equalsIgnoreCase("middle") || deviceGroup.contains("low"))
+			nVideosPerPage = 6;
+
+		int pageNum = 1;
+		String page = request.getParameter("p");
+		if (page != null) {
+			try {
+				pageNum = Integer.parseInt(page);
+			} catch (NumberFormatException ex) {
+				logger.error("Error in parsing page number "+ex.getMessage(),ex);
+			}
+		}
+
+		String query = "election";
+
+		String lang = PortalContext.getI18nContext().getLang();
+		String pageNoParam = request.getParameter("p");
+		ResponseWrapper<List<NewsItemModel>> responseWrapper = null;
+
+		int offset = PagingUtils.getOffset(pageNoParam, NUMB_NEWS_PER_PAGE).intValue();
+		List<Video> videos = null;
+		videos = videoService.searchVideos(query, nVideosPerPage + 1, (pageNum-1)*nVideosPerPage, RequestUtils.getUserAgent(request), "", lang);
+
+		Pager pager = PagingUtils.getPager(responseWrapper, offset, NUMB_NEWS_PER_PAGE);
+		if (pager.isHasNextPage()) {
+			model.put("nextpageno", pager.getNextPageNumber());
+		}
+		if(pager.isHasPrevPage()){
+			model.put("prevpageno", pager.getPreviousPageNumber());
+		}
+//		int pos   = (pageNum - 1) * nVideosPerPage;
+//		Pager pager = new Pager(pos,videos == null ? (pageNum-1)*nVideosPerPage : (pageNum-1)*nVideosPerPage + videos.size(), nVideosPerPage);
+//		model.put("pager", pager);
+
+		model.put("relatedVideos",videos);
+
+		model.put("pgeid", "videos");
+		ElectionSourcePage pageId = ElectionAnalytics.ElectionSourcePage.VID;
+		addAnalytics(request, model, pageId);
+		return new ModelAndView("elections/videos", model);
+	}
+
+	@RequestMapping("/video")
+	public ModelAndView getElectionVideo(HttpServletRequest request, HttpServletResponse response) {
+
+		String videoId = request.getParameter("id");
+		if (StringUtils.isBlank(videoId))
+		{
+			logger.warn("Couldnot find video"+videoId+" . Redirecting to videolist");
+			return getElectionVideos(request, response);
+		}
+		int nVideosPerPage = 10;
+		String deviceGroup = RequestUtils.getDeviceGroup(request,response);
+		if(deviceGroup.equalsIgnoreCase("middle") || deviceGroup.contains("low"))
+			nVideosPerPage = 6;
+
+		int pos = 0;
+		String posStr = request.getParameter("pos");
+		if (!StringUtils.isBlank(posStr)) {
+			try {
+				pos = Integer.parseInt(posStr);
+			} catch (Exception e) {
+				logger.error("Exception parsing position"+e.getMessage(),e);
+			}
+		}
+
+		String ua = RequestUtils.getUserAgent(request);
+		Video video = videoService.getVideo(videoId, ua);
+
+		if (video == null)
+			return null;
+
+		String lang = PortalContext.getI18nContext().getLang();
+
+		List<Video> relatedVideos = videoService.getRelatedVideos(videoId, nVideosPerPage, pos, lang, ua, null, null);;
+
+		Map<String, Object> model = getModel(request);
+
+		model.put("video", video);
+		model.put("relatedVideos", relatedVideos);
+
+		model.put("pgeid", "videos");
+		ElectionSourcePage pageId = ElectionAnalytics.ElectionSourcePage.VIDDET;
+		addAnalytics(request, model, pageId);
+
+		return new ModelAndView("elections/video", model);
+	}
+	private List<StarProfileMetaData> getOtherPoliticians(HttpServletRequest request) {
+		Set<String> polNames = starService.getPoliticianNames();
+		List<String> copiesList = new ArrayList<>(polNames);
+		Collections.shuffle(copiesList);
+		List<StarProfileMetaData> polProfiles = new ArrayList<StarProfileMetaData>();
+		int counter = 0;
+		for (int i = 0; i < copiesList.size(); i++) {
+			String sname = copiesList.get(i);
+			StarProfileMetaData metaData = starService.getStarMetaData(sname);
+			if (metaData != null)
+				polProfiles.add(metaData);
+
+			if (counter == 3)
+				break;
+
+			counter++;
+		}
+		return polProfiles;
+	}
+
+	@RequestMapping("/{politicianName}/profile")
+	public ModelAndView getStarProfile(@PathVariable("politicianName") String name, HttpServletRequest request, HttpServletResponse response) {
+		StarProfileMetaData polMetaData = starService.getStarMetaData(name);
+		if(polMetaData == null)
+		{
+			logger.warn("Couldnot find profile for "+name+". Redirecting to home page");
+			return getElectionData(request);
+		}
+		Map<String, Object> model = getModel(request);
+		if(!StringUtils.isBlank(polMetaData.getName())) {
+			String keyword = polMetaData.getName().trim().toLowerCase();
+			keyword = keyword.replaceAll(" ", "");
+		}
+		model.put("starmetadata", polMetaData);
+		Set<String> politicianNames = starService.getPoliticianNames();
+		if(politicianNames != null && !politicianNames.isEmpty())
+		{
+			Set<String> featuredPolitician = starService.getFeaturedPoliticianNames();
+			List<String> featuredStarsList = new ArrayList<>(featuredPolitician);
+			Collections.shuffle(featuredStarsList);
+			model.put("featuredStars", featuredStarsList.size() > 3 ? featuredStarsList.subList(0,3) : featuredStarsList);
+			model.put("allstarmetadata", starService.getStarMetaDatas());
+		}
+		model.put("otherstars", getOtherPoliticians(request));
+
+
+		String lang = PortalContext.getI18nContext().getLang();
+		try{
+			JSONObject resonseJson = (JSONObject) JSONValue.parse(polMetaData.getFullBio());
+			String bio = (String)resonseJson.get(lang);
+			model.put("fullBio", bio);
+
+			JSONObject responseJson = (JSONObject) JSONValue.parse(polMetaData.getWikipediaUrl());
+			String wikiUrl = (String)responseJson.get(lang);
+			if(wikiUrl==null || wikiUrl==""){
+				wikiUrl = (String)responseJson.get("en");
+			}
+			model.put("wikiUrl", wikiUrl);
+		}catch(Exception e){
+			logger.error("Exception parsing bio or wikipedia url "+e.getMessage(),e);
+		}
+
+		String deviceGroup = RequestUtils.getDeviceGroup(request,response);
+		List<Video> relatedVideos = getRelatedVideos(deviceGroup, request, response, polMetaData);
+
+		model.put("relatedVideos", relatedVideos);
+
+		model.put("pgeid", "profile");
+		ElectionAnalytics.ElectionSourcePage pageId = ElectionAnalytics.ElectionSourcePage.PHVWT;
+		addAnalytics(request, model, pageId);
+
+		return new ModelAndView("elections/profile", model);
+	}
+	@RequestMapping("{politicianname}/news/{page}")
+	public ModelAndView getPoliticianNews(@PathVariable("politicianname") String name, @PathVariable("page") int page, HttpServletRequest request, HttpServletResponse response) {
+		StarProfileMetaData polMetadata = starService.getStarMetaData(name);
+		if(polMetadata == null)
+		{
+			logger.warn("Couldnot find profile for "+name+". Redirecting to home page");
+			return getElectionData(request);
+		}
+		Map<String, Object> model = getModel(request);
+		model.put("starmetadata", polMetadata);
+		model.put("pgeid", "politiciannews");
+
+		if (page < 1)
+			page = 1;
+
+		model.put("pageNo", page);
+
+		int nNewsPerPage = 10;
+
+		model.put("nNewsPerPage", nNewsPerPage);
+		List<Article> news = starService.getNews(polMetadata, PortalContext.getI18nContext().getLang(), nNewsPerPage + 1, nNewsPerPage*(page-1));
+		model.put("relatedNews", news);
+
+		model.put("pgeid", "politician-news");
+		ElectionAnalytics.ElectionSourcePage pageId = ElectionAnalytics.ElectionSourcePage.POLNWP;
+		addAnalytics(request, model, pageId);
+
+		return new ModelAndView("elections/politician-news", model);
+	}
+
+	@RequestMapping("{politicianname}/news/detail/{newsId}")
+	public ModelAndView getPoliticianNewsDetail(@PathVariable("politicianname") String name, @PathVariable("newsId") String newsId, @RequestParam(value = "p", defaultValue = "1") int pageNum, HttpServletRequest request, HttpServletResponse response) {
+		StarProfileMetaData polMetadata = starService.getStarMetaData(name);
+		if(polMetadata == null)
+		{
+			logger.warn("Couldnot find profile for "+name+". Redirecting to home page");
+			return getElectionData(request);
+		}
+		Map<String, Object> model = getModel(request);
+		model.put("starmetadata", polMetadata);
+		model.put("pgeid", "politician-newsdet");
+
+		// Get news
+		Article article = null;
+		if (polMetadata.getRelatedNews() != null) {
+			for (Article art : polMetadata.getRelatedNews()) {
+				if (art.getId() != null && art.getId().equals(newsId)) {
+					article = art;
+					break;
+				}
+			}
+		}
+		if (article == null)
+			article = Article.getArticle(newsService.getDetail(newsId, DeliveryUtil.getStarNewsSite()).getResult());
+		model.put("article", article);
+
+		//Adding pager support
+		int wordCount = getWordCount(article.getDetail());
+		if(wordCount == 0){
+			logger.error("news detail for new id "+newsId+" is null");
+			return getPoliticianNews(name, 1, request, response);
+		}
+
+		//Redirection in case page num exceeds total no of pages.
+		int totalPages = (int)Math.ceil((double)wordCount / DeliveryConstants.NewsConstants.NewsDetailPage.NEWS_WORD_COUNT);
+		if (pageNum > totalPages)
+			pageNum = 1;
+
+		int offset = (pageNum - 1) * DeliveryConstants.NewsConstants.NewsDetailPage.NEWS_WORD_COUNT;
+		Pager pager = new Pager(offset, wordCount, DeliveryConstants.NewsConstants.NewsDetailPage.NEWS_WORD_COUNT);
+
+		// Clip the news article which needs to be displayed in this page
+		String[] wordsArray = article.getDetail().split("\\s+");
+
+		String newsData = "";
+		for(int i=pager.getStartIndex();i<=pager.getEndIndex();i++){
+			newsData += wordsArray[i] + " ";
+		}
+		if(pager.isHasNextPage()){
+			newsData += "...";
+		}
+
+		model.put("pager", pager);
+		model.put("newsData", newsData);
+
+		//Get news video
+		String ua = RequestUtils.getUserAgent(request);
+		List<Video> videos = videoService.searchVideos("\"story:" + NewsComparator.getDecryptedNewsId(article.getNewsid()) + "\"", 1, 0, ua, null, "hi");
+		Video video = null;
+		if ((videos != null) && (videos.size() > 0)) {
+			video = videoService.getVideo(videos.get(0).getId(), ua);
+			model.put("video", video);
+
+		}
+
+		model.put("pgeid", "politician-allnews");
+		ElectionAnalytics.ElectionSourcePage pageId = ElectionAnalytics.ElectionSourcePage.POLNWP;
+		addAnalytics(request, model, pageId);
+
+		return new ModelAndView("elections/news_detail", model);
+	}
+	private int getWordCount(String text){
+		if (StringUtils.isBlank(text))
+			return 0;
+		return (text.split("\\s+").length);
+	}
+
+	@RequestMapping(value = {"{starname}/photo"})
+	public ModelAndView getStarPhoto(@PathVariable("starname") String name, @RequestParam(value = "i", defaultValue = "0") int index, @RequestParam(value = "_ap", defaultValue = "1") int _ap, HttpServletRequest request, HttpServletResponse response) {
+
+		StarProfileMetaData starMetaData = starService.getStarMetaData(name);
+		if(starMetaData == null) {
+			logger.warn("Couldnot find profile for "+name+". Redirecting to home page");
+			return getElectionData(request);
+		}
+
+		Map<String, Object> model = getModel(request);
+		model.put("starmetadata", starMetaData);
+
+		if(starMetaData.getPhotos() != null)
+		{
+			if(starMetaData.getPhotos() != null && index >= starMetaData.getPhotos().size())
+				index = 0;
+
+			model.put("currentPhoto", starMetaData.getPhotos().get(index));
+			if (index > 0)
+				model.put("previndex", (index - 1));
+			if (index < (starMetaData.getPhotos().size() - 1))
+				model.put("nextindex", (index + 1));
+		}
+
+		request.setAttribute(AnalyticsConstants.ANALYTICS_PARTNER, starMetaData.getPartnerId());
+
+
+		return getPhotos(model, _ap, request, response);
+	}
+	private ModelAndView getPhotos(Map<String, Object> model, int _ap, HttpServletRequest request, HttpServletResponse response) {
+		model.put("_ap", _ap);
+
+		model.put("pgeid", "politician-photos");
+		ElectionAnalytics.ElectionSourcePage pageId = ElectionAnalytics.ElectionSourcePage.POLPTO;
+		addAnalytics(request, model, pageId);
+
+
+		return new ModelAndView("elections/politician-photo", model);
+	}
+	@RequestMapping(value = {"{starname}/gallery"})
+	public ModelAndView getStarGallery(@PathVariable("starname") String name, @RequestParam(value = "p", defaultValue = "1" ) int currentPageNum, HttpServletRequest request, HttpServletResponse response) {
+
+		Map<String, Object> model = getModel(request);
+		StarProfileMetaData polMetaData = starService.getStarMetaData(name);
+		if(polMetaData == null) {
+			logger.warn("Couldnot find politician profile for " + name + ". Redirecting to home page");
+			return getElectionData(request);
+		}
+
+		if(polMetaData.getPhotos() == null || polMetaData.getPhotos().isEmpty()) {
+			logger.warn("No photos found for " + name + ". Redirecting to home page");
+			return getElectionData(request);
+		}
+
+		model.put("starmetadata", polMetaData);
+
+		return getGallery(model, polMetaData.getPhotos(), currentPageNum, request, response);
+	}
+
+	private ModelAndView getGallery(Map<String, Object> model, List<String> photos, int currentPageNum, HttpServletRequest request, HttpServletResponse response) {
+
+		model.put("pgeid", PiwikConstants.STAR_PAGE_GALLERY);
+
+		int numPhotosPerPage = 15;
+		String deviceGroup = RequestUtils.getDeviceGroup(request,response);
+		if(deviceGroup.equalsIgnoreCase("middle") || deviceGroup.contains("low"))
+			numPhotosPerPage = 6;
+
+		if (currentPageNum <= 0)
+			currentPageNum = 1;
+
+		int totalPages = photos.size() / numPhotosPerPage;
+		if (photos.size() % numPhotosPerPage != 0)
+			totalPages++;
+
+		if(currentPageNum > totalPages)
+			currentPageNum = 1;
+
+		int offset   = (currentPageNum - 1) * numPhotosPerPage;
+		Pager pager = new Pager(offset, photos.size(), numPhotosPerPage);
+		model.put("pager", pager);
+
+		model.put("photos",photos.subList(pager.getStartIndex(),pager.getEndIndex()+1));
+
+		model.put("pgeid", "politician-gallery");
+		ElectionAnalytics.ElectionSourcePage pageId = ElectionAnalytics.ElectionSourcePage.POLGAL;
+		addAnalytics(request, model, pageId);
+
+
+		return new ModelAndView("elections/politician-gallery", model);
+	}
+
+	@RequestMapping("{politicianname}/videos")
+	public ModelAndView getPoliticianVideos(@PathVariable("politicianname") String name, HttpServletRequest request, HttpServletResponse response) {
+		StarProfileMetaData polMetaData = starService.getStarMetaData(name);
+		if(polMetaData == null)
+		{
+			logger.warn("Couldnot find profile for "+name+". Redirecting to home page");
+			return getElectionData(request);
+		}
+
+		Map<String, Object> model = getModel(request);
+
+		model.put("starmetadata", polMetaData);
+		model.put("pgeid", "politician-videos");
+
+		int nVideosPerPage = 10;
+		String deviceGroup = RequestUtils.getDeviceGroup(request,response);
+		if(deviceGroup.equalsIgnoreCase("middle") || deviceGroup.contains("low"))
+			nVideosPerPage = 6;
+
+		int pageNum = 1;
+		String page = request.getParameter("p");
+		if (page != null) {
+			try {
+				pageNum = Integer.parseInt(page);
+			} catch (NumberFormatException ex) {
+				logger.error("Exception parsing page number "+ex.getMessage(),ex);
+			}
+		}
+
+		String query = "\"" + polMetaData.getName() + "\"";
+		for (String otherName : polMetaData.getOtherNames())
+			query += " \"" + otherName + "\"";
+
+		String lang = PortalContext.getI18nContext().getLang();
+		List<Video> videos = null;
+		videos = videoService.searchVideos(query, nVideosPerPage, (pageNum-1)*nVideosPerPage, RequestUtils.getUserAgent(request), "", lang);
+
+		int pos   = (pageNum - 1) * nVideosPerPage;
+		Pager pager = new Pager(pos,videos == null ? 0 : videos.size(), nVideosPerPage);
+		model.put("pager", pager);
+
+		model.put("relatedVideos",videos);
+
+		model.put("pgeid", "politician-videos");
+		ElectionAnalytics.ElectionSourcePage pageId = ElectionAnalytics.ElectionSourcePage.POLVID;
+		addAnalytics(request, model, pageId);
+
+
+		return new ModelAndView("elections/politician-videos", model);
+	}
+
+	@RequestMapping("{politicianName}/video")
+	public ModelAndView getStarVideo(@PathVariable("politicianName") String name, HttpServletRequest request, HttpServletResponse response) {
+
+		StarProfileMetaData polMetaData = starService.getStarMetaData(name);
+		if(polMetaData == null)
+		{
+			logger.warn("Couldnot find profile for "+name+". Redirecting to home page");
+			return getElectionData(request);
+		}
+
+		String videoId = request.getParameter("id");
+		if (StringUtils.isBlank(videoId))
+		{
+			logger.warn("Couldnot find video"+videoId+" for "+name+". Redirecting to videolist");
+			return getPoliticianVideos(name, request, response);
+		}
+		int nVideosPerPage = 10;
+		String deviceGroup = RequestUtils.getDeviceGroup(request,response);
+		if(deviceGroup.equalsIgnoreCase("middle") || deviceGroup.contains("low"))
+			nVideosPerPage = 6;
+
+		int pos = 0;
+		String posStr = request.getParameter("pos");
+		if (!StringUtils.isBlank(posStr)) {
+			try {
+				pos = Integer.parseInt(posStr);
+			} catch (Exception e) {
+				logger.error("Exception parsing start position "+e.getMessage(),e);
+			}
+		}
+
+		String ua = RequestUtils.getUserAgent(request);
+		Video video = videoService.getVideo(videoId, ua);
+
+		if (video == null)
+			return null;
+
+		String lang = PortalContext.getI18nContext().getLang();
+
+		List<Video> relatedVideos = videoService.getRelatedVideos(videoId, nVideosPerPage, pos, lang, ua, null, null);;
+
+		
+		Map<String, Object> model = getModel(request);
+		model.put("pgeid", "politician-video");
+		model.put("video", video);
+		model.put("relatedVideos", relatedVideos);
+		model.put("starmetadata", polMetaData);
+
+		request.setAttribute(AnalyticsConstants.ANALYTICS_PARTNER, polMetaData.getPartnerId());
+
+
+		model.put("pgeid", "politician-videos");
+		ElectionAnalytics.ElectionSourcePage pageId = ElectionAnalytics.ElectionSourcePage.POLVIDDET;
+		addAnalytics(request, model, pageId);
+
+		return new ModelAndView("elections/politician-video", model);
+	}
+	@RequestMapping(value="/photo/fetch/{politicianName}", method=RequestMethod.GET)
+	@ResponseBody
+	public String getAllStarPhotos(
+			@PathVariable("polMetaData") String name, HttpServletRequest request) {
+
+		int ResolutionSize =setImageResolution(request);
+
+		StarProfileMetaData polMetaData = starService.getStarMetaData(name);
+		List<String> photos = polMetaData.getPhotos();
+		JSONArray photoMetaDataJsonArray = new JSONArray();
+		JSONObject map = new JSONObject();
+		for(String photo: photos){
+			try {
+				photoMetaDataJsonArray.add(RequestUtils.getFullResizedImageUrl(true, photo,ResolutionSize, 0));
+			} catch (Exception e) {
+				logger.error("Exception parsing json array for politician photo "+e.getMessage(),e);
+			}
+		}
+		map.put("photos",photoMetaDataJsonArray);
+		return map.toJSONString();
+
+	}
+	 @RequestMapping(value="/fetch/{galleryid}/gallery", method=RequestMethod.GET)
+		@ResponseBody
+		public String getAllGalleryPhotos(
+				@PathVariable("galleryid") String galleryId, HttpServletRequest request) throws Exception {
+	    	 int count=0,ResolutionSize=setImageResolution(request);
+	    	 
+			
+	    	PhotoAlbum gallery = photoService.getGalleryData().getGalleries().get(galleryId);
+			if (gallery == null)
+				gallery = photoService.getGalleryData().getCategoryGalleryMap().get("9");
+			if(gallery == null){
+				gallery = photoService.getGalleryData("en").getGalleries().get(galleryId);
+			}
+			if(gallery.getPhotos()==null){
+		        photoService.populateGalleryDetails(gallery);
+		        List<PhotoMetaData> photoMetaDatas = gallery.getPhotos();
+		        for (int i = 0; i < photoMetaDatas.size(); i++) {
+			         PhotoMetaData currentPhotoMD = null;
+			         String resizedUrl=null;
+			         currentPhotoMD = photoMetaDatas.get(i);
+		        	 if(!StringUtils.isBlank(currentPhotoMD.getUrl()))
+		        		 resizedUrl=RequestUtils.getFullResizedImageUrl(true, currentPhotoMD.getUrl(),ResolutionSize, 0);
+		        	      else
+		        		 resizedUrl=RequestUtils.getFullResizedImageUrl(true, currentPhotoMD.getThumbnailUrl(),ResolutionSize, 0);
+			         currentPhotoMD.setResizedUrl(resizedUrl);
+			         gallery.setResizedUrl(resizedUrl);
+		        }
+		 }
+					
+			List<PhotoMetaData> photoMetaDatasAll = (List<PhotoMetaData>) CollectionUtilities.cloneList(gallery.getPhotos());
+			
+			for (int i = 0; i < photoMetaDatasAll.size(); i++) {
+				
+		         PhotoMetaData currentPhotoMD = null;
+		         String resizedUrl=null;
+		         currentPhotoMD = photoMetaDatasAll.get(i);
+
+		         if(currentPhotoMD.getThumbnailUrl().indexOf("ic.bsbportal.com/")<0)
+		         {
+		        	 if(!StringUtils.isBlank(currentPhotoMD.getUrl()))
+		        		 resizedUrl=RequestUtils.getFullResizedImageUrl(true, currentPhotoMD.getUrl(),ResolutionSize, 0);
+		        	 else
+		        		 resizedUrl=RequestUtils.getFullResizedImageUrl(true, currentPhotoMD.getThumbnailUrl(),ResolutionSize, 0);
+			         currentPhotoMD.setResizedUrl(resizedUrl);
+			         gallery.setResizedUrl(resizedUrl);
+		         }
+			}
+			
+				
+			List<PhotoAlbum> otherGalleries = getGalleriesOtherThan(gallery);
+			
+			for(int j=1;j<otherGalleries.size();j++ ){
+				PhotoAlbum photoAlbum = otherGalleries.get(j);
+				photoService.populateGalleryDetails(photoAlbum);
+				String galid = photoAlbum.getGalleryId();
+				
+				if(!galid.equalsIgnoreCase(galleryId)){
+					
+					count++;
+					 List<PhotoMetaData>photoMetaDatas = photoAlbum.getPhotos();
+					for (int  i = 0; i < photoMetaDatas.size(); i++) {
+						
+				         PhotoMetaData currentPhotoMD = null;
+				         String resizedUrl=null;
+				         currentPhotoMD = photoMetaDatas.get(i);
+
+				         if(currentPhotoMD.getThumbnailUrl().indexOf("ic.bsbportal.com/")<0)
+				         {
+				        	 if(!StringUtils.isBlank(currentPhotoMD.getUrl()))
+				        		 resizedUrl=RequestUtils.getFullResizedImageUrl(true, currentPhotoMD.getUrl(),ResolutionSize, 0);
+				        	 else
+				        		 resizedUrl=RequestUtils.getFullResizedImageUrl(true, currentPhotoMD.getThumbnailUrl(),ResolutionSize, 0);
+					         currentPhotoMD.setResizedUrl(resizedUrl);
+					         photoAlbum.setResizedUrl(resizedUrl);
+				         }
+					}
+					photoMetaDatasAll.addAll(photoAlbum.getPhotos());
+					if(count==NUM_RELATED_GALLERIES-1)
+					{break;}
+				}
+			}
+			JSONObject result = new JSONObject();
+			List<JSONObject> photos = new ArrayList<JSONObject>();
+			for(int i=0;i<photoMetaDatasAll.size();i++)
+			{
+				PhotoMetaData photo = photoMetaDatasAll.get(i);
+				JSONObject Jsonphoto = photo.toJsonObject();
+				photos.add(Jsonphoto);
+			}
+			result.put("photos",photos );
+			System.out.println("the size is" + photoMetaDatasAll.size());
+			
+			return result.toJSONString();
+			
+		}
+	
+	
+	
+	@RequestMapping("/swipe")
+	@ResponseBody
+	public String registerRdforSwipeStars(HttpServletRequest request, HttpServletResponse response){
+		return registerRdforSwipe(request,response);
+	}
+}

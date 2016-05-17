@@ -1,0 +1,94 @@
+package com.bsb.portal.fe.services;
+
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.HashMap;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Map;
+import java.util.Set;
+import java.util.TimerTask;
+
+import javax.annotation.PostConstruct;
+import javax.management.timer.Timer;
+
+import org.springframework.stereotype.Service;
+
+import com.bsb.portal.context.PortalContext;
+import com.bsb.portal.dto.GalleryData;
+import com.bsb.portal.dto.PhotoAlbum;
+
+@Service
+public class FifaService extends BaseService {
+	
+	private static final String    NEWS_SEARCH_QUERY_STRING      	= "\"fifa\"\"world cup brazil\"";
+	private static final String    VIDEOS_SEARCH_QUERY_STRING    	= "\"fifa\"\"world cup brazil\"";
+	private static final String    PHOTOS_SEARCH_QUERY_STRING    	= "\"fifa\"\"world cup brazil\"";
+	
+	
+	private Timer timer = new Timer();
+	
+	private PhotoService photoService;
+	
+	private Map<String,List<PhotoAlbum>> galleriesMap = new HashMap<String,List<PhotoAlbum>>();
+	private static final String [] langs = {"en"};
+	
+	
+	private void init() {
+		timer.scheduleAtFixedRate(new TimerTask() {
+
+			@Override
+			public void run() {
+				load();
+			}
+		}, 20000, 60 * 60 * 1000);
+
+		timer.scheduleAtFixedRate(new TimerTask() {
+
+			@Override
+			public void run() {
+				loadPhotos();
+			}
+		}, 20000, 5 * 60 * 1000);
+	}
+	
+	
+	
+	public void loadPhotos() {
+		for(String lang : langs){
+			List<PhotoAlbum> galleries = null;
+				galleries = loadGalleries(PHOTOS_SEARCH_QUERY_STRING, "" ,200,lang);
+
+			Set<PhotoAlbum> albumsSet = new HashSet<>();
+			albumsSet.addAll(galleries);
+			galleries = new ArrayList(albumsSet) ;
+			Collections.sort(galleries, new PhotoAlbumComparator());
+			galleriesMap.put(lang, galleries);
+
+		}
+	}
+	
+	private List<PhotoAlbum> loadGalleries(String searchString, String category,int numb,String lang){
+		GalleryData galleryData = photoService.getGalleryData(lang);
+		List<PhotoAlbum> tempGalleries = photoService.searchPhotos(galleryData,searchString, true,numb,true,true,category,null,lang);
+		return tempGalleries;
+	}
+	
+	
+	public List<PhotoAlbum> getGalleries(){
+		String lang = PortalContext.getI18nContext().getLang();
+		List<PhotoAlbum> galleriesLangSpecific = null;
+
+		if(galleriesMap == null || galleriesMap.size()==0)
+			return null;
+
+		galleriesLangSpecific = galleriesMap.get(lang);
+
+		return galleriesLangSpecific;
+	}
+	
+	
+	
+	
+	
+}

@@ -1,0 +1,49 @@
+<%@ page contentType="text/html;charset=UTF-8" language="java" %>
+<%@ taglib uri="http://bsbportal.com/functions" prefix="bsbfn" %>
+<%@ taglib prefix="c" uri="http://java.sun.com/jsp/jstl/core" %>
+<%@ taglib prefix="s" uri="http://www.springframework.org/tags" %>
+<%@ taglib uri="http://java.sun.com/jsp/jstl/functions" prefix="fn" %>
+
+<c:set var="pageTitle" value="Star Profile" scope="request"/>
+<c:set var="cssPath" value="${static_file_path}/stars/css/style_low.css" scope="request"/>
+<c:set var="autoRefresh" value="${(_ap != null) &&  fn:startsWith(_ap, '1')   && bsbfn:isAutoRefCompatible(pageContext.request) && (pageContext.request.parameterMap['nexturl'] != null)}" scope="request"/>
+<c:set var="apPath" value="${pageContext.request.parameterMap['nexturl'][0]}" scope="request"/>
+<c:set var="timeout" value="6000" scope="request"/>
+<c:if test="${bsbfn:is2G(pageContext.request)}">
+               <c:set var="timeout" value="8000" scope="request"/>
+</c:if>
+
+<c:set var="showtickerbarinfooter" value="true" scope="request" />
+<c:set var="specId" value="3"/>
+<c:set var="m" value="${modules.HEADER}"/>
+<c:set var="mId" value="${moduleDescIds.HOME_LINK}"/>
+<c:set var="mId2" value="${moduleDescIds.STAR_HOME_LINK}"/>
+<c:set var="mId3" value="${moduleDescIds.MY_ACCOUNT_LINK}"/>
+<c:set var="url" value="${pageContext.request.contextPath}/stars/index.html"/>
+
+
+<c:set var="language" value="en" scope="request"/>
+<c:if test="${sessionScope.lang != null }">
+	<c:set var="language" value="${sessionScope.lang}" scope="request"/>
+</c:if>
+
+<c:if test="${language != 'en'}">
+	<c:set var="showfootersearchbar" value="false" scope="request"/>
+</c:if>
+
+<c:set var="og_title" value="Star Profile" scope="request"/>
+<c:set var="og_url" value="http://m.airtellive.com/stars/index.html" scope="request"/>
+<c:set var="og_image" value="" scope="request"/>
+<c:set var="indexUrl" value="${bsbfn:createRdUrl(pageContext.request,header,pageId,uuid,circle,specId,m,mId,'http://www.airtellive.com','','')}" scope="request"/>
+<c:set var="thisUrl" value="${bsbfn:createRdUrl(pageContext.request,header,pageId,uuid,circle,specId,m,mId2,server,'',url)}" scope="request"/>
+<c:set var="thisPage" value="Stars" scope="request"/>
+<c:if test="${bsbfn:hasMsisdn(header)}">
+	<c:set var="myAccUrl" value="${bsbfn:createRdUrl(pageContext.request,header,pageId,uuid,circle,specId,m,mId3,'http://airtellive.com/wps/portal/selfcare','','')}" scope="request"/>
+	<c:set var="myAccText" value="my a/c" scope="request"/>	
+</c:if>
+
+<c:set var="outLink" value="${bsbfn:createBcUrl(pageContext.request,pageContext.response,header,pageId,uuid,circle,specId)}" scope="request"/>
+<c:set var="outLink1" value="${bsbfn:createTrackingUrl(header,'14' ,pgeid)}" scope="request"/>
+
+<jsp:include page="../../common/low/header.jsp"/>
+

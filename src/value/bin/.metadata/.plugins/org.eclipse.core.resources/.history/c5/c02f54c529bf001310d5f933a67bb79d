@@ -1,0 +1,80 @@
+<%@ taglib uri="http://java.sun.com/jsp/jstl/core" prefix="c"%>
+<%@ taglib uri="http://java.sun.com/jsp/jstl/fmt" prefix="fmt"%>
+<%@ taglib prefix="s" uri="http://www.springframework.org/tags"%>
+<%@ taglib uri="http://java.sun.com/jsp/jstl/functions" prefix="fn"%>
+<%@ taglib uri="http://bsbportal.com/functions" prefix="bsbfn"%>
+<%@ taglib uri="http://bsbportal.com/functions/tti" prefix="tti" %>
+
+<%-- <c:set var="path" value="${pageContext.request.contextPath}/stars"/>
+<c:set var="specId" value="1"/>
+<c:set var="m" value="${modules.VIDEO_DETAIL}"/>
+<c:set var="m1" value="${modules.PAGINATION}"/>
+<c:set var="m3" value="${modules.RELATED_VIDEOS}"/>
+<c:set var="mId1" value="${moduleDescIds.VIDEO_LINK}" />
+<c:set var="mId2" value="${moduleDescIds.VID_LINK}" />
+
+<c:set var="more" value="${moduleDescIds.VIEW_MOREPHOTOS_LINK}"/>
+
+
+<jsp:include page="header.jsp"/>
+
+<table width="100%" border="0" cellspacing="0" cellpadding="10" class="rv_heading">
+	<tr>
+		<c:set var="bcm" value="${modules.BREADCRUMB}" />
+		<c:set var="bcmStarLink" value="${moduleDescIds.STARNAME_LINK}" />
+		<c:set var="bcmVidLink" value="${moduleDescIds.VIDEO_VIEW_ALL_LINK}" />
+        
+        <c:set var="url" value="${bsbfn:encode(starmetadata.name)}.html"/>
+        <td>
+        	<a style="color:#ffffff;font-weight:normal;" href="${bsbfn:createRdUrl(pageContext.request,header,pageId,uuid,circle,specId,bcm,bcmStarLink,server,path,url)}">
+        		<tti:textOrImage text="${bsbfn:getTransliteratedTextWithType(pageContext.request,starmetadata.name,2)}" style="b" size="12" bgColor="#646464"/>&nbsp;&nbsp;|&nbsp;
+        	</a>
+			
+			<c:set var="url" value="${bsbfn:encode(fn:toLowerCase(starmetadata.name))}/videos.html"/>
+			<a style="color:#ffffff" href="${bsbfn:createRdUrl(pageContext.request,header,pageId,uuid,circle,specId,bcm,bcmVidLink,server,path,url)}">
+				<strong><s:message code="label.videos" var="messageText"/><tti:textOrImage text="${messageText}" size="12" style="b" bgColor="#646464"/></strong>
+			</a>
+		</td>
+	</tr>
+</table>
+
+<jsp:include page="../../videos/smart/detail.jsp">
+	<jsp:param value="${relatedVideos}" name="video"/>
+	<jsp:param value="../css/video-detail-smart20140220.css" name="stylesheet"/>
+</jsp:include> --%>
+<c:set var="path" value="${pageContext.request.contextPath}/elections"/>
+<c:set var="specId" value="1"/>
+<c:set var="m" value="${modules.VIDEO}"/>
+<c:set var="mId" value="${moduleDescIds.VIDEO_LINK}"/>
+<s:message code="label.videos" var="videomoduletitle" scope="request"/>
+<%-- <jsp:include page="../../videos/smart/related.jsp">
+	<jsp:param value="${relatedVideos}" name="videos"/>
+	<jsp:param value="2" name="nCols"/>
+	<jsp:param value="1" name="maxRows"/>
+	<jsp:param value="" name="urlPart"/>
+	<jsp:param value="80" name="thumbnailWidth"/>
+	<jsp:param value="60" name="thumbnailHeight"/>
+	<jsp:param value="${config.watermarkImageUrl}" name="watermarkImage"/>
+	<jsp:param value="30" name="watermarkImageXPos"/>
+	<jsp:param value="20" name="watermarkImageYPos"/>
+	<jsp:param value="20" name="watermarkImageTransparency"/>
+	<jsp:param value="true" name="viewAllEnabled"/>
+	<jsp:param value="../css/video-detail-smart20140220.css" name="stylesheet"/>
+</jsp:include>
+ --%>
+ <div class="videosBlock">
+                        <a href="${ bsbfn:createRdUrl(pageContext.request,header,pageId,uuid,circle,specId,m,mId,server,path,videoDetailUrl)}">
+                            <div class="videoThumb">
+                            <c:set var="thumbUrl"
+										value="${config.icsBaseUrl}${bsbfn:getWatermarkedImageUrl(video.getThumbnailImageUrl(),80,60,config.watermarkImageUrl,30,20,20)}" />
+									<img src="${thumbUrl}" alt="-" class="thumbImg" />
+                                <div class="overlayBar">
+                                    <img src="${static_file_path}/elections/images/videoIcon2.png" alt="" class="videoIcon">
+                                    <div class="videoDuration">2:04</div>
+                                </div>
+                            </div>
+                            Caption will come here
+                        </a>
+               </div>
+
+

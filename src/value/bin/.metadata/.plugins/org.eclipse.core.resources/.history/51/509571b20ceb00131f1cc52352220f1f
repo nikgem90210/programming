@@ -1,0 +1,61 @@
+package com.bsb.portal.constants;
+
+/**
+ * Created with IntelliJ IDEA.
+ * User: dhruva
+ * Date: 15/11/13
+ * Time: 2:00 PM
+ * To change this template use File | Settings | File Templates.
+ */
+public final class AnalyticsConstants {
+    private AnalyticsConstants() {
+        throw new RuntimeException("Should not be instantiated");
+    }
+
+    public static final int SITE_SEARCH = 1; // Search
+    public static final int SITE_QRIOUS = 2; // Qrious
+    public static final int SITE_TNM = 3; // TnM Top Page & Media
+    public static final int SITE_STANDARD = 4; // Hindi Top Page & Media
+
+    public static final String COMMAND_REDIRECT = "rd";
+    public static final String COMMAND_REDIRECT_FORM = "fm";
+    public static final String COMMAND_BEACON = "bc";
+
+    public static final int TYPE_CLICK = 1;
+    public static final int TYPE_MODULE = 2;
+    public static final int TYPE_PAGE = 3;
+
+    //Analytics Category constants
+    public static final String CATEGORY_PHOTO = "4-P-1";
+    public static final String CATEGORY_PORTAL_HINDI = "4-T-V";  // changed from 4-T-HN in vernac
+    public static final String CATEGORY_DEFAULT = CATEGORY_PORTAL_HINDI;
+    public static final String CATEGORY_PHOTO_HINDI = "4-P-HN";
+    public static final String CATEGORY_STARS = "4-SP-1";
+    public static final String CATEGORY_VIDEO = "4-V-V"; // changed from 4-V-1 in vernac
+    public static final String CATEGORY_ASTRO = "4-A-1";
+    public static final String CATEGORY_CRICKET = "4-S-1";
+    public static final String CATEGORY_MICROSITES = "4-M-1";
+    public static final String CATEGORY_MICROSITE_PROMO = "4-GM-P";
+    public static final String CATEGORY_LOCAL = "4-L-1";
+    public static final String CATEGORY_SMARTSHOP = "4-SS-1";
+    public static final String CATEGORY_VAS = "4-VAS-V"; // new cat in vernac
+    public static final String CATEGORY_NEWS = "4-N-V"; // new cat in vernac
+    public static final String CATEGORY_ELECTION = "4-E-1";
+    public static final String CATEGORY_ELECTION_2 ="4-E-2";
+    public static final String CATEGORY_SMARTCHOICE = "4-SC-1";
+    public static final String CATEGORY_AIRTEL_STORE = "4-AS-V"; // new cat in for Airtel Store Vernac
+    public static final String CATEGORY_DUMMY = "4-DUM-1";
+    public static final String CATEGORY_CRICKET_BANNER = "4-S-2";
+    public static final String DEFAULT_MICROSITE_CATEGORY = "4-M-1";
+
+    public static final String ANALYTICS_PARTNER = "partnerId";
+    public static final String ANALYTICS_SEARCH_KEYWORD = "skw";
+    public static final String ANALYTICS_SEARCH_KEYWORD_COUNT = "skwc";
+    public static final String ANALYTICS_SWIPE_PHOTO = "avsp";
+    
+    //google analytics constants
+    public static final String GOOGLE_ANALYTICS_VERSION = "1";
+    public static final String GOOGLE_ANALYTICS_EVENT_HIT_TYPE = "event";
+    public static final String CATEGORY_FIFA = 4-F-1;
+     
+}

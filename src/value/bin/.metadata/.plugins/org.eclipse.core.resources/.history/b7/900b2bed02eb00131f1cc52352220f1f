@@ -1,0 +1,1438 @@
+package com.bsb.portal.fe.controller;
+
+import com.bsb.portal.common.CricketQuickLinks;
+import com.bsb.portal.common.CricketRelatedVideoCategories;
+import com.bsb.portal.common.Device.DeviceGroup;
+import com.bsb.portal.constants.AnalyticsConstants;
+import com.bsb.portal.constants.Constants;
+import com.bsb.portal.context.PortalContext;
+import com.bsb.portal.dto.*;
+import com.bsb.portal.fe.analytics.AnalyticsService;
+import com.bsb.portal.fe.analytics.CricketAnalytics;
+import com.bsb.portal.fe.analytics.CricketAnalytics.CricketSourcePage;
+import com.bsb.portal.fe.api.VideoAPI;
+import com.bsb.portal.fe.common.MatchType;
+import com.bsb.portal.fe.common.TeamInfo;
+import com.bsb.portal.fe.dataFetcher.CricketDataFetcherService;
+import com.bsb.portal.fe.delivery.DeliveryFactory;
+import com.bsb.portal.fe.delivery.helper.VideoDelivery;
+import com.bsb.portal.fe.delivery.model.NewsItemModel;
+import com.bsb.portal.fe.delivery.model.QueryItemModel;
+import com.bsb.portal.fe.delivery.model.QueryModel;
+import com.bsb.portal.fe.delivery.model.SearchModel;
+import com.bsb.portal.fe.delivery.services.DeliveryService;
+import com.bsb.portal.fe.delivery.util.DeliveryUtil;
+import com.bsb.portal.fe.services.CmsService;
+import com.bsb.portal.fe.services.ICricketService;
+import com.bsb.portal.fe.services.NewsServiceNew;
+import com.bsb.portal.fe.services.VideoService;
+import com.bsb.portal.fe.utils.PagingUtils;
+import com.bsb.portal.utils.HttpClient;
+import com.bsb.portal.utils.ResponseWrapper;
+import com.bsb.portal.utils.api.JsonUtil;
+import com.bsb.portal.utils.api.RequestUtils;
+import com.bsb.portal.utils.api.Utils;
+
+import org.apache.commons.lang3.StringUtils;
+import org.json.simple.JSONArray;
+import org.json.simple.JSONObject;
+import org.json.simple.JSONValue;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Controller;
+import org.springframework.util.CollectionUtils;
+import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestMethod;
+import org.springframework.web.bind.annotation.RequestParam;
+import org.springframework.web.servlet.ModelAndView;
+
+import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpServletResponse;
+
+import java.util.*;
+
+
+//import com.bsb.portal.fe.analytics.BaseModuleConstants;
+//import com.bsb.portal.fe.analytics.util.PhotoUtils;
+
+
+@Controller
+@RequestMapping(value = "/cricket")
+public class CricketController extends BasePhotoController{
+
+    private static Logger logger = LoggerFactory.getLogger(CricketController.class);
+
+    private static final int NUMB_COMMENTARY_PER_PAGE = 20;
+    private static final int NUMB_COMMENTARY_LIVE_PAGE = 6;
+    private static final int NUMB_SCHEDULE_PER_PAGE = 20;
+    private static final String VAS_KEYWORD = "cricketproperty";
+    private static final String PROPERTY = "cricket";
+    private static final int NUMB_GALLERY_PER_PAGE = 10;
+    private static final int NUMB_ITEMS_SCHEDULE = 3;
+    private static final int NUM_FIXTURE_SERIES = 2;
+    private static final int NUMB_ITEMS_SERIES_SCHEDULE = 2;
+    private static final int NUMB_SERIES_PER_PAGE=6;
+    private static final String GALLERY_TAGGING_KEYWORD = "_4cricket";
+    private static final int NUMB_VIDEOS_PER_PAGE_SMART = 15;
+    private static final int NUMB_VIDEOS_PER_PAGE_LOW = 6;
+    private static final int NUMB_VIDEOS_ON_VIDEOS_PAGE= 5;
+    private static final int NUMB_VIDEOS_ON_TOP_PAGE=2;
+    private static final String SMART_VIDEOS_SOURCE = "star";
+    private static final String LOW_VIDEOS_SOURCE = "s3r";
+
+    @Autowired
+    private CricketAnalytics cricketAnalytics;
+
+    @Autowired
+    private ICricketService cricketService;
+
+    @Autowired
+    private CmsService cmsService;
+
+    @Autowired
+    private NewsServiceNew newsService;
+    
+	@Autowired
+	private VideoService videoService;
+    
+	@Autowired
+	private CricketDataFetcherService cricketDataFetcher;
+
+    @Override
+    protected String getSiteId() {
+        return AnalyticsConstants.CATEGORY_CRICKET;
+    }
+    
+    public ModelAndView getMatches(HttpServletRequest request) {
+        String currentMatchId = cricketService.getCurrentMatchId();
+        return getLiveScore(currentMatchId,request);
+    }
+    
+    @RequestMapping(value = {"","/","/index","/main"})
+    public ModelAndView _getMatches(HttpServletRequest request, HttpServletResponse response) {
+    	DeliveryService deliveryService = DeliveryFactory.getDeliveryService();
+    	String srcParam = request.getParameter("src");
+        if (srcParam != null) {
+            try {
+                PortalContext.getRequestContext().setAnalyticsCategory(AnalyticsConstants.CATEGORY_DUMMY);
+                List<String> visibleModuleList = new ArrayList<>();
+                visibleModuleList.add("DM");
+                PortalContext.getRequestContext().setVisibleModuleList(visibleModuleList);
+                AnalyticsService.createBcUrl(request, response, null, srcParam, null, null, null);
+
+                if ("staripl".equalsIgnoreCase(srcParam.trim())) {
+                    return new ModelAndView("redirect:http://180.179.209.252/airtellive/MagicVideoListingAL.aspx");
+                }
+            } catch (Exception e) {
+                logger.error("Error redirecting for src [{}]", srcParam, e);
+            }
+        }
+
+        Map<String, Object> model = getModel(request);
+        insertFullScore(model, null, request);
+        insertNewsList(model, 3);
+        insertMatchSchedule(model,NUMB_ITEMS_SCHEDULE);
+        insertMatchResults(model,NUMB_ITEMS_SCHEDULE);
+        insertQriousContent(model);
+        insertGallery(null, model,false);
+        model.put("pgeid", "index");
+        insertVas(request, model);
+
+        model.put("relatedVideos", cricketService.getRelatedVideos());
+        String source=cricketService.getDeviceSpecificVideoSource();
+        List<Match> videoMatchList = cricketService.getMatchesResultVideos(source);
+        model.put("matchList",videoMatchList.get(0));
+
+        CricketAnalytics.CricketSourcePage pageId = CricketAnalytics.CricketSourcePage.TTP;
+        addAnalytics(request, model, pageId);
+        
+        
+        // new trending override from basecontroller
+        addTrendingKeywords(request, model, "cricket");
+        
+        model.put("showReadInLangLink", true);
+        return new ModelAndView("cricket/main", model);
+    }
+    
+    @RequestMapping("/langredirect")
+    public ModelAndView confirmLanguage(HttpServletRequest request) {
+        Map<String,Object> models = getModel(request);
+       
+        return new ModelAndView("cricket/confirmlanguage", models);
+    }
+    
+
+    @RequestMapping("{matchid}")
+    public ModelAndView getMatchScore(@PathVariable("matchid") String matchid, HttpServletRequest request) {
+        return getLiveScore(matchid, request);
+    }
+
+    @RequestMapping("{matchid}/live")
+    public ModelAndView getLiveScore(@PathVariable("matchid") String matchid, HttpServletRequest request) {
+        Map<String, Object> model = getModel(request);
+        boolean isMatchAvailable = insertFullScore(model, matchid, request);
+        if(!isMatchAvailable){
+            return new ModelAndView("redirect:http://m.airtellive.com/cricket/index.html");
+        }
+        insertGallery(null, model,false);
+        model.put("pgeid", "livescore");
+        model.put("fullscorecard",RequestUtils.getServer(request)+"/cricket/"+matchid+"/score.html?_ap=1");
+        model.put("fullscorecardtitle","Full Score");
+        model.put("relatedVideos", cricketService.getRelatedVideos());
+        addCommentary(matchid, model);
+        insertVas(request, model);
+        CricketSourcePage pageId = CricketAnalytics.CricketSourcePage.LSP;
+        addAnalytics(request, model, pageId);
+        return new ModelAndView("cricket/live", model);
+    }
+    @RequestMapping("{matchid}/score")
+    public ModelAndView getDetailedScore(@PathVariable("matchid") String matchid, HttpServletRequest request) {
+        Map<String, Object> model = getModel(request);
+        boolean isMatchAvailable = insertFullScore(model, matchid, request);
+        if(!isMatchAvailable){
+            return new ModelAndView("redirect:http://m.airtellive.com/cricket/index.html");
+        }
+        model.put("pgeid", "score");
+        model.put("relatedVideos", cricketService.getRelatedVideos());
+        addCommentary(matchid, model);
+        insertGallery(null, model,false);
+        insertVas(request, model);
+        CricketSourcePage pageId = CricketAnalytics.CricketSourcePage.DSP;
+        addAnalytics(request, model, pageId);
+        return new ModelAndView("cricket/full-score", model);
+    }
+    @RequestMapping("{matchid}/commentary")
+    public ModelAndView getCommentary(@PathVariable("matchid") String matchid, HttpServletRequest request) {
+        Map<String, Object> model = getModel(request);
+        boolean isMatchAvailable = insertFullScore(model, matchid, request);
+        if(!isMatchAvailable){
+            return new ModelAndView("redirect:http://m.airtellive.com/cricket/index.html");
+        }
+        insertGallery(null, model,false);
+        insertVas(request, model);
+        String pageNoParam = request.getParameter("p");
+        int pageNo = getPageParam(pageNoParam);
+        String commentaryType = request.getParameter("type");
+        model.put("type", commentaryType);
+        addFullCommentary(matchid, request, model, pageNo, commentaryType);
+        model.put("pgeid", "commentary");
+
+        model.put("fullscorecard",RequestUtils.getServer(request)+"/cricket/"+matchid+"/score.html?_ap=1");
+        model.put("fullscorecardtitle","Full Score");
+        CricketSourcePage pageId = CricketAnalytics.CricketSourcePage.CMT;
+        addAnalytics(request, model, pageId);
+        return new ModelAndView("cricket/commentary", model);
+    }
+    
+    @RequestMapping("/videos")
+    public ModelAndView getVideos( HttpServletRequest request, HttpServletResponse response) {
+    	Map<String, Object> model = getModel(request);
+    	model.put("pgeid", "score");//change to video page
+    	
+        model.put("cricketAction", cricketService.getVideos(NUMB_VIDEOS_ON_TOP_PAGE,0));
+        insertLiveScore(model);
+        
+        String source=cricketService.getDeviceSpecificVideoSource();
+    	
+        List<Match> videoMatchList = cricketService.getMatchesResultVideos(source);
+        if(!CollectionUtils.isEmpty(videoMatchList)) {
+            videoMatchList = videoMatchList.size()>NUMB_VIDEOS_ON_VIDEOS_PAGE ? videoMatchList.subList(0, NUMB_VIDEOS_ON_VIDEOS_PAGE):videoMatchList.subList(0, videoMatchList.size());
+        }
+        model.put("matchList",videoMatchList);
+        CricketSourcePage pageId = CricketAnalytics.CricketSourcePage.VIDMDL;
+        addAnalytics(request, model, pageId);
+        return new ModelAndView("cricket/videos", model);
+    }
+    
+    @RequestMapping("/recomended/videos")
+    public ModelAndView getRecomendedVideos( HttpServletRequest request, HttpServletResponse response) {
+    	Map<String, Object> model = getModel(request);
+    	model.put("pgeid", "score");//change to video page
+    	insertLiveScore(model);
+    	String pageNoParam = request.getParameter("p");
+    	String source=cricketService.getDeviceSpecificVideoSource();
+    	
+    	List<Match> matchList = cricketService.getMatchesResultVideos(source);
+        int offset = PagingUtils.getOffset(pageNoParam, NUMB_GALLERY_PER_PAGE).intValue();
+        Pager pager = PagingUtils.getPager(matchList, offset, NUMB_GALLERY_PER_PAGE);
+      
+        if (pager.isHasNextPage()) {
+            model.put("nextpageno", pager.getNextPageNumber());
+        }
+        model.put("pager", pager);
+    	model.put("matchList",matchList.subList(pager.getStartIndex(), pager.getEndIndex()+1));
+    	CricketSourcePage pageId = CricketAnalytics.CricketSourcePage.RECVID;
+        addAnalytics(request, model, pageId);
+    	return new ModelAndView("cricket/recomendedVideos", model);
+    }
+    
+    @RequestMapping("/latest/videos")
+    public ModelAndView getLatestVideos( HttpServletRequest request, HttpServletResponse response) {
+    	int nVideosPerPage = getDeviceVideosCount(request, response);
+        int pageNum = 1;
+        String page = request.getParameter("p");
+        if (page != null) {
+        	try {
+        		pageNum = Integer.parseInt(page);
+        	} catch (NumberFormatException ex) {
+        		// Do nothing
+        	}
+        }
+        String query = "cricket";
+        
+        String lang = PortalContext.getI18nContext().getLang();
+        List<Video> videos = null;
+        videos = cricketService.getVideos(nVideosPerPage, (pageNum-1)*nVideosPerPage);
+        Map<String, Object> model = getModel(request);
+        int pos   = (pageNum - 1) * nVideosPerPage;
+        Pager pager = new Pager(pos,videos == null ? 0 : videos.size(), nVideosPerPage);
+        insertLiveScore(model);
+        model.put("pager", pager);
+
+        model.put("relatedVideos",videos);
+
+        //Set analytics parameters
+        CricketSourcePage pageId = CricketAnalytics.CricketSourcePage.LATVID;
+        addAnalytics(request, model, pageId);
+        return new ModelAndView("cricket/latestVideos", model);
+    }
+   
+    @RequestMapping("/video")
+    public ModelAndView getStarVideo(HttpServletRequest request, HttpServletResponse response) {
+    	
+    	String videoId = request.getParameter("id");
+    	if (StringUtils.isBlank(videoId))
+        {
+            logger.warn("Couldnot find video"+videoId+". Redirecting to videolist");
+
+        }
+    	int nVideosPerPage = getDeviceVideosCount(request, response);
+        int pos = 0;
+        String posStr = request.getParameter("pos");
+        if (!StringUtils.isBlank(posStr)) {
+            try {
+                pos = Integer.parseInt(posStr);
+            } catch (Exception e) {
+                // do nothing
+            }
+        }
+        
+        String ua = RequestUtils.getUserAgent(request);
+        Video video = videoService.getVideo(videoId, ua);
+        
+        if (video == null)
+            return null;
+    	
+        String lang = PortalContext.getI18nContext().getLang();
+
+        List<Video> relatedVideos = videoService.getRelatedVideos(videoId, nVideosPerPage, pos, lang, ua, null, null);
+        Map<String, Object> model = getModel(request);
+        model.put("video", video);
+        model.put("relatedVideos",relatedVideos);
+        
+        CricketSourcePage pageId = CricketAnalytics.CricketSourcePage.VIDPLAY;
+        addAnalytics(request, model, pageId);
+        return new ModelAndView("cricket/video", model);
+        
+        
+    }
+    @RequestMapping("{matchid}/allvideos")
+    public ModelAndView getAllVideos(@PathVariable("matchid") String matchid, HttpServletRequest request) {
+    	Map<String, Object> model = getModel(request);
+        boolean isMatchAvailable = insertFullScore(model, matchid, request);
+        if(!isMatchAvailable){
+            return new ModelAndView("redirect:http://m.airtellive.com/cricket/index.html");
+        }
+        model.put("pgeid", "videos");
+        
+        String pageNoParam = request.getParameter("p");
+        int offset = PagingUtils.getOffset(pageNoParam, NUMB_GALLERY_PER_PAGE).intValue();
+        int size = (int)model.get("numVideos") - 1;
+        model.put("start", offset);
+        int end = offset+NUMB_GALLERY_PER_PAGE - 1;
+        if (size > end){
+        	model.put("end", end);
+        	if(pageNoParam == null)
+        		pageNoParam="1";
+        	model.put("nextpageno",Integer.parseInt(pageNoParam)+1 );
+        }
+        else{
+        	//end = size - 1;
+        	model.put("end", size);
+        }
+        
+        addCommentary(matchid, model);
+        insertGallery(null, model,false);
+        insertVas(request, model);
+        CricketSourcePage pageId = CricketAnalytics.CricketSourcePage.VID;
+        addAnalytics(request, model, pageId);
+    	return new ModelAndView("cricket/allvideos", model);
+    }
+    @RequestMapping("/newslist")
+    public ModelAndView getNewsList(HttpServletRequest request) {
+
+        Map<String, Object> model = getModel(request);
+        model.put("pgeid", "newslist");
+        insertLiveScore(model);
+
+        CricketSourcePage pageId = CricketAnalytics.CricketSourcePage.NWL;
+        addAnalytics(request, model, pageId);
+
+        String pageNoParam = request.getParameter("p");
+        
+        String lang = PortalContext.getI18nContext().getLang();
+        
+        ResponseWrapper<List<NewsItemModel>> responseWrapper = null;
+        		
+        int offset = PagingUtils.getOffset(pageNoParam, NUMB_COMMENTARY_PER_PAGE).intValue();
+
+        if(StringUtils.isBlank(lang) || lang.equalsIgnoreCase("en") || lang.equalsIgnoreCase("english")){
+ 
+        	responseWrapper = newsService.getNewsByCategory(Constants.CRICKET_NEWS_CATEGORY,
+                    PortalContext.getDeviceContext().getCircle().getCircleIdUpperCase(), 20, offset, false, DeliveryUtil.getCricketNewsSite());
+            
+        } else {
+        	
+            //restricting news by 'cricket' keyword for other languages        	
+        	responseWrapper = newsService.search("cricket", 0, 20, offset, Constants.getCricketNewsCategory(lang),
+                    PortalContext.getDeviceContext().getCircle().getCircleIdUpperCase(), null, DeliveryUtil.getCricketNewsSite());
+        }
+        
+        List<NewsItemModel> newsItemModelList = responseWrapper.getResult();
+        List<Article> newsList = Article.getArticles(newsItemModelList);
+
+        //List<Article> finalnewsList = getItemsForPage(newsList, pageNoParam, NUMB_COMMENTARY_PER_PAGE, model);
+        Pager pager = PagingUtils.getPager(responseWrapper, offset, NUMB_COMMENTARY_PER_PAGE);
+        if (pager.isHasNextPage()) {
+            model.put("nextpageno", pager.getNextPageNumber());
+        }
+        model.put("newslist", newsList);
+
+        return new ModelAndView("cricket/news-list", model);
+    }
+
+    @RequestMapping("/news/{newsid}")
+    public ModelAndView getNewsDetails(@PathVariable("newsid") String newsid, HttpServletRequest request) {
+        Map<String, Object> model = getModel(request);
+        insertLiveScore(model);
+        Article newsMetadata = Article.getArticle(newsService.getDetail(newsid, DeliveryUtil.getCricketNewsSite(),false).getResult());
+        model.put("news", newsMetadata);
+        model.put("pgeid", "news");
+        insertGallery(null, model,true);
+        CricketSourcePage pageId = CricketAnalytics.CricketSourcePage.NWD;
+        addAnalytics(request, model, pageId);
+        return new ModelAndView("cricket/news", model);
+    }
+
+    @RequestMapping("/galleries")
+    public ModelAndView getGalleries(HttpServletRequest request) {
+
+        Map<String, Object> model = getModel(request);
+        insertLiveScore(model);
+        String pageNoParam = request.getParameter("p");
+        
+        String lang = PortalContext.getI18nContext().getLang();
+        
+
+        List<PhotoAlbum> matchedGalleries = null;
+        
+        if(lang.equalsIgnoreCase("en") || lang.equalsIgnoreCase("english")) {
+        	matchedGalleries = cricketService.getGalleries();
+        }else {
+        	matchedGalleries = cricketService.getHindiGalleries();
+        }
+        
+        List<PhotoAlbum> itemsForPage = getItemsForPage(matchedGalleries, pageNoParam, NUMB_GALLERY_PER_PAGE, model);
+        model.put("galleries",itemsForPage);
+
+        model.put("pgeid", "galleries");
+        CricketSourcePage pageId = CricketAnalytics.CricketSourcePage.GLST;
+        addAnalytics(request, model, pageId);
+        return new ModelAndView("cricket/photo-list", model);
+    }
+
+    @RequestMapping("/matchschedule/{seriesId}")
+    public ModelAndView getMatchSchedule(@PathVariable("seriesId") String seriesId, HttpServletRequest request) {
+        Map<String, Object> model = getModel(request);
+        insertLiveScore(model);
+        insertMatchSchedule(seriesId, model, NUMB_SCHEDULE_PER_PAGE);
+        model.put("pgeid", "matchSchedule");
+        if(!"all".equalsIgnoreCase(seriesId)){
+            model.put("seriesDetail", cricketService.getSeriesFromId(seriesId));
+        }
+        insertGallery(null, model, true);
+        CricketSourcePage pageId = CricketAnalytics.CricketSourcePage.MTS;
+        addAnalytics(request, model, pageId);
+        return new ModelAndView("cricket/matchschedule", model);
+    }
+
+    @RequestMapping("/matchresults/{seriesId}")
+    public ModelAndView getMatchResults(@PathVariable("seriesId") String seriesId, HttpServletRequest request) {
+        Map<String, Object> model = getModel(request);
+        insertLiveScore(model);
+        insertMatchResults(seriesId, model, NUMB_SCHEDULE_PER_PAGE);
+        model.put("pgeid", "matchResults");
+        if(!"all".equalsIgnoreCase(seriesId)){
+            model.put("seriesDetail", cricketService.getSeriesFromId(seriesId));
+        }
+        CricketSourcePage pageId = CricketAnalytics.CricketSourcePage.MTR;
+        addAnalytics(request, model, pageId);
+        return new ModelAndView("cricket/matchresults", model);
+    }
+
+    @RequestMapping("/feedback")
+    public ModelAndView getFeedback(HttpServletRequest request) {
+
+        logger.info("Feedback request.");
+        return new ModelAndView("cricket/feedback");
+    }
+
+    @RequestMapping("/menu")
+    public ModelAndView getMenu(HttpServletRequest request) {
+        Map<String, Object> model = getModel(request);
+        insertLiveScore(model);
+        model.put("pgeid", "menu");
+        CricketSourcePage pageId = CricketAnalytics.CricketSourcePage.MENU;
+        addAnalytics(request, model, pageId);
+        return new ModelAndView("cricket/menu",model);
+    }
+
+    @RequestMapping("/services")
+    public ModelAndView getServices(HttpServletRequest request) {
+
+        logger.info("Services request.");
+        return new ModelAndView("cricket/services");
+    }
+
+    @RequestMapping(value={"/contest"} ,method = RequestMethod.GET)
+    public ModelAndView getContest(HttpServletRequest request) {
+        Map<String, Object> model = getModel(request);
+        insertLiveScore(model);
+        insertGallery(null, model,true);
+        Contest contest = cmsService.getCachedContest(Constants.CRICKET_SITE_ID, Constants.CONTEST_MODULE_ID);
+        model.put("siteId", Constants.CRICKET_SITE_ID);
+        model.put("contest", contest);
+        model.put("submitUrl",RequestUtils.getServer(request)+"/cricket/contest/submit.html");
+        CricketSourcePage pageId = CricketAnalytics.CricketSourcePage.CST;
+        addAnalytics(request, model, pageId);
+        return new ModelAndView("cricket/contest", model);
+    }
+
+    @RequestMapping(value={"/contest/submit"} ,method = RequestMethod.POST)
+    public ModelAndView postContest(HttpServletRequest request,@RequestParam(value = "questionId", defaultValue = "0") String qid,
+                                    @RequestParam(value = "ans", defaultValue = "0") String ans,@RequestParam(value = "contestId", defaultValue = "1") String contestId) {
+        Map<String, Object> model = getModel(request);
+        insertLiveScore(model);
+        insertGallery(null, model,true);
+
+        CricketSourcePage pageId = CricketAnalytics.CricketSourcePage.CSUC;
+        if(RequestUtils.hasMsisdn(request))
+        {
+            String msisdn = RequestUtils.getEncodedMsisdn(request);
+            JSONObject answerMap = new JSONObject();
+            answerMap.put(qid, ans);
+            JSONObject res = cmsService.postContestAnswer(Constants.CRICKET_SITE_ID,answerMap,contestId, msisdn);
+            model.put("result", res.get("responseString"));
+            if(!(Boolean)res.get("responseFlag"))
+                pageId = CricketAnalytics.CricketSourcePage.CFAIL;
+        }
+        else
+        {
+            String responseMsg = "Oops! contest is restricted for Airtel users only.In case you are an airtel mobile user you may try again after a while.* please ensure you are on airtel mobile network & not on Wi-fi";
+            model.put("result",responseMsg);
+            pageId = CricketAnalytics.CricketSourcePage.CFAIL;
+        }
+
+        addAnalytics(request, model, pageId);
+        return new ModelAndView("cricket/contest", model);
+    }
+
+    @RequestMapping(value={"/contest-tc"} ,method = RequestMethod.GET)
+    public ModelAndView contestTNC(HttpServletRequest request) {
+        Map<String, Object> model = getModel(request);
+        insertGallery(null, model, true);
+        CricketSourcePage pageId = CricketAnalytics.CricketSourcePage.CTNC;
+        addAnalytics(request, model, pageId);
+        return new ModelAndView("cricket/contest-tc", model);
+    }
+
+    @RequestMapping(value={"/grand-contest"} ,method = RequestMethod.GET)
+    public ModelAndView grandContest(HttpServletRequest request) {
+        Map<String, Object> model = getModel(request);
+        insertGallery(null, model,true);
+        CricketSourcePage pageId = CricketAnalytics.CricketSourcePage.GCON;
+        List<WinnerMetaData> listWinners = cmsService.getContestWinners(Constants.CRICKET_SITE_ID,null);
+        model.put("contestWinners", listWinners);
+        addAnalytics(request, model, pageId);
+        return new ModelAndView("cricket/grand-contest", model);
+    }
+
+    @RequestMapping(value={"/player/{playerid}"} ,method = RequestMethod.GET)
+    public ModelAndView getPlayer(@PathVariable("playerid") String playerid,HttpServletResponse response,@RequestParam(value = "type", defaultValue = "bat") String type, HttpServletRequest request) {
+        Map<String, Object> model = getModel(request);
+        insertLiveScore(model);
+        insertPlayerData(playerid, type, model);
+        CricketSourcePage pageId = CricketAnalytics.CricketSourcePage.PPRF;
+        addAnalytics(request, model, pageId);
+        return new ModelAndView("cricket/playerprofile", model);
+    }
+
+    @RequestMapping(value={"/ranking/{type}"} ,method = RequestMethod.GET)
+    public ModelAndView getRanking(@PathVariable("type") String type, HttpServletRequest request) {
+        Map<String, Object> model = getModel(request);
+        insertLiveScore(model);
+
+        Map<String,List<CricketRanking>> ranking = cricketService.getRankingByType(type);
+        model.put("typeRanking", ranking);
+        model.put("type", type);
+
+        CricketSourcePage pageId = CricketAnalytics.CricketSourcePage.RNKPGE;
+        addAnalytics(request, model, pageId);
+        return new ModelAndView("cricket/ranking", model);
+    }
+    @RequestMapping(value={"/team/{teamName}"} ,method = RequestMethod.GET)
+    public ModelAndView getTeam(@PathVariable("teamName") String teamName, HttpServletRequest request) {
+        Map<String, Object> model = getModel(request);
+        
+        //redirect to homepage if someone reaches team/tbd.html
+        if(teamName.toLowerCase().equals("tbd")) {
+        	return new ModelAndView("redirect:http://m.airtellive.com/cricket/index.html");
+        }
+        
+        Team team = cricketService.getTeamProfile(teamName);
+        model.put("team", team);
+        addTeamRanking(model,MatchType.TEST,3);
+        insertLiveScore(model);
+        //Analytics
+        CricketSourcePage pageId = CricketAnalytics.CricketSourcePage.TMPGE;
+        addAnalytics(request, model, pageId);
+
+        return new ModelAndView("cricket/teamInfo", model);
+    }
+    @RequestMapping("/gallery/{galleryId}/{photoId}")
+    public ModelAndView getGallery(@PathVariable("galleryId") String galleryId, @PathVariable("photoId") String photoId,HttpServletRequest request,HttpServletResponse response) {
+        Map<String, Object> model = getModelWithPhotoDetails(request);
+        String lang = PortalContext.getI18nContext().getLang();
+//        if(!lang.equalsIgnoreCase("hi"))
+//        	lang="en";
+        addPhotoAlbumSpecificLanguage(galleryId, photoId, model,lang);
+        addRelatedGalleriesSpecificLanguage (galleryId, photoId, model,lang);
+        boolean thankyoupage = false;
+        thankyoupage = photoId.equalsIgnoreCase("thanks");
+        CricketSourcePage pageId;
+        if (!thankyoupage){
+            pageId = CricketAnalytics.CricketSourcePage.PTO;
+        }
+        else{
+            pageId = CricketAnalytics.CricketSourcePage.PTY;
+        }
+        addAnalytics(request, model, pageId);
+
+        if (!thankyoupage){
+            return new ModelAndView("cricket/photo", model);
+        }
+        else{
+            return new ModelAndView("cricket/thanks", model);
+        }
+    }
+    
+    
+    protected void addPhotoAlbumSpecificLanguage(String galleryId, String photoId, Map<String,Object> model,String lang) {
+        GalleryData galleryData = photoService.getGalleryData(lang);
+        PhotoAlbum gallery = galleryData.getGalleries().get(galleryId);
+
+        if (gallery == null || gallery.getGalleryId() == null)
+            return;
+        photoService.populateGalleryDetails(gallery);
+        
+        String partnerName = gallery.getPartnerIdStr();
+        
+        List<PhotoMetaData> photos = gallery.getPhotos();
+        model.put("gallery", gallery);
+        
+        boolean thankyoupage = false;
+        thankyoupage = photoId.equalsIgnoreCase("thanks");
+        if (!thankyoupage) {
+            PhotoMetaData photoMetaData = null;
+            if (photoId == null || photoId.trim().equals("") || photoId.equals("0"))
+                photoMetaData = photos.get(0);
+            else {
+                boolean found = false;
+                for (int i = 0; i < photos.size(); i++) {
+                    photoMetaData = photos.get(i);
+                    if (photoMetaData.getId().equals(photoId)) {
+                        found = true;
+                        break;
+                    }
+                }
+                if (!found)
+                    photoMetaData = photos.get(0);
+
+            }
+            model.put("photo", photoMetaData);
+            model.put("photodescription",photoMetaData.getDescription());
+
+            model.put("partner", partnerName);
+            
+        } 
+
+        Category category = categoryService.getCategory(gallery.getCategory().toString().toLowerCase());
+        model.put("category", category);
+        if(category!=null){
+            model.put("categoryid", category.getId());
+        }
+        model.put("searchkeywords", photoService.getSearchKeywords());
+        return;
+    }
+    
+    protected void addRelatedGalleriesSpecificLanguage(String galleryId,String photoId, Map<String,Object> model,String lang) {
+        GalleryData galleryData = photoService.getGalleryData(lang);
+    	PhotoAlbum gallery = galleryData.getGalleries().get(galleryId);
+    	if (gallery == null || gallery.getGalleryId() == null)
+            return;
+    	List<PhotoAlbum> otherGalleries = getGalleriesOtherThan(gallery);
+    	boolean thankyoupage = false;
+        thankyoupage = photoId.equalsIgnoreCase("thanks");
+        
+    	if(thankyoupage)
+    	{
+    		List<PhotoMetaData> photoMetaDatas = new ArrayList<PhotoMetaData>();
+    		for (int i = 0; i < otherGalleries.size(); i++) {
+    			PhotoAlbum photoAlbum = otherGalleries.get(i);
+    			photoService.populateGalleryDetails(photoAlbum);
+    			if(photoAlbum.getPhotos() == null || photoAlbum.getPhotos().size() <= 2)
+    				continue;
+    			photoMetaDatas.add(photoAlbum.getPhotos().get(0));
+    			if(i==6)
+    				break;
+    		}
+    		model.put("photos",photoMetaDatas);
+    		int numRows = photoMetaDatas.size() / 2;
+    		if(photoMetaDatas.size() == 1){
+    			numRows = 1;
+    		}
+    		model.put("numRows",numRows);
+    		
+    	}
+    	if(otherGalleries!=null && otherGalleries.size()>0){
+    		
+    		int size = otherGalleries.size();
+    		int max = 2;
+    		if(max > size){
+    			max = size;
+    		}
+
+            int range = 10;
+            if(size > range)
+            {
+                int number1 = Utils.getRandomNumber((range-2));
+                otherGalleries = otherGalleries.subList(number1, number1 + 2);
+            }
+            else
+                otherGalleries = otherGalleries.subList(0, size);
+
+    		model.put("otherGalleries", otherGalleries);
+    	}
+    	else{
+    		model.put("otherGalleries", new ArrayList<PhotoAlbum>());
+    	}
+    	return;
+    }
+
+    
+
+    @RequestMapping(value={"/teamlist/{type}"} ,method = RequestMethod.GET)
+    public ModelAndView getTeamList(@PathVariable("type") String type, HttpServletRequest request) {
+        Map<String, Object> model = getModel(request);
+        List<TeamInfo> teamList = cricketService.getTeamListForTournament(type);
+        model.put("teamList", teamList);
+        model.put("type", type);
+        insertLiveScore(model);
+        CricketSourcePage pageId = CricketAnalytics.CricketSourcePage.TMLSTPGE;
+        addAnalytics(request, model, pageId);
+        return new ModelAndView("cricket/teamList", model);
+    }
+
+    @RequestMapping("/vas/all")
+    public ModelAndView getAllVas(HttpServletRequest request) {
+        Map<String, Object> model = getModel(request);
+        String page = "cricket/vas-all";
+        CricketSourcePage pageId = CricketAnalytics.CricketSourcePage.VALL;
+        page = getAllVas(VAS_KEYWORD, PROPERTY, request, model);
+        if(!StringUtils.isBlank(page) && page.contains("vas-list")) {
+            pageId = CricketAnalytics.CricketSourcePage.VLST;
+        }
+        addAnalytics(request, model, pageId);
+        return new ModelAndView(page, model);
+    }
+
+    @RequestMapping("/vas/list/{category}")
+    public ModelAndView getAllVasCategory(@PathVariable("category") String category, HttpServletRequest request) {
+        Map<String, Object> model = getAllVasCategory(VAS_KEYWORD, PROPERTY, category, request);
+        CricketSourcePage pageId = CricketAnalytics.CricketSourcePage.VLST;
+        addAnalytics(request, model, pageId);
+        return new ModelAndView("cricket/vas-list", model);
+    }
+
+    @RequestMapping(value = {"/serieslist"})
+    public ModelAndView getSeriesList(HttpServletRequest request) {
+        Map<String, Object> model = getModel(request);
+        insertLiveScore(model);
+        insertGallery(null, model,false);
+        model.put("pgeid", "index");
+        insertVas(request, model);
+        insertSeriesFixtures(model);
+        CricketAnalytics.CricketSourcePage pageId = CricketAnalytics.CricketSourcePage.SERIESLST;
+        addAnalytics(request, model, pageId);
+        return new ModelAndView("cricket/serieslist", model);
+    }
+    
+    @RequestMapping(value = {"/series/videos"})
+    public ModelAndView getSeriesListAll(HttpServletRequest request) {
+        Map<String, Object> model = getModel(request);
+        Map<Series,List<Match>> seriesFixtureMap = new HashMap<Series,List<Match>>();
+        List<Series> seriesList= cricketService.getSeriesList();
+        List<Series> modelseriesList = new ArrayList<Series>();
+        String source=cricketService.getDeviceSpecificVideoSource();
+
+        for(Series series : seriesList){
+	         List<Video> videoList = new ArrayList<Video>();
+	         videoList=cricketService.getSeriesVideos(series.getSeriesId(),source);
+	         if(videoList==null || videoList.size()==0){
+	             continue;
+	         }	
+	         else{
+	        	 modelseriesList.add(series);
+	        	 List<Match> matchList = series.getMatchList();
+	        	 List<Match> matchlist = new ArrayList<Match>();
+	        	 for(int i=matchList.size()-1;i>=0;i--){
+	        		 Match match =matchList.get(i);
+	        		 Match fullMatch = cricketService.getMatchDetails(match.getMatchId(),source);
+	        		 if(fullMatch.getAllVideos()==null || fullMatch.getAllVideos().size()==0){
+	        			 continue;
+	        		 }
+	        		 matchlist.add(fullMatch);
+	        		 seriesFixtureMap.put(series, matchlist);
+	        		 break;
+	        	 }
+	         }
+        }
+        String pageNoParam = request.getParameter("p");
+        int offset = PagingUtils.getOffset(pageNoParam, NUMB_SERIES_PER_PAGE).intValue();
+        Pager pager = PagingUtils.getPager(modelseriesList, offset, NUMB_SERIES_PER_PAGE);
+        
+        if (pager.isHasNextPage()) {
+        	model.put("nextpageno", pager.getNextPageNumber());
+        }
+        model.put("pager", pager);
+        insertLiveScore(model);
+       
+        model.put("seriesFixtureMap",seriesFixtureMap);
+        model.put("seriesList",modelseriesList.subList(pager.getStartIndex(),pager.getEndIndex()+1));
+        CricketSourcePage pageId = CricketAnalytics.CricketSourcePage.SERVID;
+        addAnalytics(request, model, pageId);
+        return new ModelAndView("cricket/seriesvideos", model);
+    }
+    @RequestMapping(value = {"/series/{seriesId}"})
+    public ModelAndView getSeriesInfo(@PathVariable("seriesId") String seriesId,HttpServletRequest request) {
+        Map<String, Object> model = getModel(request);
+        insertLiveScore(model);
+        Series seriesDetail = cricketService.getSeriesFromId(seriesId);
+        model.put("seriesDetail", seriesDetail);
+        List<PointTable> seriesStandings = seriesDetail.getPointTableList();
+        model.put("seriesStandings", seriesStandings);
+        if(seriesStandings != null ){
+        List<Team> teamList = new ArrayList<Team>();
+        for(PointTable pointTable :seriesStandings ){
+        	if(pointTable == null)
+        		continue;
+        	List<TeamPoint> teamPointList = pointTable.getTeamPoints();
+        	for(TeamPoint team :teamPointList ){
+        		Team teamWithShortName = new Team();
+        		teamWithShortName=cricketService.getTeamProfile(team.getTeamName());
+        		teamList.add(teamWithShortName);
+        		
+        	}
+        }
+        if(teamList != null && teamList.size()>0){
+        	model.put("teamList", teamList);
+        }
+        insertNewsList(model, 2);
+        insertMatchResults(seriesId, model, NUMB_ITEMS_SERIES_SCHEDULE);
+        insertMatchSchedule(seriesId, model, NUMB_ITEMS_SERIES_SCHEDULE);
+        insertQriousContent(model);
+        insertGallery(seriesId+GALLERY_TAGGING_KEYWORD, model,false);
+        model.put("pgeid", "index");
+        insertVas(request, model);
+        insertSeriesFixtures(model);
+        insertMatchSchedule(seriesId, model, NUMB_ITEMS_SERIES_SCHEDULE);
+        CricketAnalytics.CricketSourcePage pageId = CricketAnalytics.CricketSourcePage.SERIESDTL;
+        addAnalytics(request, model, pageId);
+        return new ModelAndView("cricket/seriespage", model);
+    }
+    @RequestMapping(value = {"/series/{seriesId}/videos"})
+    public ModelAndView getSeriesVideosAll(@PathVariable("seriesId") String seriesId,HttpServletRequest request){
+    	
+    	Map<String, Object> model = getModel(request);
+    	List<Match> matchList = cricketService.getSeriesResultList(seriesId);
+        String source=cricketService.getDeviceSpecificVideoSource();
+
+		List<Match> matchlist = new ArrayList<Match>();
+		for(int i=matchList.size()-1;i>=0;i--){
+		       Match match =matchList.get(i);
+		       Match fullMatch = cricketService.getMatchDetails(match.getMatchId(),source);
+			
+		       if(fullMatch.getAllVideos()==null || fullMatch.getAllVideos().size()==0)
+			        continue;
+		
+		       matchlist.add(fullMatch);
+		}
+		String pageNoParam = request.getParameter("p");
+        int offset = PagingUtils.getOffset(pageNoParam, NUMB_GALLERY_PER_PAGE).intValue();
+        
+        Pager pager = PagingUtils.getPager(matchlist, offset, NUMB_GALLERY_PER_PAGE);
+        
+        if (pager.isHasNextPage()) {
+            model.put("nextpageno", pager.getNextPageNumber());
+        }
+        model.put("pager", pager);
+       
+		model.put("matchlist",matchlist.subList(pager.getStartIndex(),pager.getEndIndex()+1));
+		model.put("seriesId", seriesId);
+		insertLiveScore(model);
+		CricketSourcePage pageId = CricketAnalytics.CricketSourcePage.SERALLVID;
+        addAnalytics(request, model, pageId);
+		return new ModelAndView("cricket/seriesallvideos", model);
+    }
+   
+    
+    
+    
+    
+    private void insertSeriesFixtures(Map<String, Object> model) {
+        List<Series> seriesList = cricketService.getSeriesList();
+        Map<Series,List<Match>> seriesFixtureMap = new HashMap<Series,List<Match>>();
+        for(Series series:seriesList){
+            List<Match> seriesFixture = new ArrayList<Match>();
+            List<Match> seriesResults = getSeriesResult(series,NUM_FIXTURE_SERIES);
+            List<Match> seriesSchedule = getSeriesSchedule(series,NUM_FIXTURE_SERIES);
+            if(seriesResults.size() == 0){
+                seriesFixture.addAll(seriesSchedule);
+            }else if(seriesSchedule.size() == 0){
+                seriesFixture.addAll(seriesResults);
+            }
+            else{
+                seriesFixture.add(seriesSchedule.get(0));
+                seriesFixture.add(seriesResults.get(0));
+            }
+            seriesFixtureMap.put(series, seriesFixture);
+        }
+        List<Series>latestSeriesList = new ArrayList<Series>();
+        for(int seriesIndex = seriesList.size()-1 ; seriesIndex>=0; seriesIndex--){
+        	latestSeriesList.add(seriesList.get(seriesIndex));
+        }
+        model.put("seriesList", latestSeriesList);
+        model.put("seriesFixtureMap", seriesFixtureMap);
+    }
+
+    private void addFullCommentary(String matchid,HttpServletRequest request, Map<String, Object> model, int pageNo, String commentaryType) {
+        matchid = CricketDataFetcherService.getUpdatedMatchId(matchid);
+        String source=cricketService.getDeviceSpecificVideoSource();
+
+        Match matchDetails = cricketService.getMatchDetails(matchid,source);
+        int currInning = getInningParam(request, matchDetails);
+        List<Commentary> commentary = cricketService.getCommentaryByType(matchid,currInning, commentaryType);
+        List<Commentary> pageCommentary = getPageCommentary(commentary, pageNo, NUMB_COMMENTARY_PER_PAGE);
+        model.put("matchCommentary", pageCommentary);
+        int nextPageNo = getNextCommentaryPage(commentary, pageNo, NUMB_COMMENTARY_PER_PAGE);
+        model.put("nextpageno",""+nextPageNo);
+    }
+
+    private List<Match> getSeriesResult(Series series, int count) {
+        List<Match> results = cricketService.getSeriesResultList(series.getSeriesId());
+        return Utils.getSublist(results, count);
+    }
+
+    private List<Match> getSeriesSchedule(Series series, int count) {
+        List<Match> schedule = cricketService.getSeriesScheduleList(series.getSeriesId());
+        return Utils.getSublist(schedule, count);
+    }
+
+    private void insertPlayerData(String playerid, String type,Map<String, Object> model) {
+        PlayerProfile player = cricketService.fetchPlayerDetail(playerid);
+        String bowlUrl = "/cricket/player/"+playerid+".html?type=bowl";
+        String batUrl = "/cricket/player/"+playerid+".html?type=bat";
+        model.put("player", player);
+        model.put("bowlUrl", bowlUrl);
+        model.put("batUrl", batUrl);
+        addTeamRanking(model, MatchType.TEST, 3);
+        model.put("showBattingStat", type.equalsIgnoreCase("bat") ? 1 : 0);
+        if(player != null){
+            insertGallery(player.getDisplayName(),model,false);
+            model.put("relatedPlayers",cricketService.fetchRelatedPlayers(player.getTeam()));
+        }
+    }
+
+    private void addTeamRanking(Map<String, Object> model, MatchType matchType, int size) {
+        List<CricketRanking> testRanking = cricketService.getTeamRanking(matchType);
+        model.put("teamRanking", Utils.getSublist(testRanking, size));
+    }
+
+    private void insertMatchResults(String seriesId, Map<String, Object> model, int count) {
+        List<Match> matchresults;
+        if(StringUtils.isEmpty(seriesId) || seriesId.equalsIgnoreCase("all")){
+            matchresults = cricketService.getMatchesResults();
+        }
+        else{
+            matchresults = cricketService.getSeriesResultList(seriesId);
+        }
+        matchresults = Utils.getSublist(matchresults, count);
+        List<Match> matchWithVideos = new ArrayList<Match>();
+        for(Match match:matchresults){
+        	String matchId = match.getMatchId();
+        	String source=cricketService.getDeviceSpecificVideoSource();
+        	match = cricketService.getMatchDetails(matchId, source);
+        	matchWithVideos.add(match);
+        }
+        
+        model.put("matchresults", matchWithVideos);
+    }
+
+    private void insertMatchSchedule(String seriesId, Map<String, Object> model, int count) {
+        List<Match> matchSchedule;
+        if(StringUtils.isEmpty(seriesId) || seriesId.equalsIgnoreCase("all")){
+            matchSchedule = cricketService.getFutureSchedule(count);
+        }
+        else{
+            matchSchedule = cricketService.getSeriesScheduleList(seriesId);
+        }
+        matchSchedule = Utils.getSublist(matchSchedule, count);
+        model.put("matchschedule", matchSchedule);
+    }
+
+    private int getPageParam(String pageNum){
+        int pageNo = 1;
+        try {
+            if(pageNum != null){
+                pageNo = Integer.parseInt(pageNum.trim());
+            }
+        } catch (Throwable e) {
+            logger.warn("Invalid page param value : "+pageNum,e);
+        }
+        return pageNo;
+    }
+    private <E extends Object> List<E> getItemsForPage(List<E> entireList, String pageNum, int itemsPerPage, Map<String, Object> model){
+        List<E> finalList = entireList;
+        int pageNo = getPageParam(pageNum);
+        int nextPageNo =  pageNo+1;
+        if(entireList == null){
+        	return Collections.emptyList();
+        }
+        if(entireList.size() < itemsPerPage){
+        	nextPageNo = 1;
+        	return finalList;
+        }
+        int numbPages = entireList.size()/itemsPerPage;
+        if(pageNo > numbPages)
+        {
+            pageNo = numbPages -1;
+            nextPageNo = 1;
+            if(pageNo == 0){
+                pageNo = 1;
+            }
+        }
+        int itemStartIndex = (pageNo-1) * itemsPerPage;
+        int itemEndIndex =  pageNo * itemsPerPage;
+        finalList = entireList.subList(itemStartIndex,itemEndIndex);
+        model.put("nextpageno",""+nextPageNo);
+        return finalList;
+    }
+
+    private void addCommentary(String matchid, Map<String, Object> model) {
+        if(matchid == null){
+            matchid = cricketService.getCurrentMatchId();
+        }
+        matchid = CricketDataFetcherService.getUpdatedMatchId(matchid);
+        String source=cricketService.getDeviceSpecificVideoSource();
+
+        Match matchDetails = cricketService.getMatchDetails(matchid,source);
+        if(matchDetails == null){
+            return;
+        }
+        int currentInng = matchDetails.getCurrentInning();
+        List<Commentary> commentary = getLatestCommentary(matchid, currentInng);
+        model.put("matchCommentary",commentary);
+        if((matchDetails != null && matchDetails.getCurrentInning() > 0) && (matchDetails.isStarted() || matchDetails.isMatchFinished()))
+            model.put("thisover",matchDetails.getCurrentOverDetails());
+    }
+
+    private void addAnalytics(HttpServletRequest request,Map<String, Object> model, CricketSourcePage pageId) {
+        cricketAnalytics.setAnalytics(pageId.name(), request, model);
+    }
+
+    private void insertVas(HttpServletRequest request, Map<String, Object> model) {
+        model.put("vas", vasPackageService.getTopItems(VAS_KEYWORD, "cricket", request,false));
+    }
+
+    private void insertQriousContent(Map<String, Object> model) {
+        model.put("qriousList",cricketService.getQriousContent());
+    }
+
+    private void insertTopPlayers(Map<String,Object> model, Match matchDetails){
+        model.put("topPlayers", cricketService.getRandomTopPlayer(matchDetails.getMatchType(), 3));
+    }
+
+    private void insertMatchSchedule(Map<String, Object> model, int size) {
+        List<Match> matchSchedule = Utils.getSublist(cricketService.getMatchSchedule(), size);
+        model.put("matchschedule",matchSchedule);
+    }
+
+    private void insertMatchResults(Map<String, Object> model, int size) {
+        List<Match> matchResults = Utils.getSublist(cricketService.getMatchesResults(), size);
+        model.put("matchresults",matchResults);
+    }
+
+
+    private void insertNewsList(Map<String, Object> model, int size) {
+            	
+        String lang = PortalContext.getI18nContext().getLang();
+        
+        List<Article> newsList = null;
+        List<NewsItemModel> newsItemModelList = null;
+        
+        if(StringUtils.isBlank(lang) || lang.equalsIgnoreCase("en") || lang.equalsIgnoreCase("english")){
+        	newsItemModelList = newsService.getNewsByCategory(Constants.CRICKET_NEWS_CATEGORY,
+                    PortalContext.getDeviceContext().getCircle().getCircleIdUpperCase(), size + 2, 0, false, DeliveryUtil.getCricketNewsSite()).getResult();
+            
+        }
+        else { 
+        	
+        	//restricting news by 'cricket' keyword for other languages
+        	newsItemModelList = newsService.search("cricket", 0, size+2, 0, Constants.getCricketNewsCategory(lang),
+                    PortalContext.getDeviceContext().getCircle().getCircleIdUpperCase(), null, DeliveryUtil.getCricketNewsSite()).getResult();
+            
+        }
+    	
+    	newsList = Utils.getSublist(Article.getArticles(newsItemModelList), 5);
+
+        model.put("newslist", newsList);
+    }
+
+    private int getInningParam(HttpServletRequest request, Match matchDetails) {
+        String inningParam = request.getParameter("inng");
+        int currInning = matchDetails.getCurrentInning();
+        if(StringUtils.isNotBlank(inningParam))
+        {
+            try {
+                currInning = Integer.parseInt(inningParam);
+            } catch (NumberFormatException e) {
+                currInning = matchDetails.getCurrentInning();
+            }
+            if(currInning > matchDetails.getCurrentInning() || currInning < 1)
+                currInning = matchDetails.getCurrentInning();
+        }
+        return currInning;
+    }
+
+    private void insertLiveMatches(Map<String, Object> model, String currentMatchId){
+        List<Match> liveMatches = cricketService.getCurrentLiveMatches(currentMatchId);
+        model.put("liveMatches", liveMatches);
+    }
+
+    private int getGraphType(HttpServletRequest request) {
+        String graphTypeParam = request.getParameter("gph");
+        int graphType = 1;
+        if(StringUtils.isNotBlank(graphTypeParam))
+        {
+            try {
+                graphType = Integer.parseInt(graphTypeParam);
+            } catch (NumberFormatException e) {
+                graphType = 1;
+            }
+        }
+        request.setAttribute("gph",graphType);
+        return graphType;
+    }
+
+    private List<Commentary> getLatestCommentary(String matchid, int inning)
+    {
+        List<Commentary> commentary = cricketService.getCommentary(matchid, inning);
+        return getPageCommentary(commentary, 1, NUMB_COMMENTARY_LIVE_PAGE);
+    }
+
+    private void insertLiveScore(Map<String, Object> model){
+        String matchid = cricketService.getCurrentMatchId();
+        String source=cricketService.getDeviceSpecificVideoSource();
+        Match matchDetails = cricketService.getMatchDetails(matchid,source);
+       
+        model.put("matchDetails", matchDetails);
+        model.put("currentMatch", matchid);
+        if(matchDetails !=null && matchDetails.getTeam1() != null){
+            TeamInfo team1 = matchDetails.getTeam1().getTeamInfo();
+            model.put("team1",team1);
+        }
+        if(matchDetails != null && matchDetails.getTeam2() != null)
+        {
+            TeamInfo team2 = matchDetails.getTeam2().getTeamInfo();
+            model.put("team2",team2);
+        }
+    }
+
+    private boolean insertFullScore(Map<String, Object> model, String matchid, HttpServletRequest request)
+    {
+        if(matchid == null){
+            matchid = cricketService.getCurrentMatchId();
+        }
+        matchid = CricketDataFetcherService.getUpdatedMatchId(matchid);
+        model.put("currentMatch", matchid);
+        insertLiveMatches(model, matchid);
+        return insertMatchDetails(model,matchid,request);
+    }
+
+    private boolean insertMatchDetails(Map<String, Object> model, String matchid, HttpServletRequest request){
+
+        String source=cricketService.getDeviceSpecificVideoSource();
+
+    	Match matchDetails = cricketService.getMatchDetails(matchid,source);
+        
+        model.put("matchDetails", matchDetails);
+        if(matchDetails == null){
+            return false;
+        }
+        if(matchDetails.getMatchId() == null) { 	
+            return false;			
+		}
+        if(!StringUtils.isBlank(matchDetails.getTossWinningId())){
+        	model.put("TossWinningId", Integer.parseInt(matchDetails.getTossWinningId()));
+        }
+        List<PlayerProfile> momNames = new ArrayList<PlayerProfile>();
+        if(matchDetails.getMoms() != null && matchDetails.getMoms().size()>0){
+        	
+        
+        	for(String momId : matchDetails.getMoms()){
+        		PlayerProfile player = cricketService.fetchPlayerDetail(momId);
+        		momNames.add(player);
+
+        	}
+        	 model.put("momNames", momNames);
+        
+        }
+       
+        insertTopPlayers(model, matchDetails);
+        int inng = getInningParam(request, matchDetails);
+        if((matchDetails.getInnings() != null) && (matchDetails.getCurrentInning() > 0))
+        {
+            Inning currentInnings = matchDetails.getInnings()[inng - 1];
+            model.put("currentInning", currentInnings);
+            model.put("currentInningNum", inng);
+            model.put("stillToBat",currentInnings.getStillToBat());
+            String graph = currentInnings.getManhattan();
+            if(matchDetails.getMatchType() == MatchType.TEST || StringUtils.isEmpty(graph)){
+                graph = currentInnings.getWagonWheel();
+            }
+            graph = graph +"&rnd="+matchDetails.getLastUpdatedDateTime();
+            model.put("graph",graph);
+            model.put("graphType",getGraphType(request));
+        }
+        if(MatchType.TEST.equals(matchDetails.getMatchType())){
+            model.put("isTest", true);
+        }
+        model.put("allInnings", matchDetails.getInnings());
+
+        if(!matchDetails.isStarted() || matchDetails.isMatchFinished())
+        {
+            model.put("headTitle",matchDetails.getTitle());
+            model.put("btnTitle","View Details");
+        }
+        else
+        {
+            model.put("headTitle","Live Score");
+            model.put("btnTitle","View Live Score");
+        }
+
+        if(matchDetails.getCurrentInning() <= 0)
+        {
+            if(matchDetails.getTeam1() != null)
+            {
+                TeamInfo team1 = matchDetails.getTeam1().getTeamInfo();
+                model.put("team1",team1);
+            }
+            if(matchDetails.getTeam2() != null)
+            {
+                TeamInfo team2 = matchDetails.getTeam2().getTeamInfo();
+                model.put("team2",team2);
+            }
+            Team firstTeamProfile = cricketService.getTeamProfile(matchDetails.getTeam1().getName());
+            Team secondTeamProfile = cricketService.getTeamProfile(matchDetails.getTeam2().getName());
+
+            model.put("firstTeamProfile", firstTeamProfile);
+            model.put("secondTeamProfile", secondTeamProfile);
+            return true;
+        }
+
+        Inning inning1 = null;
+        Inning inning2 = null;
+        int firstScoreInng = 1;
+        int secondScoreInng = 1;
+        if(matchDetails.getCurrentInning() > 1){
+            inning1 = matchDetails.getInnings()[matchDetails.getCurrentInning()-2];
+            inning2 = matchDetails.getInnings()[matchDetails.getCurrentInning()-1];
+            firstScoreInng = matchDetails.getCurrentInning()-1;
+            secondScoreInng = matchDetails.getCurrentInning();
+        }
+        else{
+            inning1 = matchDetails.getInnings()[matchDetails.getCurrentInning()-1];
+            firstScoreInng = matchDetails.getCurrentInning();
+            secondScoreInng = matchDetails.getCurrentInning() + 1;
+        }
+
+        TeamInfo team1 = inning1.getBattingTeam();
+        TeamInfo team2 = inning1.getBowlingTeam();
+
+        model.put("team1",team1);
+        model.put("team2",team2);
+        model.put("firstScoreInng",firstScoreInng);
+        model.put("secondScoreInng",secondScoreInng);
+
+        //if(matchDetails.getMatchType() !=  MatchType.TEST)
+        model.put("numVideos", matchDetails.getAllVideos().size());
+        {
+            model.put("inning1",inning1);
+            if(inning2 != null)
+                model.put("inning2",inning2);
+        }
+        
+        return true;
+    }
+    private void insertVideos(String searchString, Map<String, Object> model){
+    	model.put("pgeid", "videos");
+    	
+    }
+    private void insertGallery(String searchString, Map<String, Object> model, boolean showRandom){
+        List<PhotoAlbum> galleries = null;
+        if(searchString == null)
+        {
+        	String lang = PortalContext.getI18nContext().getLang();
+            
+            if(lang.equalsIgnoreCase("en") || lang.equalsIgnoreCase("english")) {
+            	galleries = cricketService.getGalleries();
+            }else{ 
+            	galleries = cricketService.getHindiGalleries();
+            }
+        }
+            
+        else
+            galleries = cricketService.getGalleries(searchString);
+        if(galleries!= null && galleries.size() > 1){
+            Random random = new Random();
+            int item1 = 0; //random.nextInt(galleries.size());
+            int item2 = 1; //random.nextInt(galleries.size());
+            if(showRandom)
+            {
+                int count =  (galleries.size() > 10) ? 10 : galleries.size();
+                item1 = random.nextInt(count);
+                item2 = random.nextInt(count);
+            }
+
+            if(item2 == item1)
+            {
+                while (true)
+                {
+                    item2 = random.nextInt(galleries.size());
+                    if(item2 != item1)
+                        break;
+                }
+            }
+            List<PhotoAlbum> twoGalleries = new ArrayList<PhotoAlbum>();
+            twoGalleries.add(galleries.get(item1));
+            twoGalleries.add(galleries.get(item2));
+
+            model.put("galleries", twoGalleries);
+        }else if(galleries!= null && galleries.size() > 0){
+            model.put("galleries", galleries);
+        }
+
+    }
+
+    private void addContest(Map<String, Object> model){
+        Contest contest = cmsService.getCachedContest(Constants.CRICKET_SITE_ID, Constants.CONTEST_MODULE_ID);
+        if(contest != null && !StringUtils.isBlank(contest.getContest_id()))
+            model.put("contest",contest);
+    }
+
+    @Override
+    protected Map<String, Object> getModel(HttpServletRequest request) {
+
+        Map<String, Object> model = super.getBaseModel(request);
+        model.put("_ap",request.getParameter("_ap"));
+
+        model.remove("ticker");
+        insertQuickLinks(model);
+        return model;
+    }
+
+    private void insertQuickLinks(Map<String, Object> model) {
+        model.put("quickLinks", CricketQuickLinks.values());
+    }
+
+    protected Map<String, Object> getModelWithPhotoDetails(HttpServletRequest request){
+        Map<String, Object> model = super.getModel(request);
+        model.remove("ticker");
+        insertQuickLinks(model);
+        return model;
+    }
+
+    private List<Commentary> getPageCommentary(List<Commentary> commentary, int pageNo, int no_items_per_page){
+        List<Commentary> latestCommentary;
+        if(commentary != null && commentary.size() > NUMB_COMMENTARY_PER_PAGE)
+        {
+            int numbPages = commentary.size()/NUMB_COMMENTARY_PER_PAGE;
+            if(pageNo > numbPages)
+            {
+                pageNo = numbPages -1;
+                if(pageNo == 0){
+                    pageNo = 1;
+                }
+            }
+            int itemStartIndex = commentary.size() - (pageNo * NUMB_COMMENTARY_PER_PAGE);
+            int itemEndIndex =  commentary.size()- ((pageNo-1) * NUMB_COMMENTARY_PER_PAGE);
+            latestCommentary = commentary.subList(itemStartIndex,itemEndIndex);
+        }
+        else
+        {
+            latestCommentary = commentary;
+        }
+        return latestCommentary;
+    }
+
+    private int getNextCommentaryPage(List<Commentary> commentary, int pageNo, int no_items_per_page){
+        if(commentary != null && commentary.size() > NUMB_COMMENTARY_PER_PAGE)
+        {
+            int numbPages = commentary.size()/NUMB_COMMENTARY_PER_PAGE;
+            if(pageNo > numbPages)
+            {
+                return 1;
+            }
+            return pageNo + 1;
+        }
+        else
+        {
+            return 1;
+        }
+    }
+    private  int getDeviceVideosCount(HttpServletRequest request, HttpServletResponse response){
+    	String deviceGroup = RequestUtils.getDeviceGroup(request,response);
+    	if(deviceGroup.equalsIgnoreCase("middle") || deviceGroup.contains("low")){
+    		return NUMB_VIDEOS_PER_PAGE_LOW;
+    	}
+    	else{
+    		return NUMB_VIDEOS_PER_PAGE_SMART;
+    	}
+    }
+    
+    
+
+
+}

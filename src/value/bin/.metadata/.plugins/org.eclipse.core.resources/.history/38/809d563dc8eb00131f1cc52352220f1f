@@ -1,0 +1,643 @@
+<%@ page contentType="text/html;charset=UTF-8" language="java" %>
+<%@ taglib uri="http://java.sun.com/jsp/jstl/core" prefix="c" %>
+<%@ taglib uri="http://java.sun.com/jsp/jstl/fmt" prefix="fmt" %>
+<%@ taglib prefix="s" uri="http://www.springframework.org/tags" %>
+<%@ taglib uri="http://java.sun.com/jsp/jstl/functions" prefix="fn" %>
+<%@ taglib uri="http://bsbportal.com/functions" prefix="bsbfn" %>
+<%-- galleryIcon.png --%>
+<c:set var="path" value="${pageContext.request.contextPath}/fifa" />
+<c:set var="m" value="${modules.FOOTER}"/>
+<c:set var="mId" value="${moduleDescIds.HOME_LINK}"/>
+<c:set var="slId" value="${moduleDescIds.SUGGESTION_LINK}"/>
+<c:set var="homelink1" value="${server}${pageContext.request.contextPath}/elections/index.html"/>
+
+<c:set var="homeUrl" value="${bsbfn:createRdUrl(pageContext.request,header,pageId,uuid,circle,'5',m,mId,homelink1,'','')}" scope="request"/>
+<c:set var="actionUrl" value="http://search.airtellive.com/unisearch" scope="request" />
+<c:set var="p" value="" scope="request"/>
+<c:set var="erValue" value="ER" scope="request"/>
+<c:set var="frValue" value="bsite_cricket" scope="request"/>
+<c:set var="cValue" value="${circle}" scope="request"/>
+<s:message code="label.Search" var="searchText" scope="request"/>
+<c:set var="feedbackUrl" value="${bsbfn:createRdUrl(pageContext.request,header,pageId,uuid,circle,'5',m,slId,'http://airtellive.com/wps/portal/wappush?tpl=fbkActn','','')}" scope="request" />
+
+<c:set var="stop" value="${moduleDescIds.STOP_LINK}"/>
+<c:set var="next" value="${moduleDescIds.NEXT_LINK}"/>
+<c:set var="prev" value="${moduleDescIds.PREV_LINK}"/>
+<c:set var="beforeOpen" value="${moduleDescIds.BEFORE_OPEN_LINK}"/>
+<c:set var="play" value="${moduleDescIds.PLAY_LINK}"/>
+<c:set var="galleryView" value="${moduleDescIds.GALLERY_VIEW_LINK}"/>
+<c:set var="close" value="${moduleDescIds.CLOSE_LINK}"/>
+<c:set var="captionOff" value="${moduleDescIds.CAPTION_OFF_LINK}"/>
+<c:set var="captionOn" value="${moduleDescIds.CAPTION_ON_LINK}"/>
+<c:set var="socailShare" value="${moduleDescIds.SOCIAL_SHARE_LINK}"/>
+<c:set var="seeMoreDesc" value="${moduleDescIds.SEE_MORE_DESC_LINK}"/>
+<c:set var="seeLessDesc" value="${moduleDescIds.SEE_LESS_DESC_LINK}"/>
+<c:set var="lazyLoad" 	value="${moduleDescIds.LAZY_LOAD_LINK}"/>
+
+
+<s:message code="label.back_to_top" var="topText" scope="request"/>
+<s:message code="top.menu.home" var="homeText" scope="request"/>
+<s:message code="footer.feedback" var="feedbackText" scope="request"/>
+<s:message code="footer.back" var="backText" scope="request"/>
+
+<c:set var="photoModule" value="true" scope="request" />
+
+<c:set var="showLangsInFooter" value="false" scope="request" />
+<c:set var="showfootersearchbar" value="false" scope="request" />
+<jsp:include page="../../fifa/supersmart/searchbox.jsp" />
+<jsp:include page="../../common/supersmart/footer.jsp" />
+<c:choose>
+<c:when test="${showChart == false or showChart == null}">
+<script type="text/javascript">
+$(document).ready(function() {
+    /*code for menu*/
+	
+	var isMobile = {
+				Android: function() {
+					return navigator.userAgent.match(/Android/i);
+				},
+				BlackBerry: function() {
+					return navigator.userAgent.match(/BlackBerry/i);
+				},
+				iOS: function() {
+					return navigator.userAgent.match(/iPhone|iPad|iPod/i);
+				},
+				Opera: function() {
+					return navigator.userAgent.match(/Opera Mini/i);
+				},
+				Windows: function() {
+					return navigator.userAgent.match(/IEMobile/i);
+				},
+				any: function() {
+					return (isMobile.Android() || isMobile.BlackBerry() || isMobile.iOS() || isMobile.Opera() || isMobile.Windows());
+				}
+			};
+			
+			if( isMobile.iOS() ) {
+				$("body").css('font-family','HelveticaNeue');
+			}
+			if( isMobile.Android() ) {
+				$("body").css('font-family','robotoregular');
+			}
+			  
+			var screenHeight = $(window).height();
+			$("#menu").css('height',screenHeight-40);
+			
+	 
+		$("#moviesTab").click(function(){
+			$("#moviesubmenu").slideDown(500);
+		});
+		
+		$("#submenuClose").click(function(){
+			$("#moviesubmenu").slideUp(500);
+		});
+		
+		$("#newsTab").click(function(){
+			$("#newsubmenu").slideDown(500);
+		});
+		
+		$("#newsubmenuClose").click(function(){
+			$("#newsubmenu").slideUp(500);
+		});
+		
+		$("#photosTab").click(function(){
+			$("#photosubmenu").slideDown(500);
+		});
+		
+		$("#photosubmenuClose").click(function(){
+			$("#photosubmenu").slideUp(500);
+		});
+		
+		$("#videosTab").click(function(){
+			$("#videosubmenu").slideDown(500);
+		});
+		
+		$("#videosubmenuClose").click(function(){
+			$("#videosubmenu").slideUp(500);
+		});
+		
+		$("#cricketTab").click(function(){
+			$("#cricketsubmenu").slideDown(500);
+		});
+		
+		$("#cricketsubmenuClose").click(function(){
+			$("#cricketsubmenu").slideUp(500);
+		});
+		
+		$("#horoscopeTab").click(function(){
+			$("#horoscopesubmenu").slideDown(500);
+		});
+		
+		$("#horoscopesubmenuClose").click(function(){
+			$("#horoscopesubmenu").slideUp(500);
+		});
+		
+		$("#downloadsTab").click(function(){
+			$("#downloadsubmenu").slideDown(500);
+		});
+		
+		$("#downloadsubmenuClose").click(function(){
+			$("#downloadsubmenu").slideUp(500);
+		});
+		
+		$("#breadcrumbTab").click(function(){
+			$("#breadcrumbSubmenu").toggle(500);
+		});
+});
+</script>
+</c:when>
+<c:otherwise>
+<script type="text/javascript">
+$(document).ready(function() {
+    /*code for menu*/
+	
+	var isMobile = {
+				Android: function() {
+					return navigator.userAgent.match(/Android/i);
+				},
+				BlackBerry: function() {
+					return navigator.userAgent.match(/BlackBerry/i);
+				},
+				iOS: function() {
+					return navigator.userAgent.match(/iPhone|iPad|iPod/i);
+				},
+				Opera: function() {
+					return navigator.userAgent.match(/Opera Mini/i);
+				},
+				Windows: function() {
+					return navigator.userAgent.match(/IEMobile/i);
+				},
+				any: function() {
+					return (isMobile.Android() || isMobile.BlackBerry() || isMobile.iOS() || isMobile.Opera() || isMobile.Windows());
+				}
+			};
+			
+			if( isMobile.iOS() ) {
+				$("body").css('font-family','HelveticaNeue');
+			}
+			if( isMobile.Android() ) {
+				$("body").css('font-family','robotoregular');
+			}
+			  
+			var screenHeight = $(window).height();
+			$("#menu").css('height',screenHeight-40);
+			
+	 
+		$("#moviesTab").click(function(){
+			$("#moviesubmenu").slideDown(500);
+		});
+		
+		$("#submenuClose").click(function(){
+			$("#moviesubmenu").slideUp(500);
+		});
+		
+		$("#newsTab").click(function(){
+			$("#newsubmenu").slideDown(500);
+		});
+		
+		$("#newsubmenuClose").click(function(){
+			$("#newsubmenu").slideUp(500);
+		});
+		
+		$("#photosTab").click(function(){
+			$("#photosubmenu").slideDown(500);
+		});
+		
+		$("#photosubmenuClose").click(function(){
+			$("#photosubmenu").slideUp(500);
+		});
+		
+		$("#videosTab").click(function(){
+			$("#videosubmenu").slideDown(500);
+		});
+		
+		$("#videosubmenuClose").click(function(){
+			$("#videosubmenu").slideUp(500);
+		});
+		
+		$("#cricketTab").click(function(){
+			$("#cricketsubmenu").slideDown(500);
+		});
+		
+		$("#cricketsubmenuClose").click(function(){
+			$("#cricketsubmenu").slideUp(500);
+		});
+		
+		$("#horoscopeTab").click(function(){
+			$("#horoscopesubmenu").slideDown(500);
+		});
+		
+		$("#horoscopesubmenuClose").click(function(){
+			$("#horoscopesubmenu").slideUp(500);
+		});
+		
+		$("#downloadsTab").click(function(){
+			$("#downloadsubmenu").slideDown(500);
+		});
+		
+		$("#downloadsubmenuClose").click(function(){
+			$("#downloadsubmenu").slideUp(500);
+		});
+		
+		$("#breadcrumbTab").click(function(){
+			$("#breadcrumbSubmenu").toggle(500);
+		});
+	 
+
+		 
+		 
+		 
+		
+	 
+});
+
+</script>
+</c:otherwise>
+</c:choose>
+
+<script type="text/javascript">
+
+var isGalRunning = false;
+function setGallerySettingsWithElection(slideshowInterval, wordLimit, galleryId){
+	gallerySettings = {
+			hideBarsDelay: 0,
+		    slideshowInterval: slideshowInterval,
+		    wordLimit: wordLimit,
+		    onClickThis: function(){
+		    	if(isGalRunning){
+		    		return false;
+		    	}
+		    },
+		    beforeOpen: function(){
+		    	jQuery.ajax('/elections/swipe.html?pid=${pageId}&cid=${beforeOpen}&mid=${moduleId}&pageUrl=${thisPageUrl}&cpv=1&t='+jQuery.now());
+		    	isGalRunning = true;
+		    },
+		    afterMoveSlide: function(){
+		    	jQuery('.share_icons_box').hide();
+		    },
+		    onMovePrev: function(){
+		    	jQuery('#btn_prev_next .back_to_page').css('display','none');
+				jQuery('#swipebox-next').show();
+		    },
+			onGoToPrev: function(){
+				jQuery.ajax('/elections/swipe.html?pid=${pageId}&cid=${prev}&mid=${moduleId}&pageUrl=${thisPageUrl}&cpv=1&t='+jQuery.now());
+		    },
+		    onGoToNext: function(){
+		    	jQuery.ajax('/elections/swipe.html?pid=${pageId}&cid=${next}&mid=${moduleId}&pageUrl=${thisPageUrl}&cpv=1&t='+jQuery.now());
+		    },
+		    onClickPlay: function(){
+		    	jQuery.ajax('/elections/swipe.html?pid=${pageId}&cid=${play}&mid=${moduleId}&pageUrl=${thisPageUrl}&t='+jQuery.now());
+		    },
+		    onClickStop: function(){
+		    	jQuery.ajax('/elections/swipe.html?pid=${pageId}&cid=${stop}&mid=${moduleId}&pageUrl=${thisPageUrl}&t='+jQuery.now());
+		    },
+		    clickSeeMore: function(){
+		    	jQuery.ajax('/elections/swipe.html?pid=${pageId}&cid=${seeMoreDesc}&mid=${moduleId}&pageUrl=${thisPageUrl}&t='+jQuery.now());
+		    },
+			clickSeeLess: function(){
+				jQuery.ajax('/elections/swipe.html?pid=${pageId}&cid=${seeLessDesc}&mid=${moduleId}&pageUrl=${thisPageUrl}&t='+jQuery.now());
+		    },
+		    afterOpen: function(){
+		    	jQuery('#swipebox-overlay #list').attr('href', '${path}/gallery/'+galleryId+'.html');
+		        jQuery('#swipebox-overlay #list').unbind('click').bind('click', function(){
+		        	jQuery.ajax({
+		        		url: '/elections/swipe.html?pid=${pageId}&cid=${galleryView}&mid=${moduleId}&pageUrl=${thisPageUrl}&cpv=1&t='+jQuery.now(),
+		        		async: false
+		        	});
+		        	return true;
+		        });
+		    	jQuery('#btn_prev_next .back_to_page').unbind('click').bind('click', function(){
+					jQuery('#swipebox-close').trigger('click');
+					return false;
+				});
+		    	jQuery('#showHide').unbind('click').bind('click', function(){
+		        	jQuery.ajax('/elections/swipe.html?pid=${pageId}&cid=${captionOff}&mid=${moduleId}&pageUrl=${thisPageUrl}&t='+jQuery.now());
+		        	jQuery('#swipebox-caption').css('margin-bottom','-100%');
+		            jQuery('#showHide').hide();
+		            jQuery('#showHideDisabled').show();
+		        });
+		        jQuery('#showHideDisabled').unbind('click').bind('click', function(){
+		        	jQuery.ajax('/elections/swipe.html?pid=${pageId}&cid=${captionOn}&mid=${moduleId}&pageUrl=${thisPageUrl}&t='+jQuery.now());
+		            jQuery('#swipebox-caption').css('margin-bottom','0');
+		            jQuery('#showHide').show();
+		            jQuery('#showHideDisabled').hide();
+		        });
+		        jQuery('.gallery-zoom .loading').remove();
+		        jQuery('#share').unbind('click').bind('click', function(){
+		        	jQuery.ajax('/elections/swipe.html?pid=${pageId}&cid=${socailShare}&mid=${moduleId}&pageUrl=${thisPageUrl}&t='+jQuery.now());
+		        	jQuery(this).find('.share_icons_box').toggle();
+		        });
+		        jQuery('.share_icons_box').html(jQuery('.share_buttons').html());
+		    },
+		    afterClose: function(){
+		    	//check if gallery html exists
+				jQuery.ajax('/elections/swipe.html?pid=${pageId}&cid=${close}&mid=${moduleId}&pageUrl=${thisPageUrl}&cpv=1&t='+jQuery.now());
+				photos = null;
+				isGalRunning = false;
+		    	if(jQuery('.galleryPhotosContainer').index('div')>=0){
+		            jQuery('.galleryPhotosContainer').remove();
+		        }
+				jQuery('.gallery-zoom .loading').remove();
+		    }
+		};
+	return gallerySettings;
+}
+
+
+
+
+
+
+function galleryOpenWithPhotoIndexWithElection(ele, galleryId, wordLimit, ind){
+	if(!isGalRunning){
+		var gallery_zoom = jQuery(ele).parent().find('.gallery-zoom');
+		if(gallery_zoom.find('.loading').index()<0){
+			gallery_zoom.append('<div class="loading"><span class="loader"></span></div>');
+		}
+		isGalRunning = true;
+		var currentStart = ind;
+        var currentPhotos = 0;
+        var limit = 10;
+        var isNext = false;
+        var maxPhotos = 0;
+        var photos = null;
+        var options = null;
+        var is_2G = '${is_2G}';
+		var slideshowInterval = (is_2G) ? 6000 : 5000;
+		/*gallery fixed oprion*/
+		gallerySettings = setGallerySettingsWithElection(slideshowInterval, wordLimit, galleryId);
+		xhr = jQuery.ajax({
+			type: 'GET',
+			url: '/elections/fetch/'+galleryId+'/gallery.html',
+			dataType: 'text',
+			async: true,
+			cache: true
+		}).done(function(result){
+			photos = jQuery.parseJSON(result).photos;
+			maxPhotos = photos.length;
+			currentPhotos = (limit>maxPhotos) ? maxPhotos : limit;
+			if(currentStart >= currentPhotos)
+			{
+			     if(currentStart+limit > maxPhotos)
+			     currentPhotos=currentStart + (maxPhotos-currentStart);
+			     else
+			     currentPhotos=currentStart+ limit;
+			 
+			}
+			var data = '<div id="'+galleryId+'" class="galleryPhotosContainer" style="display:none"><div class="photoListing"><ul>';
+			for(i=currentStart; i<currentPhotos; i++){
+				if(photos[i]){
+					data += '<li><a href="'+photos[i].resizedUrl+'" title="'+photos[i].desc.replace(/<(?:.|\n)*?>/gm, '')+'" count="'+(i+1)+'" total="'+maxPhotos+'" class="tos-zoom">'+photos[i].resizedUrl+'</a></li>';	
+				}
+			}
+			data += '</ul></div></div>';
+			isNext = (maxPhotos-currentPhotos>0) ? true : false;
+	        if(isNext && maxPhotos-currentPhotos >= limit){
+	            //currentStart += limit;
+	            currentStart=currentPhotos;
+	            currentPhotos += limit;
+	        }
+	        else if(isNext && maxPhotos-currentPhotos>0){
+	            //currentStart += limit;
+	            currentStart=currentPhotos;
+	            currentPhotos += (maxPhotos-currentPhotos);
+	        }
+			jQuery('body').append(data);
+			gallerySettings.pagination = function(){
+				var elements = [];
+            	if(isNext){
+            		for(i=currentStart; i<currentPhotos; i++){
+        				if(photos[i]){
+        					elements.push({
+                                href: photos[i].resizedUrl,
+                                title: photos[i].desc,
+                                src: null,
+                                count: (i+1),
+                                total: maxPhotos
+                            });
+        					jQuery('#'+galleryId+' ul').append('<li><a href="'+photos[i].resizedUrl+'" title="'+photos[i].desc.replace(/<(?:.|\n)*?>/gm, '')+'" count="'+(i+1)+'" total="'+maxPhotos+'" class="gallery-zoom">'+photos[i].resizedUrl+'</a></li>');	
+        				}
+        			}
+            		isNext = (maxPhotos-currentPhotos>0) ? true : false;
+                    if(isNext && maxPhotos-currentPhotos >= limit){
+                        //currentStart += limit;
+                        currentStart=currentPhotos;
+                        currentPhotos += limit;
+                    }
+                    else if(isNext && maxPhotos-currentPhotos>0){
+                        //currentStart += limit;
+                        currentStart=currentPhotos;
+                        currentPhotos += (maxPhotos-currentPhotos);
+                    }
+        			jQuery('.photoListing a').unbind().swipebox(options);
+            	}
+            	else{
+            		jQuery('#btn_prev_next .back_to_page').css('display','block');
+					jQuery('#swipebox-next').hide();
+            	}
+            	return (jQuery.swipebox.isOpen) ? elements : false;
+			}
+			options = gallerySettings;
+			jQuery('.photoListing a').swipebox(options);
+			jQuery('.photoListing a:eq(0)').trigger('click');
+		}).fail(function(){
+			jQuery('.gallery-zoom .loading').remove();
+			isGalRunning = false;
+		});	
+	}
+}
+
+function setGallerySettingsWithHeavyWeights(slideshowInterval, wordLimit, starname){
+	gallerySettings = {
+			hideBarsDelay: 0,
+		    slideshowInterval: slideshowInterval,
+		    wordLimit: wordLimit,
+		    onClickThis: function(){
+		    	if(isGalRunning){
+		    		return false;
+		    	}
+		    },
+		    beforeOpen: function(){
+		    	jQuery.ajax('/elections/swipe.html?pid=${pageId}&cid=${beforeOpen}&mid=${moduleId}&pageUrl=${thisPageUrl}&cpv=1&t='+jQuery.now());
+		    	isGalRunning = true;
+		    },
+		    afterMoveSlide: function(){
+		    	jQuery('.share_icons_box').hide();
+		    },
+		    onMovePrev: function(){
+		    	jQuery('#btn_prev_next .back_to_page').css('display','none');
+				jQuery('#swipebox-next').show();
+		    },
+			onGoToPrev: function(){
+				jQuery.ajax('/elections/swipe.html?pid=${pageId}&cid=${prev}&mid=${moduleId}&pageUrl=${thisPageUrl}&cpv=1&t='+jQuery.now());
+		    },
+		    onGoToNext: function(){
+		    	jQuery.ajax('/elections/swipe.html?pid=${pageId}&cid=${next}&mid=${moduleId}&pageUrl=${thisPageUrl}&cpv=1&t='+jQuery.now());
+		    },
+		    onClickPlay: function(){
+		    	jQuery.ajax('/elections/swipe.html?pid=${pageId}&cid=${play}&mid=${moduleId}&pageUrl=${thisPageUrl}&t='+jQuery.now());
+		    },
+		    onClickStop: function(){
+		    	jQuery.ajax('/elections/swipe.html?pid=${pageId}&cid=${stop}&mid=${moduleId}&pageUrl=${thisPageUrl}&t='+jQuery.now());
+		    },
+		    clickSeeMore: function(){
+		    	jQuery.ajax('/elections/swipe.html?pid=${pageId}&cid=${seeMoreDesc}&mid=${moduleId}&pageUrl=${thisPageUrl}&t='+jQuery.now());
+		    },
+			clickSeeLess: function(){
+				jQuery.ajax('/elections/swipe.html?pid=${pageId}&cid=${seeLessDesc}&mid=${moduleId}&pageUrl=${thisPageUrl}&t='+jQuery.now());
+		    },
+		    afterOpen: function(){
+		    	jQuery('#swipebox-overlay #list').attr('href' /*'${path}/gallery/'+galleryId+'.html'*/ , '${path}/'+ starname + '/gallery.html');
+		        jQuery('#swipebox-overlay #list').unbind('click').bind('click', function(){
+		        	jQuery.ajax({
+		        		url: '/elections/swipe.html?pid=${pageId}&cid=${galleryView}&mid=${moduleId}&pageUrl=${thisPageUrl}&cpv=1&t='+jQuery.now(),
+		        		async: false
+		        	});
+		        	return true;
+		        });
+		    	jQuery('#btn_prev_next .back_to_page').unbind('click').bind('click', function(){
+					jQuery('#swipebox-close').trigger('click');
+					return false;
+				});
+		    	jQuery('#showHide').unbind('click').bind('click', function(){
+		        	jQuery.ajax('/elections/swipe.html?pid=${pageId}&cid=${captionOff}&mid=${moduleId}&pageUrl=${thisPageUrl}&t='+jQuery.now());
+		        	jQuery('#swipebox-caption').css('margin-bottom','-100%');
+		            jQuery('#showHide').hide();
+		            jQuery('#showHideDisabled').show();
+		        });
+		        jQuery('#showHideDisabled').unbind('click').bind('click', function(){
+		        	jQuery.ajax('/elections/swipe.html?pid=${pageId}&cid=${captionOn}&mid=${moduleId}&pageUrl=${thisPageUrl}&t='+jQuery.now());
+		            jQuery('#swipebox-caption').css('margin-bottom','0');
+		            jQuery('#showHide').show();
+		            jQuery('#showHideDisabled').hide();
+		        });
+		        jQuery('.gallery-zoom .loading').remove();
+		        jQuery('#share').unbind('click').bind('click', function(){
+		        	jQuery.ajax('/elections/swipe.html?pid=${pageId}&cid=${socailShare}&mid=${moduleId}&pageUrl=${thisPageUrl}&t='+jQuery.now());
+		        	jQuery(this).find('.share_icons_box').toggle();
+		        });
+		        jQuery('.share_icons_box').html(jQuery('.share_buttons').html());
+		    },
+		    afterClose: function(){
+		    	//check if gallery html exists
+				jQuery.ajax('/elections/swipe.html?pid=${pageId}&cid=${close}&mid=${moduleId}&pageUrl=${thisPageUrl}&cpv=1&t='+jQuery.now());
+				photos = null;
+				isGalRunning = false;
+		    	if(jQuery('.galleryPhotosContainer').index('div')>=0){
+		            jQuery('.galleryPhotosContainer').remove();
+		        }
+				jQuery('.gallery-zoom .loading').remove();
+		    }
+		};
+	return gallerySettings;
+}
+
+function galleryOpenWithHeavyWeightsWithInd(ele,starname, wordLimit,ind){
+	
+	if(!isGalRunning){
+		var gallery_zoom = jQuery(ele).parent().find('.gallery-zoom');
+		if(gallery_zoom.find('.loading').index()<0){
+			gallery_zoom.append('<div class="loading"><span class="loader"></span></div>');
+		}
+		isGalRunning = true;
+		var currentStart = ind;
+        var currentPhotos = 0;
+        var limit = 10;
+        var isNext = false;
+        var maxPhotos = 0;
+        var photos = null;
+        var options = null;
+        var is_2G = '${is_2G}';
+		var slideshowInterval = (is_2G) ? 6000 : 5000;
+		
+		gallerySettings = setGallerySettingsWithHeavyWeights(slideshowInterval, wordLimit, starname);
+		xhr = jQuery.ajax({
+			type: 'GET',
+			url: '/elections/photo/fetch/'+starname+'.html',
+			dataType: 'text',
+			async: true,
+			cache: true
+		}).done(function(result){
+			photos = jQuery.parseJSON(result).photos;
+			
+			maxPhotos = photos.length;
+			
+			currentPhotos = (limit>maxPhotos) ? maxPhotos : limit;
+			
+			if(currentStart >= currentPhotos)
+				{
+				     if(currentStart+limit > maxPhotos)
+				     currentPhotos=currentStart + (maxPhotos-currentStart);
+				     else
+				     currentPhotos=currentStart+ limit;
+				
+				}
+			var data = '<div id="'+starname+'" class="galleryPhotosContainer" style="display:none"><div class="photoListing"><ul>';
+			for(i=currentStart; i<currentPhotos; i++){
+				if(photos[i]){
+					data += '<li><a href="'+photos[i]+/*.desc.replace(/<(?:.|\n)*?>/gm, '')*/'" count="'+(i+1)+'" total="'+maxPhotos+'" class="tos-zoom">'+photos[i]+'</a></li>';	
+				}
+			}
+			data += '</ul></div></div>';
+			isNext = (maxPhotos-currentPhotos>0) ? true : false;
+	        if(isNext && maxPhotos-currentPhotos >= limit){
+	            //currentStart +=limit;
+	            currentStart=currentPhotos;
+	            currentPhotos += limit;
+	        }
+	        else if(isNext && maxPhotos-currentPhotos>0){
+	            //currentStart += limit;
+	            currentStart=currentPhotos;
+	            currentPhotos += (maxPhotos-currentPhotos);
+	        }
+			jQuery('body').append(data);
+			gallerySettings.pagination = function(){
+				
+				
+				var elements = [];
+            	if(isNext){
+            		
+            		for(i=currentStart; i<currentPhotos; i++){
+            			
+        				if(photos[i]){
+        					
+        					elements.push({
+                                href: photos[i],
+                               
+                                src: null,
+                                count: (i+1),
+                                total: maxPhotos
+                            });
+        					jQuery('.photoListing ul').append('<li><a href="'+photos[i]/*.desc.replace(/<(?:.|\n)*?>/gm, '')*/+'" count="'+(i+1)+'" total="'+maxPhotos+'" class="gallery-zoom">'+photos[i]+'</a></li>');	
+        				}
+        			}
+            		isNext = (maxPhotos-currentPhotos>0) ? true : false;
+                    if(isNext && maxPhotos-currentPhotos >= limit){
+                        //currentStart += limit;
+                        currentStart=currentPhotos;
+                        currentPhotos += limit;
+                    }
+                    else if(isNext && maxPhotos-currentPhotos>0){
+                       // currentStart += limit;
+                       currentStart=currentPhotos;
+                        currentPhotos += (maxPhotos-currentPhotos);
+                    }
+        			jQuery('.photoListing a').unbind().swipebox(options);
+            	}
+            	else{
+            		jQuery('#btn_prev_next .back_to_page').css('display','block');
+					jQuery('#swipebox-next').hide();
+            	}
+            	return (jQuery.swipebox.isOpen) ? elements : false;
+			}
+			options = gallerySettings;
+			jQuery('.photoListing a').swipebox(options);
+			jQuery('.photoListing a:eq(0)').trigger('click');
+		}).fail(function(){
+			jQuery('.gallery-zoom .loading').remove();
+			isGalRunning = false;
+		});	
+	}
+}
+</script>
+

@@ -1,0 +1,160 @@
+package com.bsb.portal.fe.services;
+
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.HashMap;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Map;
+import java.util.Set;
+import java.util.Timer;
+import java.util.TimerTask;
+
+import javax.annotation.PostConstruct;
+import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpServletResponse;
+
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Service;
+
+import com.bsb.portal.common.Device.DeviceGroup;
+import com.bsb.portal.context.PortalContext;
+import com.bsb.portal.dto.Article;
+import com.bsb.portal.dto.GalleryData;
+import com.bsb.portal.dto.PhotoAlbum;
+import com.bsb.portal.dto.StarProfileMetaData;
+import com.bsb.portal.dto.Video;
+import com.bsb.portal.fe.delivery.model.NewsItemModel;
+import com.bsb.portal.fe.delivery.util.DeliveryUtil;
+import com.bsb.portal.utils.api.Utils;
+
+@Service
+public class FifaService extends BaseService {
+	
+	@Autowired
+	private NewsServiceNew newsService;
+	
+	private static final String    NEWS_SEARCH_QUERY_STRING      	= "\"fifa\"\"world cup brazil\"";
+	private static final String    VIDEOS_SEARCH_QUERY_STRING    	= "\"fifa\"\"world cup brazil\"";
+	private static final String    PHOTOS_SEARCH_QUERY_STRING    	= "\"fifa\"\"world cup brazil\"";
+	
+	private Map<String,List<Article>> newsListMap = new HashMap<String,List<Article>>();
+
+	
+	private Timer timer = new Timer();
+	
+	@Autowired
+	private PhotoService photoService;
+	
+	@Autowired
+	private VideoService videoService;
+	
+	
+	
+	private Map<String,List<PhotoAlbum>> galleriesMap = new HashMap<String,List<PhotoAlbum>>();
+	private Map<String,Map<DeviceGroup, List<Video>>> videosMap =  new HashMap<String,Map<DeviceGroup, List<Video>>>();
+	
+	
+	private static final String [] langs = {"en"};
+
+	
+	@PostConstruct
+	private void init() {
+		timer.scheduleAtFixedRate(new TimerTask() {
+
+			@Override
+			public void run() {
+				load();
+			}
+		}, 10000, 60 * 60 * 1000);
+	}
+	void load(){
+		populateNews();
+		loadPhotos();
+		populateRelatedVideos();
+	}
+	
+	
+	
+	
+	
+	public void loadPhotos() {
+		for(String lang : langs){
+			List<PhotoAlbum> galleries = null;
+				galleries = loadGalleries(PHOTOS_SEARCH_QUERY_STRING, "" ,200,lang);
+
+			Set<PhotoAlbum> albumsSet = new HashSet<>();
+			albumsSet.addAll(galleries);
+			galleries = new ArrayList(albumsSet) ;
+			Collections.sort(galleries, new PhotoAlbumComparator());
+			galleriesMap.put(lang, galleries);
+
+		}
+	}
+	
+	private void populateRelatedVideos() {
+		for(String lang : langs){
+			Map<DeviceGroup, List<Video>> relatedVideosMap = new HashMap<>();
+				relatedVideosMap = videoService.getVideosForAllDeviceGroup("", 3, 0, null, lang,VIDEOS_SEARCH_EN_CATEGORY);
+
+			videosMap.put(lang, relatedVideosMap);
+		}
+	}
+	
+	
+	
+	private List<PhotoAlbum> loadGalleries(String searchString, String category,int numb,String lang){
+		GalleryData galleryData = photoService.getGalleryData(lang);
+		List<PhotoAlbum> tempGalleries = photoService.searchPhotos(galleryData,searchString, true,numb,true,true,category,null,lang);
+		return tempGalleries;
+	}
+	
+	
+	public List<PhotoAlbum> getGalleries(){
+		String lang = PortalContext.getI18nContext().getLang();
+		List<PhotoAlbum> galleriesLangSpecific = null;
+
+		if(galleriesMap == null || galleriesMap.size()==0)
+			return null;
+
+		galleriesLangSpecific = galleriesMap.get(lang);
+
+		return galleriesLangSpecific;
+	}
+	private void populateNews(){
+		for(String lang : langs){
+
+			List<Article> newsList = null;
+			List<NewsItemModel> newsItemModelList = null;
+			newsItemModelList = newsService.search(NEWS_SEARCH_QUERY_STRING, 1, 2, 0, null, null, null, DeliveryUtil.getLocalNewsSite(),lang).getResult();
+			newsList = Utils.getSublist(Article.getArticles(newsItemModelList), 5);
+			newsListMap.put(lang, newsList);
+		}
+	}
+	public List<Article> getRelatedNews() {
+		String lang = PortalContext.getI18nContext().getLang();
+		List<Article> articles = null;
+
+		if(newsListMap == null || newsListMap.size()==0)
+			return null;
+
+		articles = newsListMap.get(lang);
+		return articles;
+	}
+	
+	public Map<DeviceGroup, List<Video>> getRelatedVideos() {
+		String lang = PortalContext.getI18nContext().getLang();
+		Map<DeviceGroup, List<Video>> relatedVideos = null;
+
+		if(videosMap == null || videosMap.size()==0)
+			return null;
+
+		relatedVideos = videosMap.get(lang);
+
+		return relatedVideos;
+	}
+	
+	
+	
+	
+}

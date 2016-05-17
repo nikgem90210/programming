@@ -1,0 +1,63 @@
+<%@ page contentType="text/html;charset=UTF-8" language="java"%>
+<%@ taglib uri="http://java.sun.com/jsp/jstl/core" prefix="c"%>
+<%@ taglib uri="http://java.sun.com/jsp/jstl/fmt" prefix="fmt"%>
+<%@ taglib prefix="s" uri="http://www.springframework.org/tags"%>
+<%@ taglib uri="http://java.sun.com/jsp/jstl/functions" prefix="fn"%>
+<%@ taglib uri="http://bsbportal.com/functions" prefix="bsbfn"%>
+<%@ taglib uri="http://bsbportal.com/functions/tti" prefix="tti" %>
+
+<jsp:include page="../../common/low/banner.jsp"/>
+
+<c:set var="path" value="${pageContext.request.contextPath}/stars" />
+
+<c:if test="${param.showothers == null || param.showothers == true}">
+	
+    <h2 class="ttl">
+            <img src="http://54.197.253.14:8080/stars/images/icon_ttl_middle_next.gif">
+            <span class="title_bg"><s:message code="label.other_stars" var="messageText"/><tti:textOrImage bgColor="#e7e7e7" text="${messageText}" size="12" style="b"/></span>
+    </h2>
+    
+    
+    <c:set var="specId" value="3" />
+	<c:set var="m" value="${modules.OTHER_STARS}" />
+	<c:set var="mId" value="${moduleDescIds.IMAGE_LINK}" />
+	<c:set var="url1" value="${bsbfn:encode(otherstars[0].name)}.html" />
+	<c:set var="url2" value="${bsbfn:encode(otherstars[1].name)}.html" />
+	
+	<table width="100%" border="0" cellspacing="0" cellpadding="5">
+		<tr>
+			<td width="50%" align="center"><a
+				href="${bsbfn:createRdUrl(pageContext.request,header,pageId,uuid,circle,specId,m,mId,server,path,url1)}">
+					<img
+					src="${config.icsBaseUrl}${bsbfn:getResizedImageUrl(otherstars[0].photos[0],50,50)}" />
+	            <br><div style="text-align: center; font-size: x-small;  padding-left: 1px;"><tti:textOrImage text="${bsbfn:getTransliteratedTextWithType(pageContext.request,otherstars[0].name,2)}"/></div>
+			</a></td>
+			<td width="50%" align="center"><a
+				href="${bsbfn:createRdUrl(pageContext.request,header,pageId,uuid,circle,specId,m,mId,server,path,url2)}">
+					<img
+					src="${config.icsBaseUrl}${bsbfn:getResizedImageUrl(otherstars[1].photos[0],50,50)}" />
+	            <br><div style="text-align: center; font-size: x-small; padding-left: 1px;"><tti:textOrImage text="${bsbfn:getTransliteratedTextWithType(pageContext.request,otherstars[1].name,2)}"/></div>
+			</a></td>
+		</tr>
+	</table>
+</c:if>
+
+<c:set var="actionUrl" value="http://search.airtellive.com/unisearch" scope="request"/>
+<c:set var="searhText" value="Search" scope="request" />
+<c:set var="p" value="" scope="request"/>
+<c:set var="erValue" value="ER" scope="request"/>
+<c:set var="frValue" value="bsite_starprofiles" scope="request"/>
+<c:set var="cValue" value="${circle}" scope="request"/>
+
+<s:message code="top" var="topText" scope="request"/>
+<s:message code="home" var="homeText" scope="request"/>
+<s:message code="feedback" var="feedbackText" scope="request"/>
+<s:message code="Back" var="backText" scope="request"/>
+
+<c:set var="m" value="${modules.FOOTER}"/>
+<c:set var="mId" value="${moduleDescIds.STAR_HOME_LINK}"/>
+<c:set var="mId2" value="${moduleDescIds.SUGGESTION_LINK}"/>
+<c:set var="homeUrl" value="${bsbfn:createRdUrl(pageContext.request,header,pageId,uuid,circle,specId,m,mId,server,path,'index.html')}" scope="request"/>
+<c:set var="feedbackUrl" value="${bsbfn:createRdUrl(pageContext.request,header,pageId,uuid,circle,specId,m,mId2,'http://airtellive.com/wps/portal/wappush?tpl=fbkActn','','')}" scope="request"/>
+<c:set var="showLangsInFooter" value="false" scope="request" />
+<jsp:include page="../../common/low/footer.jsp"/>

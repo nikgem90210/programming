@@ -1,0 +1,48 @@
+<%@ taglib uri="http://java.sun.com/jsp/jstl/core" prefix="c"%>
+<%@ taglib prefix="s" uri="http://www.springframework.org/tags"%>
+<%@ taglib uri="http://java.sun.com/jsp/jstl/functions" prefix="fn"%>
+<%@ taglib uri="http://bsbportal.com/functions" prefix="bsbfn"%>
+<%@ page contentType="text/html;charset=UTF-8" language="java"%>
+<c:set var="path" value="${pageContext.request.contextPath}/elections" />
+<c:if test="${qriousContent != null && qriousContent.size() >= 0}">
+
+<c:set var="qriousUrl" value="http://qrious.airtellive.com/question/ask.html" />
+
+<c:if test="${language == 'en'}">
+	
+<!--Qurious Module-->
+
+    <div class="rv_module">
+    	<div class="item-header">
+        	<a href="${bsbfn:createRdUrlWithId(pageContext.request,pageId,modules.QRIOUS_MODULE,moduleDescIds.QRIOUS_LINK_1,'http://qrious.airtellive.com/category/1062.html',null,null,null)}">
+            	${bsbfn:getTranslatedText(pageContext.request,'Your PM Your Agenda')}
+            </a>
+        </div>
+        <div class="moduleContent">
+        	<div class="agenda">
+            	<a href="${bsbfn:createRdUrlWithId(pageContext.request,pageId,modules.QRIOUS_MODULE,moduleDescIds.QRIOUS_LINK_2,'http://qrious.airtellive.com/category/1062.html',null,null,null)}"><span>${bsbfn:getTranslatedText(pageContext.request,'Post your agenda here')}</span></a>
+            </div>
+            <div class="agendaMsg" >
+                <div class="subSection">
+                    <a href="${bsbfn:createRdUrlWithId(pageContext.request,pageId,modules.QRIOUS_MODULE,moduleDescIds.QRIOUS_LINK_3,'http://qrious.airtellive.com/category/1062.html',null,null,null)}">
+                        <strong>${bsbfn:getTranslatedText(pageContext.request,'Other discussions')}</strong>
+                        <span>${bsbfn:getTranslatedText(pageContext.request,'See All')}</span>
+                    </a>
+                </div>
+            	<ul>
+            		<c:forEach var="question" items="${qriousContent}" begin="0" end="1">
+                    	<li><c:set var="url" value="${question.getLink()}" />
+                	<c:set var="rdUrl" value="${bsbfn:createRdUrlWithId(pageContext.request,pageId,modules.QRIOUS_MODULE,moduleDescIds.QRIOUS_LINK_QUESTION,url,null,null,null)}" />
+                    <a href="${rdUrl}">${question.getTitle()}</a><br>
+                    <span><a href="${rdUrl }">${question.answer_count} ${bsbfn:getTranslatedText(pageContext.request,'answers')}</a>&nbsp;|&nbsp;<a href="${rdUrl }">${question.views_count} ${bsbfn:getTranslatedText(pageContext.request,'views')}</a></span>
+                    <div class="ansNow"><a href="${rdUrl }">${question.getQuestion_user_name()}</a></div>
+                    </li>
+                    </c:forEach>
+                </ul>
+            </div>
+        </div>
+    </div>
+
+</c:if>
+
+</c:if>

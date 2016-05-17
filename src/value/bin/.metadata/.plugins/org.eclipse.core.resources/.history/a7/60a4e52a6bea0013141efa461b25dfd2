@@ -1,0 +1,67 @@
+<%@ page contentType="text/html;charset=UTF-8" language="java" %>
+<%@ taglib uri="http://java.sun.com/jsp/jstl/core" prefix="c" %>
+<%@ taglib uri="http://java.sun.com/jsp/jstl/fmt" prefix="fmt" %>
+<%@ taglib prefix="s" uri="http://www.springframework.org/tags" %>
+<%@ taglib uri="http://bsbportal.com/functions" prefix="bsbfn" %>
+<%@ taglib uri="http://java.sun.com/jsp/jstl/functions" prefix="fn" %>
+<%@ taglib uri="http://bsbportal.com/functions/tti" prefix="tti" %>
+
+<c:if test="${matchresults != null && matchresults.size() > 0}">
+    <div class="item-header"  style="padding-left: 10px;padding-top: 5px;"><s:message code="label.results" var="messageText"/><tti:textOrImage fontColor="black" style="b" text="${messageText}" /></div>
+    <c:forEach var="match" items="${matchresults}">
+		<c:set var="match" value="${match }" scope="request"/>
+		<jsp:include page="resultModule.jsp"/>
+    </c:forEach>
+    <c:set var="mlink" value="${server}${pageContext.request.contextPath}/cricket/matchresults/${seriesId}.html"/>
+	<c:set var="murl" value="${bsbfn:createRdUrlWithId(pageContext.request,pageId,modules.RESULTS_TABLE,moduleDescIds.VIEW_ALL,mlink,'Matchlink' ,1,'Matchlink')}"/>
+    <div class="view-all" style="border:0px;"> <a href="${murl }"><s:message code="label.viewallresults" var="messageText"/><tti:textOrImage bgColor="#e5e5e5" text="${messageText}" />>></a></div>
+</c:if>
+
+<c:if test="${matchschedule != null && matchschedule.size() > 0 }">
+	<div class="item-header"  style="padding-left: 10px;padding-top: 5px;"><s:message code="label.matchschedule" var="messageText"/><tti:textOrImage fontColor="black" style="b" text="${messageText}" /></div>
+    <c:forEach var="match" items="${matchschedule}">
+		<c:set var="match" value="${match }" scope="request"/>
+		<jsp:include page="scheduleModule.jsp"/>
+		<!-- Video Feed -->
+		
+		<div class="grey-box">
+    <c:set var="path" value="${pageContext.request.contextPath}/cricket"/>
+    <c:forEach items="${match.allVideos }" varStatus="loopStatus">
+    <c:set var="index" value="${loopStatus.index }" />
+     <div class="match_video_listing">
+                 <table width="100%" border="0" cellspacing="0" cellpadding="0">
+                <tr>
+                    <td width="110" align="left">
+			   <c:set var="m" value="${modules.CRICKET_VIDEO}"/>
+	    	   <c:set var="videoLinkId" value="${moduleDescIds.SINGLE_VIDEO_LINK}"/>
+ 			   <a href="${bsbfn:createRdUrlWithId(pageContext.request,pageId,m,videoLinkId,matchDetails.allVideos[index].videoUrl,null,null,null)}">
+ 			   
+ 			   			<c:set var="thumbUrl"
+										value="${config.icsBaseUrl}${bsbfn:getWatermarkedImageUrl(matchDetails.allVideos[index].thumbnailUrl,90,70,config.watermarkImageUrl,40,30,20)}" />
+                            <img src="${ matchDetails.allVideos[index].thumbnailUrl}" width="50" height="37" />
+                        </a></td></tr>
+                  <tr>  <td align="left" valign="top">
+                        <c:if test="${language == 'en'}">
+	                        <a href="${bsbfn:createRdUrlWithId(pageContext.request,pageId,m,videoLinkId,matchDetails.allVideos[index].videoUrl,null,null,null)}">
+	                            <strong><tti:textOrImage fontColor="black" text="${matchDetails.allVideos[index].title}" width="-90"/></strong></a>
+                        </c:if>
+                       <br />
+                        <strong>
+                            	<a href="${bsbfn:createRdUrlWithId(pageContext.request,pageId,m,videoLinkId,matchDetails.allVideos[index].videoUrl,null,null,null)}" class="red-btn-carousal"><tti:textOrImage bgColor="#ff462d" fontColor="white" text="Rs. ${matchDetails.allVideos[index].price} /-" size="12"/></a>
+                        </strong>
+                    </td>
+                </tr>
+
+            </table>
+        </div>
+    </c:forEach>
+    
+ </div>
+		
+<!-- Video Feed -->	
+		
+    </c:forEach>
+    <c:set var="mlink" value="${server}${pageContext.request.contextPath}/cricket/matchschedule/${seriesId}.html"/>
+	<c:set var="murl" value="${bsbfn:createRdUrlWithId(pageContext.request,pageId,modules.SCHEDULE,moduleDescIds.VIEW_ALL,mlink,'Matchlink' ,1,'Matchlink')}"/>
+    <div class="view-all" style="border:0px;"> <a href="${murl }"><s:message code="label.viewallschedule" var="messageText"/><tti:textOrImage bgColor="#e5e5e5" text="${messageText}" />>></a></div>
+</c:if>

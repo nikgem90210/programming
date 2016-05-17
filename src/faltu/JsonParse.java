@@ -18,7 +18,7 @@ import org.json.simple.parser.ParseException;
 
 public class JsonParse {
 	
-	private static final String fileName = "/Users/nishant/Desktop/parse.json";
+	private static final String fileName = "/Users/nishant/Desktop/parse.txt";
 
 	public static void main(String[] args) {
 
@@ -32,7 +32,7 @@ public class JsonParse {
 			JSONObject jsonObject = (JSONObject) jsonParser.parse(fileReader);
 			String name = (String) jsonObject.get("Name");
 			dataList.add(name);
-			String company = (String) jsonObject.get("Comapany");
+			String company = (String) jsonObject.get("Company");
 			dataList.add(company);
 			String siteName = (String) jsonObject.get("Site Name");
 			dataList.add(siteName);

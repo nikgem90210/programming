@@ -1,0 +1,66 @@
+<%@ taglib uri="http://bsbportal.com/functions" prefix="bsbfn"%>
+<%@ taglib uri="http://java.sun.com/jsp/jstl/core" prefix="c"%>
+<%@ taglib prefix="s" uri="http://www.springframework.org/tags" %>
+<c:set var="cssPath"
+	value="${static_file_path}/elections/css/style_smart20140205.css"
+	scope="request" />
+
+<!-- Poll Questionnaire -->
+<div class="rv_module">
+	<div class="item-header">
+		<a href="javascript:void(0);">
+			${bsbfn:getTranslatedText(pageContext.request,'Polls')} </a>
+	</div>
+	<div class="moduleBlock">
+		<div style="margin: 10px 0px 10px 5px;">${question}</div>
+		<c:forEach var="option" items="${options}">
+			<p style="margin: 0px 0px 5px 30px;">
+				<input type="radio" onclick="enableVote()" name="option"
+					value="${option.getKey()}">${option.getValue()}</input>
+			</p>
+		</c:forEach>
+	</div>
+	<div class="poll">
+		<c:set var="vote"
+			value="${pageContext.request.contextPath}/elections/vote.html?uid=${uuid}&qid=${qid}&pid=${pid}" />
+		<div>
+			<form id="voteAnchor" method="post" onsubmit="getCheckedRadio()"
+				style="display: inline;"
+				action="${bsbfn:createRdUrl(pageContext.request,header,pageId,uuid,circle,'3',modules.POLL_MODULE,moduleDescIds.POLL_VOTE_LINK,server,'',vote)}">
+				<s:message code="label.vote" var="messageText"/>
+				<input type="hidden" id="key" name="key"> <input
+					type="submit" id="choose" onclick="clicked()" value="${messageText }"
+					disabled="disabled" />
+			</form>
+				<s:message code="label.viewResult" var="messageText"/>
+					<c:set var="result"
+			value="${pageContext.request.contextPath}/elections/voteresult.html?qid=${qid}&pid=${pid}" />
+			<a href="${bsbfn:createRdUrl(pageContext.request,header,pageId,uuid,circle,'3',modules.POLL_MODULE,moduleDescIds.POLL_RESULT_LINK,server,'',result)}">${messageText}</a>
+		</div>
+	</div>
+
+
+	<script>
+		function enableVote() {
+			var ele = document.getElementsByName('option');
+			var flag = 0;
+			for (var i = 0; i < ele.length; i++) {
+				if (ele[i].checked)
+					flag = 1;
+			}
+			if (flag == 1)
+				document.getElementById('choose').disabled = false;
+		}
+
+		function getCheckedRadio() {
+			var radioButtons = document.getElementsByName("option");
+			for (var x = 0; x < radioButtons.length; x++) {
+				console.log("x:" + x);
+				if (radioButtons[x].checked) {
+					var selectedOption = radioButtons[x].value;
+					document.getElementById("key").value = selectedOption;
+				}
+			}
+
+		}
+	</script>

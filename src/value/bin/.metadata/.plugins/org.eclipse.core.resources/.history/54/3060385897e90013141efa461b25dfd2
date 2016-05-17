@@ -1,0 +1,870 @@
+package faltu;
+
+import java.awt.Rectangle;
+import java.io.BufferedReader;
+import java.io.IOException;
+import java.io.InputStreamReader;
+import java.util.Scanner;
+import java.awt.Rectangle;
+import java.awt.Point;
+
+/*public class MulMethod {				// PRINT FUNCTION
+	
+	public static void main(String[] args){
+		zool(11, "Pillu", "Raj");
+	}
+
+	public static void zool(int age, String name, String street) {
+		System.out.println(age);
+		System.out.println(name);
+		System.out.println(street);
+	}
+
+}
+*/
+
+/*public class MulMethod {								//DATE
+	
+	public static void main(String[] args){
+		printAmerica("Saturday", 16, "July", 2011);
+		printEurope("Saturday", 16, "July", 2011);
+	}
+
+	public static void printAmerica(String day, int date, String month, int year) {
+		System.out.print(day+", ");
+		System.out.print(month+" ");
+		System.out.print(date+", ");
+		System.out.println(year);
+	}
+	public static void printEurope(String day, int date, String month, int year) {
+		System.out.print(date+" ");
+		System.out.print(month+", ");
+		System.out.print(day+", ");
+		System.out.println(year);
+	}
+}*/
+
+/*public class MulMethod {						// EVEN - ODD
+		
+	public static void main(String[] args){
+		Scanner scan = new Scanner(System.in);
+		int x;
+		System.out.println("Enter the number to check its Parity");
+		x = scan.nextInt();
+		printParity(x);
+	}
+
+	public static void printParity(int x) {
+		if(x%2==0){
+			System.out.println(x +" is Even");
+		}
+		else{
+			System.out.println(x +" is Odd");
+		}
+	}
+	
+}
+*/
+
+/*public class MulMethod {				// recursion
+	
+	public static void main(String[] args){
+		System.out.println("Are u Ready");
+		countdown(2);
+	}
+	public static void countdown(int n) {
+		if (n == 0) {
+		System.out.println("Blastoff!");
+		} else {
+		System.out.println(n);
+		countdown(n-1);
+		}
+	}
+}*/
+	
+/*public class MulMethod {							//FUNCTION
+
+	public static void baffle(String blimp) {
+		System.out.println(blimp);
+		zippo("ping", -5);
+	}
+	public static void zippo(String quince, int flag) {
+		if (flag < 0) {
+			System.out.println(quince + " zoop");
+		} else {
+			System.out.println("ik");
+			baffle(quince);
+			System.out.println("boo-wa-ha-ha");
+		}
+	}
+	public static void main(String[] args) {
+		zippo("rattle", 13);
+	}
+}*/
+
+
+/*public class MulMethod {								//99 BOTTLES
+	
+	public static void main(String[] args){
+		bottles(9);
+	}
+
+	private static void bottles(int n) {
+		
+		if (n <= 0){
+			System.out.println("No more bottles on the Wall");
+		}
+		else{
+			System.out.println(n+" bottles of beer on the wall,"+ n+ " bottles of beer, ya take one down, you pass it around," + (n-1) + " bottles of beer on the wall.");
+			bottles(n-1);
+		}
+		
+	}
+}
+*/
+
+/*public class MulMethod {								//FUNCTION
+	public static void zoop(String fred, int bob) {
+		System.out.println(fred);
+		if (bob == 5) {
+			ping("not ");
+		} else {
+			System.out.println("!");
+		}
+	}
+	public static void main(String[] args) {
+		int bizz = 5;
+		int buzz = 2;
+		zoop("just for", bizz);
+		clink(2*buzz);
+	}
+	public static void clink(int fork) {
+		System.out.print("It's ");
+		zoop("breakfast ", fork) ;
+	}
+	public static void ping(String strangStrung) {
+		System.out.println("any " + strangStrung + "more ");
+	}
+}*/
+
+/*public class MulMethod {						// FERMAT'S THEORUM
+	
+	public static void main(String[] args){
+		Scanner scan = new Scanner(System.in);
+		System.out.println("Enter the Value for a");
+		int a = scan.nextInt();
+		System.out.println("Enter the value for b");
+		int b = scan.nextInt();
+		System.out.println("Enter the value for c");
+		int c = scan.nextInt();
+		System.out.println("Enter the value for n");
+		int n = scan.nextInt();
+		checkFermat(a,b,c,n);
+		
+	}
+
+	public static void checkFermat(int a, int b, int c, int n) {
+		int x = (int)Math.pow(a, n);
+		int y = (int)Math.pow(b, n);
+		int z = (int)Math.pow(c, n);
+		int i = (x + y);
+		if(n>2){
+			if(x + y == c){
+				System.out.println("Holy smokes, Fermat was wrong!");
+			}
+			else{
+				System.out.println("No, that doesn't work.");
+			}
+		}
+		else if(n<2){
+			System.out.println("not good");
+		}
+		else{
+			System.out.println("true");
+		}
+		System.out.println(i + " = " + z);
+	}
+}*/
+
+/*public class MulMethod{						// DISTANCE BETWEEN POINTS
+	
+	public static void main(String[] args){
+		 double radius = distance(1.0,2.0,4.0,6.0);
+		// System.out.println(radius);
+	}
+
+	public static double distance(double x1, double y1, double x2, double y2) {
+		double dx = x2-x1;
+		double dy = y2-y1;
+		double dsquare = dx*dx + dy*dy;
+		double result = Math.sqrt(dsquare);
+		System.out.println("dx is " + dx);
+		System.out.println("dy is " + dy);
+		System.out.println("dsquare is " + dsquare);
+		return result;
+	}
+}*/
+
+/*public class MulMethod{				// FACTORIAL recursion
+	
+	public static void main(String[] args){
+		Scanner scan = new Scanner(System.in);
+		System.out.println("Enter the number for the Factorial");
+		int x = scan.nextInt();
+		int result = factorial(x);
+		System.out.println("Factorial is " + result);
+		scan.close();
+	}
+
+	public static int factorial(int x) {
+		if(x==0){
+			return 1;
+		}
+		else{
+			int result = x * factorial(x-1);
+			return result;
+		}
+		
+		
+	}
+	
+}*/
+
+
+/*public class MulMethod{			// FIBONACCI recursion
+	
+	public static void main(String[] args){
+		Scanner scan = new Scanner(System.in);
+		System.out.println("Enter the value of x : ");
+		int x = scan.nextInt();
+		System.out.print("Series is :- ");
+		for (int i = 0; i <= x; i++) {
+	           System.out.print(fibo(i) + " ");
+	       }
+//		System.out.println("Series is " + result);
+		scan.close();
+	}
+
+	public static int fibo(int x) {
+		if(x==0 || x==1){
+		return 1;
+		}
+		else{
+			int result = fibo(x-1) + fibo(x-2);
+			return result;
+		}
+	}
+	
+}*/
+
+
+/*public class MulMethod {
+	public static void main(String[] args) throws IOException{
+		BufferedReader br = new BufferedReader(new InputStreamReader(System.in));
+		System.out.println("Enter the String");
+		String s = br.readLine();
+		char first = first(s);
+		System.out.println(first);
+		String rest = rest(s);
+		System.out.println(rest);
+		int length = length(s);
+		System.out.println(length);
+		printString(s);
+		printBackward(s);
+		reverseString(s);
+//		String back = printBackward(s);			//	with 2nd method
+//		System.out.println(back);				//	with 2nd method
+		System.out.println(first(s));
+		System.out.println(rest(s));
+		System.out.println(length(s));
+	}
+	// first: returns the first character of the given String
+	public static char first(String s) {
+		return s.charAt(0);
+	}
+	// last: returns a new String that contains all but the
+	// first letter of the given String
+	public static String rest(String s) {
+		return s.substring(1, s.length());
+	}
+	// length: returns the length of the given String
+	public static int length(String s) {
+		return s.length();
+	}
+	// printString: one character per line
+	public static void printString(String s){
+		System.out.println("String is: ");
+		for(int i = 0; i < s.length(); i++){
+			System.out.println(s.charAt(i));
+		}
+	}
+//	public static String printBackward(String s){
+	public static void printBackward(String s){	
+		String reverse = "";
+		System.out.println("Reverse string is: ");
+		for(int i = (s.length()-1); i >= 0; i--){
+			//reverse = reverse + s.charAt(i);
+			System.out.println(reverse + s.charAt(i));
+		}
+		if(s==null || (s.length() <= 1)){			//working but in same line 
+			return s;
+		}else{
+			return printBackward(s.substring(1))+s.charAt(0);	
+		}
+	}
+	public static void reverseString(String s){			// in same line
+		String reverse = "";
+		System.out.println("Reverse String is :");
+		for(int i = (s.length()-1); i >= 0; i--){
+			reverse = reverse + s.charAt(i);
+		}
+		System.out.println(reverse);
+	}
+	
+}*/
+
+/*public class MulMethod {
+	public static void main(String[] args){
+		Scanner scan = new Scanner(System.in);
+		System.out.println("Enter the value of x");
+		double x = scan.nextDouble();
+		System.out.println("Enter the value of n");
+		int n = scan.nextInt();
+		double result = power(x,n);
+		System.out.println(result);
+	}
+	public static double power(double x, int n){
+		if(n==0){
+			return 1;
+		}
+		else{
+			return (x * power(x, n-1));
+		}
+	}
+}
+*/
+
+												/* WHILE STARTS FROM HERE */
+
+/*public class MulMethod {
+	public static void main(String[] args){
+		Scanner scan = new Scanner(System.in);
+		System.out.println("Enter the value of n");
+		int n = scan.nextInt();
+		countDown(n);
+	}
+
+	public static void countDown(int n) {
+		while(n>1){
+			
+			System.out.println(n-1);
+			n = (n-1);
+			
+		}
+	}
+	
+}*/
+
+
+/*public class MulMethod {
+	public static void main(String[] args){
+		Scanner scan = new Scanner(System.in);
+		System.out.println("Enter the value of n");
+		int n = scan.nextInt();
+		sequence(n);
+
+	}
+	public static void sequence(int n) {
+		while (n != 1) {
+			System.out.println(n);
+			if (n%2 == 0) { // n is even
+				n = n / 2;
+			} else { // n is odd
+				n = n*3 + 1;
+			}
+		}
+	}
+}*/
+
+/*public class MulMethod {
+	public static void main(String[] args){
+		int i = 1;
+		while(i<=10){
+			System.out.print(2*i + "   ");
+			i=i+1;
+		}
+		System.out.println("");
+	}
+}*/
+
+/*public class MulMethod {								//Multiplication table
+	public static void main(String[] args){
+		Scanner scan = new Scanner(System.in);
+		System.out.println("Enter the value of n");
+		int n = scan.nextInt();
+		System.out.print("Upto");
+		int x = scan.nextInt();
+		printMultiple(n,x);
+		printMulTable(n,x);
+		scan.close();
+	}
+
+	public static void printMulTable(int n, int x) {
+		int i = n+1;
+		while(i<=x){
+			printMultiple(i,x);
+			i = i + 1;
+		}
+	}
+
+	public static void printMultiple(int n, int x) {
+		int i = 1;
+		while(i<=n){
+			System.out.print(n*i + "   ");
+			i = i + 1;
+		}
+		System.out.println("");
+	}
+	
+}*/
+
+/*public class MulMethod {
+	public static void main(String[] args) {
+		loop(10);
+	}
+	public static void loop(int n) {
+		int i = n;
+		System.out.println(i);
+		System.out.println(n);
+		while (i > 0) {
+			System.out.println(i);
+			if (i%2 == 0) {
+				i = i/2;
+				System.out.println(i);
+			} else {
+				i = i+1;
+				System.out.println(i);
+			}
+		}
+	}
+}*/
+
+
+/*public class MulMethod{						// COUNT CHARACTER
+	public static void main(String[] args) throws IOException{
+		int index=0;
+		int count=0;
+		BufferedReader br = new BufferedReader(new InputStreamReader(System.in));
+		System.out.println("Enter the String");
+		String string = br.readLine();
+		System.out.println("Enter the character so see its count");
+		char search = (char) br.read();
+		while(index < string.length()){
+			if(string.charAt(index) == search)
+			{
+				count++;
+			}
+			index++;
+		}
+		System.out.println("There are " + count + " " + search + " in the string u entered");
+	}
+}*/
+
+/*public class MulMethod{							
+	public static void main(String[] args) throws IOException{								// REVERSE STRING   (FOR)
+		BufferedReader br = new BufferedReader(new InputStreamReader(System.in));
+		System.out.println("Enter the String");
+		String string = br.readLine();
+//		StringBuilder sb = new StringBuilder(string);
+//		System.out.println(sb.reverse());
+		printReverse(string);
+	}
+
+	public static void printReverse(String string) {
+		String reverse = "";
+		int length = string.length();
+		for(int i = length-1; i >= 0; i-- ){
+			System.out.println(reverse + string.charAt(i));
+		}
+	}
+}*/
+
+/*public class MulMethod{						// REVERSE STRING
+	public static String mystery(String s) {
+		int i = s.length() - 1;
+		String total = "";
+		while (i >= 0 ) {
+			char ch = s.charAt(i);
+			System.out.println(i + " " + ch);
+			total = total + ch;
+			i--;
+		}
+		return total;
+	}
+	public static void main(String[] args) {
+		System.out.println(mystery("Allen"));
+	}
+}*/
+
+/*public class MulMethod{								// PALINDROME NUMBER (WHILE)
+	public static void main(String[] args){
+		int reverse = 0;
+		Scanner sc = new Scanner(System.in);
+		System.out.println("enter the number");
+		int i = sc.nextInt();
+		while(i != 0){
+			reverse = reverse * 10;
+			reverse = reverse + i%10;
+			i = i/10;
+		}
+		System.out.println(reverse);
+		sc.close();
+	}
+}*/
+
+/*public class MulMethod{								//STRING
+	public static void main(String[] args)throws IOException{
+		BufferedReader br = new BufferedReader(new InputStreamReader(System.in));
+		System.out.println("Enter the String");
+		String string = br.readLine();
+		first(string);
+		middle(string);
+		last(string);
+	}
+	public static void first(String string) {
+		char c = string.charAt(0);
+		System.out.println("The First letter is " + c);
+	}
+	private static void middle(String string) {
+		int i = string.length();
+		String s = string.substring(1, i-1);
+		System.out.println("The middle string is " + s);
+	}
+	public static void last(String string) {
+		int i = string.length();
+		char c = string.charAt(i-1);
+		System.out.println("The Last letter is " + c);
+	}
+}*/
+
+/*public class MulMethod{						//PYRAMID
+	public static void main(String[] args){
+		for(int i = 4 ; i >= 0 ; i--){
+			for(int j = 0 ; j< i ; j--){
+				System.out.print("*");
+			}
+			System.out.println("*");
+		}
+	}
+}*/
+
+/*
+public class MulMethod{
+	public static void main(String[] args)throws IOException{
+		String reverse = "";
+		BufferedReader br = new BufferedReader(new InputStreamReader(System.in));
+		System.out.println("Enter the string");
+		String s = br.readLine();
+		int i = s.length()-1;
+		while(i >= 0){
+			char c = s.charAt(i);
+			reverse = reverse + c;
+			i--;
+		}
+		System.out.println(reverse);
+	}
+}
+*/
+
+/*public class MulMethod{
+	public static void main(String[] args)throws IOException{
+		BufferedReader br = new BufferedReader(new InputStreamReader(System.in));
+		System.out.println("Enter the string");
+		String s = br.readLine();
+		char a[] = s.toCharArray();
+		int i = s.length();
+			if(i%2 == 0){
+				System.out.println("Middle Characters are : " + a[i/2-1] + a[i/2]);
+			}
+			else{
+				System.out.println("Middle Characters is : " + a[i/2]);
+			}
+	}
+}*/
+
+/*public class MulMethod{
+	public static void main(String[] args)throws IOException{
+		BufferedReader br = new BufferedReader(new InputStreamReader(System.in));
+		System.out.println("Enter the 1st string");
+		String s1 = br.readLine();
+		System.out.println("Enter the 2nd string");
+		String s2 = br.readLine();
+		isAbecedarian(s1,s2);
+	}
+
+	public static void isAbecedarian(String s1, String s2) {
+		int flag = s1.compareTo(s2);
+		if(flag==0){
+			System.out.println("Strings are same");
+		}
+		else if(flag > 0){
+			System.out.println("2nd String comes before 1st in alpha order");
+		}
+		else if(flag < 0){
+			System.out.println("1st String comes before 2nd in alpha order");
+		}
+	}
+	
+}*/
+
+/*public class MulMethod{
+	public static void main(String[] args)throws IOException{
+		BufferedReader br = new BufferedReader(new InputStreamReader(System.in));
+		System.out.println("Enter the string");
+		String s = br.readLine();
+		int index = 0;
+		char c = 'a';								//check
+		while(index < s.length()){
+			if(c > s.charAt(index)){
+				System.out.println("not Abecedarian");
+			}
+			c = s.charAt(index);
+			index = index + 1;
+		}
+//		System.out.println("Abecedarian");
+	}
+}*/
+
+
+/*public class MulMethod{
+	public static void main(String[] args)throws IOException{
+		BufferedReader br = new BufferedReader(new InputStreamReader(System.in));
+		System.out.println("Enter the string");
+		String s = br.readLine();
+		int index = 0;
+		char a = s.charAt(index);
+//		System.out.println(index);
+		System.out.println(a);
+		
+		char b = s.charAt(index+1);						//why index + 1,,,, index++
+//		System.out.println(index+1);
+		System.out.println(b);
+		int flag = 
+	}
+}*/
+
+
+/*public class MulMethod{
+	public static void main(String[] args)throws IOException{
+		BufferedReader br = new BufferedReader(new InputStreamReader(System.in));
+		System.out.println("Enter the string");
+		String s = br.readLine();
+		int length = s.length();
+		if (length%2 != 0){
+			System.out.println("Can't");
+		}
+		else{
+		int index = 0;
+		while(index < length){						//check
+			if(s.charAt(index) != s.charAt(index+1)){
+				System.out.println("nope");
+				break;
+			}
+//			else{
+//				System.out.println("yup");
+//			}
+			index = index + 2;
+		}
+		if(index==length){
+			System.out.println("yup");
+		}
+		}
+	}
+}*/
+
+
+/*public class MulMethod{						//CONSTRUCTOR
+	int hour, minute;
+	double second;
+
+	public MulMethod(){
+		this.hour=0;
+		this.minute=0;
+		this.second=0.0;
+	}
+	public MulMethod(int hour, int minute, double second){
+		this.hour=hour;
+		this.minute=minute;
+		this.second=second;
+	}
+	
+	public static void main(String[] argv){
+		MulMethod m1 = new MulMethod();
+		m1.hour = 11;
+		m1.minute = 20;
+		m1.second = 13.3435;
+		System.out.println(m1);
+		printTime(m1);
+		
+		
+		MulMethod m2 = new MulMethod(10, 30, 2.214);
+		System.out.println(m2);
+		printTime(m2);
+		System.out.println("True if first time is greater" + " " + "False ,Otherwise" + " " );
+		System.out.println("The result is " + comTime(m1, m2));
+	}
+	public static void printTime(MulMethod m){
+		System.out.println(m.hour+":"+m.minute+":"+m.second);
+	}
+	public static boolean comTime(MulMethod m1, MulMethod m2){
+		if (m1.hour > m2.hour) return true;
+		if (m1.hour < m2.hour) return false;
+		
+		if (m1.minute > m2.minute) return true;
+		if (m1.minute < m2.minute) return false;
+		
+		if (m1.second > m2.second)
+			return true;
+		
+	return false;
+	
+	}
+}*/
+
+
+public class Time{
+	int hour , minute;
+	double second;
+	
+	public Time(){
+		this.hour=0;
+		this.minute=0;
+		this.second=0.0;
+	}
+	public Time(int hour, int minute, double second){
+		this.hour=hour;
+		this.minute=minute;
+		this.second=second;
+	}
+	
+	Time currentTime = new Time(9,14,30.0);
+	Time reqTime = new Time(3, 35, 28.0);
+	Time totTime = addTime(currentTime, reqTime);
+	
+	
+	public static Time addTime(Time t1, Time t2){
+		Time sum = new Time();
+		sum.hour = t1.hour + t2.hour;
+		sum.minute = t1.minute + t2.minute;
+		sum.second = t1.second + t2.second;
+		if (sum.second >= 60.0){
+			sum.second -= 60.0;
+			sum.hour += 1;
+		}
+		if(sum.minute >= 60){
+			sum.minute -=60;
+			sum.minute += 1;
+		}
+		return sum;
+		
+	}
+	void printTime(totTime);
+	
+	
+	public static void printTime(Time m){
+		System.out.println(m.hour+":"+m.minute+":"+m.second);
+	}
+}
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+

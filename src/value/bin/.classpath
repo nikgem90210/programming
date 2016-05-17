@@ -1,0 +1,33 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<classpath>
+	<classpathentry excluding="value/src/|passbyvalue/src/|string from console/src/|passing by value/src/|passing/src/|.metadata/.plugins/org.eclipse.wst.server.core/tmp0/work/Catalina/localhost/LoginApp/|commandline/src/|passingvalue/src/passingvalue/|Char/src/|JSPProject/src/|SeleniumTest/src/|.metadata/.plugins/org.eclipse.wst.server.core/tmp0/work/Catalina/localhost/JSPProject/|Method calling/src/|XML Parsing/src/|Argument/src/|construstor/src/|mvcproject/src/|ServletProject/src/|Tables/src/|LoginApp/src/|demo/src/|Reading from console/src/" kind="src" path=""/>
+	<classpathentry kind="src" path=".metadata/.plugins/org.eclipse.wst.server.core/tmp0/work/Catalina/localhost/JSPProject"/>
+	<classpathentry kind="src" path=".metadata/.plugins/org.eclipse.wst.server.core/tmp0/work/Catalina/localhost/LoginApp"/>
+	<classpathentry kind="src" path="Argument/src"/>
+	<classpathentry kind="src" path="Char/src"/>
+	<classpathentry kind="src" path="commandline/src"/>
+	<classpathentry kind="src" path="construstor/src"/>
+	<classpathentry kind="src" path="demo/src"/>
+	<classpathentry kind="src" path="JSPProject/src"/>
+	<classpathentry kind="src" path="LoginApp/src"/>
+	<classpathentry kind="src" path="Method calling/src"/>
+	<classpathentry kind="src" path="mvcproject/src"/>
+	<classpathentry kind="src" path="passbyvalue/src"/>
+	<classpathentry kind="src" path="passing by value/src"/>
+	<classpathentry kind="src" path="passing/src"/>
+	<classpathentry kind="src" path="passingvalue/src/passingvalue"/>
+	<classpathentry kind="src" path="Reading from console/src"/>
+	<classpathentry kind="src" path="SeleniumTest/src"/>
+	<classpathentry kind="src" path="ServletProject/src"/>
+	<classpathentry kind="src" path="string from console/src"/>
+	<classpathentry kind="src" path="Tables/src"/>
+	<classpathentry kind="src" path="value/src"/>
+	<classpathentry kind="src" path="XML Parsing/src"/>
+	<classpathentry kind="con" path="org.eclipse.jdt.launching.JRE_CONTAINER"/>
+	<classpathentry kind="lib" path="/portal-bheem/lib/javax.servlet.jar"/>
+	<classpathentry kind="lib" path="/Users/admin/Downloads/jackson-annotations-2.4.1.jar"/>
+	<classpathentry kind="lib" path="/Users/admin/Downloads/jackson-core-2.4.1.1.jar"/>
+	<classpathentry kind="lib" path="/Users/admin/Downloads/jackson-databind-2.4.1.3.jar"/>
+	<classpathentry kind="lib" path="/portal-bheem/lib/commons-lang-2.2.jar"/>
+	<classpathentry kind="output" path="value/bin"/>
+</classpath>

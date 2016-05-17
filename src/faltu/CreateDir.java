@@ -16,7 +16,8 @@ public class CreateDir
 			System.out.println("Directory of " + dirname);
 	//		File s[] = f.listFiles();
 			String s[] = f.list();
-			for(int i=0 ; i<s.length; i++)
+			if(s != null){
+				for(int i=0 ; i<s.length; i++)
 				{
 				//File ff = s[i];
 				//if(s[i].isDirectory()){
@@ -37,6 +38,8 @@ public class CreateDir
 		else{
 			System.out.println(f + " is not a Directory");
 		}
+			}
+			
 		fw.flush();
 		fw.close();
 	}	

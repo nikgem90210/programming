@@ -1,0 +1,121 @@
+(function($) {
+	loadKeywordsAll();
+	loadCircles();
+	loadDatePickers();
+	addList();
+	
+	function loadCircles() {
+		var circleGrp = $('#circle-grp-table');
+		if(circleGrp !== undefined && circleGrp.length > 0) {
+			$('#circle-grp-table').removeClass('hide');
+		}
+		/*$('.circle-select').attr("disabled", true);
+		$('.circle-chkbox').attr("disabled",true);*/
+	}
+	
+//	$('#btnEdit').click(function(){
+//		event.preventDefault();
+//		$('.form-control:not(#txt_id), .span3:not(#txt_actor)').removeAttr("disabled");
+//		$('.selectRight:not(#txt_id), .circle-select:not(#txt_actor)').removeAttr("disabled");
+//		$('.savebtn').removeAttr("disabled");
+//		$('#btnEdit').attr("disabled",true);
+//		$('.text_area').removeAttr("readonly");
+//		$('#txt_title').focus();
+//		$('.tm-tag').removeClass("tm-tag-disabled");
+//		$('.tm-input').removeClass("tm-input-disabled");
+//		$('.tm-input').css('visibility','visible');
+//		$('.edit_track_date').attr("readonly",false);
+//		$('.circle-chkbox').attr("disabled",false);
+//		
+////		loadKeywordsAll();
+//		$('body').scrollTop();
+//		return false;
+//	});
+	
+	function loadDatePickers() {
+		var components = ["enddate","startdate","releasedate"];
+		for(var i=0;i<components.length;i++) {
+			$('#edit_track_'+components[i]+'div').datepicker({ 
+				format : 'dd M yyyy',
+				autoclose: true,
+				onRender: function(date) {
+							var nowTemp = new Date();
+							var now = new Date(nowTemp.getFullYear(), nowTemp.getMonth(), nowTemp.getDate(), 0, 0, 0, 0);
+							return date.valueOf();
+						  }
+			});
+		}
+	}
+	
+	function addList(){
+		if($("#txt_releaseYear") !== undefined && $("#txt_releaseYear").length > 0 ) {
+			for(var i = 2013; i >= 1900; --i) {
+				var option = document.createElement('option');
+				option.text = option.value = i;
+				$("#txt_releaseYear").add(option, 0);
+			}
+		}
+	}
+    	
+	function loadKeywordsAll() {
+		//for track keywords
+		var keywordsForTags = "";
+		var fields = ["artist","lyricist","instrument","composer","keyword","singer","actor"];
+		for(var i=0;i<fields.length;i++) {
+			var field = fields[i];
+			if($('#orig_track_' + field) !== undefined && $('#orig_track_' + field).val() != undefined ) {
+				keywordsForTags = $('#orig_track_' + field).val().split(',');
+			}
+			$('#'+field+'_track_tags').tagsManager({
+				"prefilled": keywordsForTags,
+				"hiddenTagListName":"txt_track_" + field,
+			});
+		}
+	}
+	
+	$('#editTrack').submit(function() {
+		event.preventDefault();
+		var result = $('#editTrack').parsley('validate');
+		if(result === true) {
+			var options = { 
+				url:      '/cms/editcontent',        // override for form's 'action' attribute 
+				type:      'POST',
+				success:       showResponse,  // post-submit callback 
+				beforeSubmit: loading
+			};
+	        $(this).ajaxSubmit(options);
+		}
+    });
+	
+	function loading(){
+		$('#modalBox').show();
+	}
+	
+	
+	
+	// post-submit callback 
+	function showResponse(responseText, statusText, xhr, $form)  {
+		$('#modalBox').hide();
+		if(responseText === true) {
+			$('#editTrackResult').css("color","#0f0");
+			$('#editTrackResult').html('Content successfully uploaded.');
+			bootbox.alert("Content Saved Successfully!", function() {
+			    console.log("Alert dismissed");
+			    window.location.href = "/cms/contentlisting";
+			});
+			
+			
+		} else {
+			$('#editTrackResult').css("color","#f00");
+			$('#editTrackResult').html('Content upload failed.');
+			bootbox.alert("Content upload Failed");
+		}
+	}
+		
+	$('#txt_mobile_streaming_price').spinedit();
+	$('#txt_mobile_downloding_price').spinedit();
+	$('#txt_web_streaming_price').spinedit();
+	$('#txt_web_downloding_price').spinedit();
+	
+
+})(jQuery);

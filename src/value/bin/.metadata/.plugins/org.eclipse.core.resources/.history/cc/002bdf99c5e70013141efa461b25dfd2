@@ -1,0 +1,132 @@
+<%@ page contentType="text/html;charset=UTF-8" language="java"%>
+<%@ taglib uri="http://java.sun.com/jsp/jstl/core" prefix="c"%>
+<%@ taglib uri="http://java.sun.com/jsp/jstl/fmt" prefix="fmt"%>
+<%@ taglib prefix="s" uri="http://www.springframework.org/tags"%>
+<%@ taglib uri="http://java.sun.com/jsp/jstl/functions" prefix="fn"%>
+<%@ taglib uri="http://bsbportal.com/functions" prefix="bsbfn"%>
+<%@ taglib uri="http://bsbportal.com/functions/tti" prefix="tti" %>
+
+<jsp:include page="header.jsp"></jsp:include>
+
+<c:set var="path" value="${pageContext.request.contextPath}/stars" />
+
+<link href="${pageContext.request.contextPath}/movies/css/base_paging_smart.css" rel="stylesheet" type="text/css">
+
+<c:set var="specId" value="1" />
+<c:set var="m" value="${modules.MOVIES_LIST}" />
+<c:set var="mId" value="${moduleDescIds.TITLE_LINK}" />
+
+<table width="100%" border="0" cellspacing="0" cellpadding="10">
+	<tr>
+        <c:set var="url" value="${bsbfn:encode(starmetadata.name)}.html"/>
+		<td width="92%" class=" page-heading">
+			<a style="color:#ffffff" href="${bsbfn:createRdUrl(pageContext.request,header,pageId,uuid,circle,specId,m,moduleDescIds.TITLE_LINK,server,path,url)}">
+				<tti:textOrImage text="${bsbfn:getTransliteratedTextWithType(pageContext.request,starmetadata.name,2)}" size="12" style="b" bgColor="#646464" fontColor="white"/>&nbsp;</a>|&nbsp;
+				<strong><s:message code="label.news" var="messageText"/><tti:textOrImage text="${messageText}" size="12" style="b" bgColor="#646464" fontColor="white" /></strong>
+		</td>
+	</tr>
+</table>
+
+
+
+<table cellpadding="4" width="100%">
+<tr>
+<td>
+
+<div>
+	<!-- New Detail module start -->
+	<c:if test="${not empty article}">
+	
+		<c:set var="lnv" value="${modules.LATEST_NEWS_VIDEO}" />
+		<c:set var="lnppr" value="${modules.LATEST_NEWS_PAGINATION_PREV}" />
+		<c:set var="lnpne" value="${modules.LATEST_NEWS_PAGINATION_NEXT}" />
+		
+		<c:set var="lnvlnk" value="${moduleDescIds.LATEST_NEWS_VID_LINK}" />
+		<c:set var="pprlnk" value="${moduleDescIds.PAGINATION_PRV}" />
+		<c:set var="pnelnk" value="${moduleDescIds.PAGINATION_NXT}" />
+	
+	
+		<h1 class="infoheader"><tti:textOrImage text="${article.title}" size="15" style="b"/></h1>
+		<c:if test="${not empty article.partner}">
+			<div class="newscp"><tti:textOrImage text="${article.partner}"/></div>
+		</c:if>
+		<div class="infotime"><tti:textOrImage text="${bsbfn:formatDate(article.lastUpdated)}"/></div>
+		
+		
+		<!-- News image/video start -->
+		<c:choose>
+		  <c:when test="${not empty video && not empty video.url}">
+		      <c:set var="videoDetailUrl" value="/video/detail.html?id=${video.id}&bu=${server}${path}/news/${article.id}.html"/>
+		      <a href="${bsbfn:createRdUrl(pageContext.request,header,pageId,uuid,circle,specId,lnv,lnvlnk,server,path,videoDetailUrl)}">
+			      	<div class="infoph"  align="center">
+			      		<img src="${config.icsBaseUrl}${bsbfn:getWatermarkedImageUrl(article.imageUrl,120,0,config.watermarkImageUrlLarge,130,55,20)}" alt="-" />
+			      	</div>
+		      </a>
+		  </c:when>
+		  <c:otherwise>
+		      <div class="infoph" align="center"><img src="${bsbfn:getFullResizedImageUrl(config.icsBaseUrl, article.imageUrl,120,0)}" alt="-" /></div>
+		  </c:otherwise>
+		</c:choose>
+		<!-- News image/video end -->
+		
+		<!-- New detail and pagination start -->
+			<div class="detail">${bsbfn:formatFeedText(newsData)}</div>
+			<!--Pagination  -->
+			<div class="pagination">
+			        <c:if test="${pager.hasPrevPage}">
+			            <c:set var="mId" value="${moduleDescIds.PAGINATION_PRV}"/>
+			            <c:set var="rurl" value="${starmetadata.name}/news/detail/${article.id}.html?p=${pager.previousPageNumber}"/>
+			            <a href="${bsbfn:createRdUrl(pageContext.request,header,pageId,uuid,circle,'1',lnppr,pprlnk,server,path,rurl)}"><s:message code="label.prev" var="messageText"/><tti:textOrImage text="${messageText}" /></a>
+			        </c:if>
+			        &nbsp;
+			        <c:if test="${pager.hasNextPage}">
+			           <c:set var="mId" value="${moduleDescIds.PAGINATION_NXT}"/>
+			           <c:set var="rurl" value="${starmetadata.name}/news/detail/${article.id}.html?p=${pager.nextPageNumber}"/>
+			           <a href="${bsbfn:createRdUrl(pageContext.request,header,pageId,uuid,circle,'1',lnpne,pnelnk,server,path,rurl)}"><s:message code="label.next" var="messageText"/><tti:textOrImage text="${messageText}" /></a>
+			        </c:if>
+			</div>
+		<!-- New detail and pagination end -->
+	
+	</c:if>
+	<!-- New Detail module end -->
+</div>
+
+</td>
+</tr>
+</table>
+
+
+<h2 class="ttl">
+            <img src="http://54.197.253.14:8080/stars/images/icon_ttl_middle_next.gif">
+            <span class="title_bg"><s:message code="label.quick_links" var="messageText"/><tti:textOrImage bgColor="#646464" fontColor="white" text="${messageText}" size="12" style="b"/></span>
+    </h2>
+
+<c:set var="m" value="${modules.QUICK_LINKS}" />
+<c:set var="mId" value="${moduleDescIds.TITLE_LINK}" />
+<c:set var="url"
+	value="${bsbfn:encode(fn:toLowerCase(starmetadata.name))}/about.html" />
+<div class="listing-text">
+	<a
+		href="${bsbfn:createRdUrl(pageContext.request,header,pageId,uuid,circle,specId,m,mId,server,path,url)}"><s:message code="label.aboutme" var="messageText"/><tti:textOrImage text="${messageText}" />
+        <img src="http://54.197.253.14:8080/stars/images/arrow2.png" width="4" align="right" />
+        </a>
+</div>
+<c:set var="url"
+	value="${bsbfn:encode(fn:toLowerCase(starmetadata.name))}/awards.html" />
+<div class="listing-text">
+	<a
+		href="${bsbfn:createRdUrl(pageContext.request,header,pageId,uuid,circle,specId,m,mId,server,path,url)}"><s:message code="label.awards" var="messageText"/>
+		<s:message code="label.nominations" var="messageText1"/><tti:textOrImage text="${messageText} & ${messageText1}" />
+        <img src="http://54.197.253.14:8080/stars/images/arrow2.png" width="4" align="right" />
+        </a>
+</div>
+<c:set var="url"
+	value="${bsbfn:encode(fn:toLowerCase(starmetadata.name))}/gallery.html" />
+<div class="listing-text">
+	<a
+		href="${bsbfn:createRdUrl(pageContext.request,header,pageId,uuid,circle,specId,m,mId,server,path,url)}"><s:message code="label.photos" var="messageText"/>
+		<s:message code="label.videos" var="messageText1"/><tti:textOrImage text="${messageText} & ${messageText1}"/>
+        <img src="http://54.197.253.14:8080/stars/images/arrow2.png" width="4" align="right" />
+        </a>
+</div>
+<jsp:include page="footer.jsp" />

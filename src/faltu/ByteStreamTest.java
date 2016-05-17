@@ -16,7 +16,10 @@ public class ByteStreamTest {
 //		for(char c:charArray){
 //			bOut.write(c);
 //		}
-		bOut.write(br.readLine().getBytes());
+		String readLine = br.readLine();
+		if(readLine != null){
+			bOut.write(readLine.getBytes());
+		}
 		byte[] b = bOut.toByteArray();
 		System.out.println("Print the Content");
 		for(int i=0 ; i<b.length ; i++)

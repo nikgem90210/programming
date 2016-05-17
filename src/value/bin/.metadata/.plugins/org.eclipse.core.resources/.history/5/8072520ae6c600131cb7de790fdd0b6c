@@ -1,0 +1,54 @@
+<%@ taglib uri="http://bsbportal.com/functions/tti" prefix="tti"%>
+<%@ taglib prefix="s" uri="http://www.springframework.org/tags"%>
+
+<!--  Twitter Feeds Module -->
+<div class="moduleBlock">
+    	<div class="moduleHead">
+        	<a href="javascript:void(0);">
+            	<strong>Twitter Feeds</strong>
+            </a>
+        </div>
+        <div class="moduleContent">
+        	
+            <div class="twitterFeed">
+            	<table width="100%" cellpadding="0" cellspacing="0" border="0">
+                	<!--Twiiter Repeatable Row-->
+                    <tbody><tr>
+                    	<td class="row">
+                        	<table width="100%" cellpadding="0" cellspacing="0" border="0">
+                            	<tbody><tr>
+                                	<td width="55"><a href="javascript:void(0);"><img src="./twitter_files/photo1.jpg" alt="" class="avatar"></a></td>
+                                    <td>
+                                    	<div class="twitterHeader">
+                                          <div class="name"><a href="javascript:void(0);"><span class="fullname">Nitin Pratap Singh</span> <span class="nickname">@ps_nitin</span></a></div>
+                                          <div class="timestamp"><a href="javascript:void(0);">46m</a></div>
+                                        </div>
+                                        
+                                      	<div class="twitterContent">
+                                        	Lorem ipsum dolor sit amet, <a href="javascript:void(0);">#consectetur</a> non tincidunt at, consectetur a urna. 
+                                        </div>
+                                        
+                                      <div class="retweet"><img src="./twitter_files/retweetSmall.png"> Retweeted by Lorem ipsum</div>
+                                        
+                                        <div class="twitterFooter">
+                                        	<a href="javascript:void(0);" class="expand">Expand</a>
+                                            
+                                            <ul>
+                                            	<li><a href="javascript:void(0);"><img src="./twitter_files/twitterReplyIcon.png" alt=""></a></li>
+                                                <li><a href="javascript:void(0);"><img src="./twitter_files/reTweetBigIcon.png" alt=""></a></li>
+                                                <li><a href="javascript:void(0);"><img src="./twitter_files/twitterFavIcon.png" alt=""><!--</li-->
+                                            </a></li></ul><a href="javascript:void(0);">
+                                        </a></div><a href="javascript:void(0);">
+                                    </a></td>
+                                </tr>
+                            </tbody></table>
+                        </td>
+                    </tr>
+                    <!--Twiiter Repeatable Row-->
+                   
+                </tbody></table>
+            </div>
+            
+    	</div>
+    </div>
+<!--  Twitter Feeds Module -->

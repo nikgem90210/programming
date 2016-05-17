@@ -1,0 +1,166 @@
+package com.bsb.portal.fe.controller;
+
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Map;
+
+import javax.servlet.http.HttpServletRequest;
+
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Controller;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.servlet.ModelAndView;
+
+import com.bsb.portal.common.Device.DeviceGroup;
+import com.bsb.portal.constants.AnalyticsConstants;
+import com.bsb.portal.constants.ScreenConstants;
+import com.bsb.portal.context.PortalContext;
+import com.bsb.portal.dto.Category;
+import com.bsb.portal.dto.GalleryData;
+import com.bsb.portal.dto.Pager;
+import com.bsb.portal.dto.PhotoAlbum;
+import com.bsb.portal.dto.PhotoMetaData;
+import com.bsb.portal.fe.services.FifaService;
+import com.bsb.portal.fe.services.PhotoService;
+import com.bsb.portal.fe.utils.PagingUtils;
+import com.bsb.portal.fe.utils.Screen;
+
+
+@Controller
+@RequestMapping(value = "/fifa")
+public class FifaController extends BasePhotoController{
+	
+	@Autowired
+    private FifaService     		fifaService;
+	
+	@Autowired
+	private PhotoService        	photoService;
+	
+	private static final int        NUMB_GALLERY_PER_PAGE  					= 6;
+	
+	
+	
+	
+	@Override
+	protected String getSiteId() {
+		
+		return AnalyticsConstants.CATEGORY_FIFA;
+	}
+	
+	
+	
+	@Screen(name=ScreenConstants.ROUTE_FIFA_INDEX)
+	@RequestMapping(value = {"","/","/index","/main"})
+	public ModelAndView getFifaData(HttpServletRequest request) {
+		Map<String, Object> model = getModel(request);
+		DeviceGroup deviceGroup = PortalContext.getDeviceContext().getDeviceGroup();
+		addPhotoAlbumSpecificLanguage(galleryId, photoId, model, lang);
+		List<PhotoAlbum> photoList = new ArrayList<PhotoAlbum>();
+		photoList = fifaService.getGalleries();
+		if (photoList != null && photoList.size()> 0){
+			model.put("galleries", photoList);
+		}
+		return new ModelAndView("fifa/"+deviceGroup.getGroupName()+"/index",model);
+		
+	}
+
+
+	
+	protected void addPhotoAlbumSpecificLanguage(String galleryId, String photoId, Map<String, Object> model, String lang) {
+        GalleryData galleryData = photoService.getGalleryData(lang);
+        PhotoAlbum gallery = galleryData.getGalleries().get(galleryId);
+
+        if(gallery == null || gallery.getGalleryId() == null)
+            return;
+        photoService.populateGalleryDetails(gallery);
+
+        String partnerName = gallery.getPartnerIdStr();
+
+        List<PhotoMetaData> photos = gallery.getPhotos();
+        model.put("gallery", gallery);
+
+        boolean thankYouPage = false;
+        thankYouPage = photoId.equalsIgnoreCase("thanks");
+        if(!thankYouPage) {
+            PhotoMetaData photoMetaData = null;
+            if(photoId == null || photoId.trim().equals("") || photoId.equals("0"))
+                photoMetaData = photos.get(0);
+            else {
+                boolean found = false;
+                for(int i = 0; i < photos.size(); i++) {
+                    photoMetaData = photos.get(i);
+                    if(photoMetaData.getId().equals(photoId)) {
+                        found = true;
+                        break;
+                    }
+                }
+                if(!found)
+                    photoMetaData = photos.get(0);
+
+            }
+            model.put("photo", photoMetaData);
+            model.put("photodescription", photoMetaData.getDescription());
+
+            model.put("partner", partnerName);
+
+        }
+
+        Category category = categoryService.getCategory(gallery.getCategory().toString().toLowerCase());
+        model.put("category", category);
+        if(category != null) {
+            model.put("categoryid", category.getId());
+        }
+        model.put("searchkeywords", photoService.getSearchKeywords());
+        return;
+    }
+		
+
+	@RequestMapping("/photos")
+	public ModelAndView getGalleries(HttpServletRequest request) {
+
+		Map<String, Object> model = getModel(request);
+		
+		String pageNoParam = request.getParameter("p");
+
+		List<PhotoAlbum> fifaGalleries = null;
+		fifaGalleries = fifaService.getGalleries();
+		int offset = (PagingUtils.getOffset(pageNoParam, NUMB_GALLERY_PER_PAGE)).intValue();
+		Pager pager = PagingUtils.getPager(fifaGalleries, offset, NUMB_GALLERY_PER_PAGE);
+		if(pager.isHasNextPage()) {
+			model.put("nextpageno", pager.getNextPageNumber());
+		}
+		if(pager.isHasPrevPage()) {
+			model.put("prevpageno", pager.getPreviousPageNumber());
+		}
+
+		model.put("galleries", fifaGalleries.subList(pager.getStartIndex(), pager.getEndIndex() + 1));
+
+		model.put("pgeid", "galleries");
+		/*ElectionSourcePage pageId = ElectionAnalytics.ElectionSourcePage.GLST;*/
+		/*addAnalytics(request, model, pageId);*/
+		return new ModelAndView("fifa/photolist", model);
+	}
+
+}
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+	

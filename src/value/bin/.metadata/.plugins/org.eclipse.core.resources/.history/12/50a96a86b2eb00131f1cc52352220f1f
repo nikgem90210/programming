@@ -1,0 +1,110 @@
+package com.bsb.portal.fe.controller;
+
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Map;
+
+import javax.servlet.http.HttpServletRequest;
+
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Controller;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.servlet.ModelAndView;
+
+import com.bsb.portal.common.Device.DeviceGroup;
+import com.bsb.portal.constants.AnalyticsConstants;
+import com.bsb.portal.constants.ScreenConstants;
+import com.bsb.portal.context.PortalContext;
+import com.bsb.portal.dto.Pager;
+import com.bsb.portal.dto.PhotoAlbum;
+import com.bsb.portal.fe.services.FifaService;
+import com.bsb.portal.fe.utils.PagingUtils;
+import com.bsb.portal.fe.utils.Screen;
+
+
+@Controller
+@RequestMapping(value = "/fifa")
+public class FifaController extends BasePhotoController{
+	
+	@Autowired
+    private FifaService     fifaService;
+	
+	
+	
+	private static final int       NUMB_GALLERY_PER_PAGE  			= 6;
+	
+	
+	
+	
+	@Override
+	protected String getSiteId() {
+		
+		return AnalyticsConstants.CATEGORY_FIFA;
+	}
+	
+	
+	
+	@Screen(name=ScreenConstants.ROUTE_FIFA_INDEX)
+	@RequestMapping(value = {"","/","/index","/main"})
+	public ModelAndView getFifaData(HttpServletRequest request) {
+		Map<String, Object> model = getModel(request);
+		DeviceGroup deviceGroup = PortalContext.getDeviceContext().getDeviceGroup();
+		List<PhotoAlbum> photoList = new ArrayList<PhotoAlbum>();
+		photoList = fifaService.getGalleries();
+		if (photoList != null && photoList.size()> 0){
+			model.put("galleries", photoList);
+		}
+		return new ModelAndView("fifa/"+deviceGroup.getGroupName()+"/index",model);
+		
+	}
+
+
+	@RequestMapping("/photos")
+	public ModelAndView getGalleries(HttpServletRequest request) {
+
+		Map<String, Object> model = getModel(request);
+		
+		String pageNoParam = request.getParameter("p");
+
+		List<PhotoAlbum> fifaGalleries = null;
+		fifaGalleries = fifaService.getGalleries();
+		int offset = (PagingUtils.getOffset(pageNoParam, NUMB_GALLERY_PER_PAGE)).intValue();
+		Pager pager = PagingUtils.getPager(fifaGalleries, offset, NUMB_GALLERY_PER_PAGE);
+		if(pager.isHasNextPage()) {
+			model.put("nextpageno", pager.getNextPageNumber());
+		}
+		if(pager.isHasPrevPage()) {
+			model.put("prevpageno", pager.getPreviousPageNumber());
+		}
+
+		model.put("galleries", fifaGalleries.subList(pager.getStartIndex(), pager.getEndIndex() + 1));
+
+		model.put("pgeid", "galleries");
+		/*ElectionSourcePage pageId = ElectionAnalytics.ElectionSourcePage.GLST;*/
+		/*addAnalytics(request, model, pageId);*/
+		return new ModelAndView("fifa/photolist", model);
+	}
+
+}
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+	

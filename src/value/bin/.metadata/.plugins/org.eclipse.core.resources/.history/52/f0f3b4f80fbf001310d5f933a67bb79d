@@ -1,0 +1,43 @@
+ <%@ taglib uri="http://bsbportal.com/functions" prefix="bsbfn" %>
+ <%@ taglib uri="http://java.sun.com/jsp/jstl/core" prefix="c" %>
+ <c:set var="cssPath" value="${static_file_path}/elections/css/style_smart20140205.css" scope="request"/>
+ 
+ <!--Poll Schedule-->
+    <div class="rv_module">
+    	<div class="item-header">
+        	<a href="javascript:void(0);">
+            	${bsbfn:getTranslatedText(pageContext.request,'Poll Schedule')}
+            </a>
+        </div>
+        <div class="moduleBlock">
+        	<c:set var="april" value="${bsbfn:getTranslatedText(pageContext.request,'April')}"></c:set>
+        	<c:set var="may" value="${bsbfn:getTranslatedText(pageContext.request,'May')}"></c:set>
+        	<div class="moduleContent">
+        	
+	            <ul class="pollSchedule">
+	            <c:set var="gotoUrl" value="${server}${pageContext.request.contextPath}/elections/pollDate.html?date=7"></c:set>
+	            	<li><a href="${bsbfn:createRdUrlWithId(pageContext.request,pageId,modules.POLL_SCHEDULE,moduleDescIds.POLL_7,gotoUrl,null,null,null)}">7 <br>${april}</a></li>
+	            <c:set var="gotoUrl" value="${server}${pageContext.request.contextPath}/elections/pollDate.html?date=9"></c:set>
+	                <li><a href="${bsbfn:createRdUrlWithId(pageContext.request,pageId,modules.POLL_SCHEDULE,moduleDescIds.POLL_9,gotoUrl,null,null,null)}">9 <br>${april}</a></li>
+	            <c:set var="gotoUrl" value="${server}${pageContext.request.contextPath}/elections/pollDate.html?date=10"></c:set>
+	                <li><a href="${bsbfn:createRdUrlWithId(pageContext.request,pageId,modules.POLL_SCHEDULE,moduleDescIds.POLL_10,gotoUrl,null,null,null)}">10 <br>${april}</a></li>
+	            <c:set var="gotoUrl" value="${server}${pageContext.request.contextPath}/elections/pollDate.html?date=12"></c:set>
+	                <li><a href="${bsbfn:createRdUrlWithId(pageContext.request,pageId,modules.POLL_SCHEDULE,moduleDescIds.POLL_12,gotoUrl,null,null,null)}">12 <br>${april}</a></li>
+	            <c:set var="gotoUrl" value="${server}${pageContext.request.contextPath}/elections/pollDate.html?date=17"></c:set>
+	                <li><a href="${bsbfn:createRdUrlWithId(pageContext.request,pageId,modules.POLL_SCHEDULE,moduleDescIds.POLL_17,gotoUrl,null,null,null)}">17 <br>${april}</a></li>
+				<c:set var="gotoUrl" value="${server}${pageContext.request.contextPath}/elections/pollDate.html?date=24"></c:set>
+	                <li><a href="${bsbfn:createRdUrlWithId(pageContext.request,pageId,modules.POLL_SCHEDULE,moduleDescIds.POLL_24,gotoUrl,null,null,null)}">24 <br>${april}</a></li>
+	            <c:set var="gotoUrl" value="${server}${pageContext.request.contextPath}/elections/pollDate.html?date=30"></c:set>
+	                <li><a href="${bsbfn:createRdUrlWithId(pageContext.request,pageId,modules.POLL_SCHEDULE,moduleDescIds.POLL_30,gotoUrl,null,null,null)}">30 <br>${april}</a></li>
+	            <c:set var="gotoUrl" value="${server}${pageContext.request.contextPath}/elections/pollDate.html?date=57"></c:set>
+	                <li><a href="${bsbfn:createRdUrlWithId(pageContext.request,pageId,modules.POLL_SCHEDULE,moduleDescIds.POLL_57,gotoUrl,null,null,null)}">7 <br>${may}</a></li>
+	            <c:set var="gotoUrl" value="${server}${pageContext.request.contextPath}/elections/pollDate.html?date=512"></c:set>
+	                <li><a href="${bsbfn:createRdUrlWithId(pageContext.request,pageId,modules.POLL_SCHEDULE,moduleDescIds.POLL_512,gotoUrl,null,null,null)}">12 <br>${may}</a></li>
+	            </ul>
+            
+            </div>
+            
+        </div>
+    </div>
+    <!--Poll Schedule-->
+    

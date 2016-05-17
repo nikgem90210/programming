@@ -1,0 +1,95 @@
+<%@ page contentType="text/html;charset=UTF-8" language="java" %>
+<%@ taglib uri="http://java.sun.com/jsp/jstl/core" prefix="c" %>
+<%@ taglib uri="http://java.sun.com/jsp/jstl/fmt" prefix="fmt" %>
+<%@ taglib prefix="s" uri="http://www.springframework.org/tags" %>
+<%@ taglib uri="http://bsbportal.com/functions" prefix="bsbfn" %>
+<%@ taglib uri="http://java.sun.com/jsp/jstl/functions" prefix="fn" %>
+<%@ page contentType="text/html;charset=UTF-8" language="java" %>
+<%@ taglib prefix="c" uri="http://java.sun.com/jsp/jstl/core" %>
+
+
+<c:set var="path" value="${pageContext.request.contextPath}/elections" scope="request"/>
+<c:set var="m" value="${modules.HEADER}" />
+<c:set var="pageTitle" value="Airtel | Elections " scope="request"/>
+<c:set var="cssPath" value="${static_file_path}/elections/css/style_smart20140205.css" scope="request"/>
+<c:set var="cssPath1" value="${static_file_path}/cricket/css/flexslider.css" scope="request"/>
+<c:set var="autoRefresh" value="${(_ap != null) &&  fn:startsWith(_ap, '1')  && (param._ap != 0) && (param._ap != null) && !bsbfn:isOpera(pageContext.request) && !bsbfn:isNokiaS40(pageContext.request)}" scope="request"/>
+<c:set var="refId" value="${moduleDescIds.REFRESH_LINK}"/>
+<%-- <c:if test="${path == null }">
+<c:set var="path" value="${pageContext.request.contextPath}/election" scope="request"/>
+</c:if> --%>
+<c:set var="apPath" value="${bsbfn:createRdUrl(pageContext.request,header,pageId,uuid,circle,'1',m,refId,server,path,pageContext.request.parameterMap['nexturl'][0])}" scope="request"/>
+<c:if test="${timeout == null }">
+	<c:set var="timeout" value="20000" scope="request"/>
+</c:if>
+
+<c:set var="mId" value="${moduleDescIds.AIRTELLIVE_HOME_LINK}" />
+<c:set var="myAccmId" value="${moduleDescIds.MY_ACCOUNT_LINK}" />
+<c:set var="airtellink" value="http://125.21.246.90" />
+<c:set var="headerlink" value="${pageContext.request.contextPath}/elections/index.html"/>
+<c:set var="og_title" value="Cricket Live Score" scope="request"/>
+<c:set var="og_url" value="http://m.airtellive.com/cricket" scope="request"/>
+<c:set var="og_image" value="" scope="request"/>
+
+<c:set var="outLink" value="${bsbfn:createBcUrl(pageContext.request,pageContext.response,header,pageId,uuid,circle,'1')}" scope="request"/>
+<c:set var="indexUrl" value="${bsbfn:createRdUrl(pageContext.request,header,pageId,uuid,circle,'1',m,mId,airtellink,'','')}"  scope="request"/>
+<c:set var="thisUrl" value="${bsbfn:createRdUrl(pageContext.request,header,pageId,uuid,circle,'1',m,mId,server,'',headerlink)}" scope="request"/>
+
+<%-- <c:set var="srchImg" value="${server}${pageContext.request.contextPath}/cricket/images/search_icon19112013.png"/>
+<c:set var="searchImgUrl" value="${config.icsBaseUrl}${bsbfn:getResizedImageUrl(srchImg,21,21)}" scope="request"/> --%>
+
+<c:set var="thisPage" value="Elections" scope="request"/>
+
+
+<c:set var="language" value="en" scope="request"/>
+<c:if test="${sessionScope.lang != null }">
+	<c:set var="language" value="${sessionScope.lang}" scope="request"/>
+</c:if>
+
+<c:if test="${language != 'en'}">
+    <c:set var="showfootersearchbar" value="false" scope="request"/>
+    <c:remove var="searchImgUrl"/>
+	<c:set var="langUrl" value="${bsbfn:createRdUrl(pageContext.request,header,pageId,uuid,circle,'1',m,lIde,server,path,'?lang=en')}" scope="request"/>
+	<c:set var="langImgUrl" value="${config.staticCdnUrl}/portal/images/hi/btn_english_smart.gif" scope="request"/>
+</c:if>
+
+<c:if test="${language == 'en'}">
+	<c:set var="link" value="lang/langimage.html?tti=${sessionScope.tti}&lang=hi" />
+	<c:if test="${sessionScope.tti==null}">
+		<c:set var="link" value="langredirect.html?lpage=1" />
+	</c:if>
+		<c:set var="langUrl" value="${bsbfn:createRdUrl(pageContext.request,header,pageId,uuid,circle,'1',m,lIde,server,path,link)}" scope="request"/>
+		<c:set var="langImgUrl" value="${pageContext.request.contextPath}/photo/images/hi320/hindi.gif" scope="request"/>
+</c:if>
+
+
+<c:if test="${bsbfn:hasMsisdn(header)}">
+	<c:set var="myAccUrl" value="${bsbfn:createRdUrl(pageContext.request,header,pageId,uuid,circle,'1',m,myAccmId,'http://airtellive.com/wps/portal/selfcare','','')}" scope="request"/>
+</c:if>
+ <c:set var="menuUrl" value="${bsbfn:createRdUrl(pageContext.request,header,pageId,uuid,circle,5,m,moduleDescIds.MENU_LINK,server,path,'menu.html')}" scope="request"/>
+
+<c:set var="menuImg" value="${server}${pageContext.request.contextPath}/cricket/images/menu19112013.png"/>
+<c:set var="menuImageUrl" value="${config.icsBaseUrl}${bsbfn:getResizedImageUrl(menuImg,18,18)}" scope="request"/>
+ 
+<input type="hidden" value="${language}" id="langVal"/>
+
+<%-- <!--Header-->
+    <div id="headerElec">
+    <div style="float:left; margin:8px 0 0 10px; border-right: 1px solid #dfdfdf; padding: 5px 10px 5px 0px;"><a href="${indexUrl}"><img src="${static_file_path}/portal/images/home_new.png" style="margin-top:0;"/></a></div>
+        <div class="logo"><a href="${thisUrl}"><img src="${static_file_path}/portal/images/logo.png"/></a></div>
+        <!-- <div class="menu" id="menuBtn"><a href="#"><span><img src="images/menuBtn.png" alt=""></span> menu</a></div>-->
+        <c:set var="searchImgUrl" scope="request"/>
+        <div class="searchElec" id="searchIcon"><img src="${static_file_path}/portal/images/searchIcon.png" alt=""></div> 
+    </div>
+    <!--Header-->
+ <div style="margin-bottom:10px;">&nbsp;</div>
+<style>
+	#header #searchIcon{display:none;}
+</style>
+<!--Header--> --%>
+
+
+<jsp:include page="../../common/supersmart/header.jsp"/>
+
+
+

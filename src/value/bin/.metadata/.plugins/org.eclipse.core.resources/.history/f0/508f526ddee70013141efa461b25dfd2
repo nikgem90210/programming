@@ -1,0 +1,131 @@
+<%@ page contentType="text/html;charset=UTF-8" language="java"%>
+<%@ taglib uri="http://java.sun.com/jsp/jstl/core" prefix="c"%>
+<%@ taglib uri="http://java.sun.com/jsp/jstl/fmt" prefix="fmt"%>
+<%@ taglib prefix="s" uri="http://www.springframework.org/tags"%>
+<%@ taglib uri="http://java.sun.com/jsp/jstl/functions" prefix="fn"%>
+<%@ taglib uri="http://bsbportal.com/functions" prefix="bsbfn"%>
+<%@ taglib uri="http://bsbportal.com/functions/tti" prefix="tti" %>
+<jsp:include page="header.jsp"></jsp:include>
+
+<c:set var="path" value="${pageContext.request.contextPath}/stars" />
+<c:set var="specId" value="3" />
+<c:set var="m" value="${modules.AWARDS_LIST}" />
+<c:set var="mId" value="${moduleDescIds.TITLE_LINK}" />
+
+<table width="100%" border="0" cellspacing="0">
+	<tr>
+        <c:set var="url" value="${bsbfn:encode(starmetadata.name)}.html"/>
+        <td width="75%" align="left" valign="top" class="celebName"><a href="${bsbfn:createRdUrl(pageContext.request,header,pageId,uuid,circle,specId,m,moduleDescIds.TITLE_LINK,server,path,url)}"> <strong><tti:textOrImage text="${bsbfn:getTransliteratedTextWithType(pageContext.request,starmetadata.name,2)}" size="12" style="b"/> </strong></a><br />
+		</td>
+	</tr>
+</table>
+
+<h2 class="ttl">
+            <img src="${static_file_path}/stars/images/icon_ttl_middle_next.gif">
+            <span class="title_bg"><s:message code="label.awards" var="messageText"/><tti:textOrImage bgColor="#646464" fontColor="white" text="${messageText}" size="12" style="b"/></span>
+    </h2>
+
+<table width="100%" border="0" cellspacing="0" cellpadding="4">
+	<c:forEach var="award" items="${starmetadata.awards}">
+		<tr>
+			<td width="88%" valign="top" class="image-list"><tti:textOrImage text="${bsbfn:getTranslatedText(pageContext.request,award)}"/><br /> </a></td>
+		</tr>
+	</c:forEach>
+
+</table>
+
+<h2 class="ttl">
+            <img src="${static_file_path}/stars/images/icon_ttl_middle_next.gif">
+            <span class="title_bg"><s:message code="label.photos" var="messageText"/><tti:textOrImage text="${messageText}" size="12" style="b"/></span>
+    </h2>
+
+
+<div class="photo-module">
+	<c:set var="m" value="${modules.GALLERY}" />
+	<c:set var="mId" value="${moduleDescIds.IMAGE_LINK}" />
+	<table width="100%" border="0" cellspacing="0" cellpadding="0">
+		<tr>
+			<c:set var="url"
+				value="${bsbfn:encode(fn:toLowerCase(starmetadata.name))}/photo.html?i=1&_ap=1" />
+			<td width="33%" align="center"><a
+				href="${bsbfn:createRdUrl(pageContext.request,header,pageId,uuid,circle,specId,m,mId,server,path,url)}">
+					<img
+					src="${config.icsBaseUrl}${bsbfn:getResizedImageUrl(starmetadata.photos[1],50,50)}" />
+			</a></td>
+			<c:set var="url"
+				value="${bsbfn:encode(fn:toLowerCase(starmetadata.name))}/photo.html?i=0&_ap=1" />
+			<td width="33%" align="center"><a
+				href="${bsbfn:createRdUrl(pageContext.request,header,pageId,uuid,circle,specId,m,mId,server,path,url)}">
+					<img
+					src="${config.icsBaseUrl}${bsbfn:getResizedImageUrl(starmetadata.photos[0],50,50)}" />
+			</a></td>
+		</tr>
+	</table>
+</div>
+<c:set var="mId" value="${moduleDescIds.VIEWALL_LINK}" />
+<c:set var="url"
+	value="${bsbfn:encode(fn:toLowerCase(starmetadata.name))}/gallery.html" />
+<div class="view-all-photo">
+	<a
+		href="${bsbfn:createRdUrl(pageContext.request,header,pageId,uuid,circle,specId,m,mId,server,path,url)}"
+		class="light-grey-btn"><s:message code="label.viewall" var="messageText"/><tti:textOrImage bgColor="#e7e7e7" text="${messageText}"/></a>
+</div>
+<!--c:if test="${language == 'en' }"-->
+<jsp:include page="../../videos/low/related.jsp">
+	<jsp:param value="${relatedVideos}" name="videos"/>
+	<jsp:param value="2" name="nCols"/>
+	<jsp:param value="1" name="maxRows"/>
+	<jsp:param value="${path}/${bsbfn:encode(fn:toLowerCase(starmetadata.name))}" name="urlPart"/>
+	<jsp:param value="50" name="thumbnailWidth"/>
+	<jsp:param value="38" name="thumbnailHeight"/>
+	<jsp:param value="${config.watermarkImageUrl}" name="watermarkImage"/>
+	<jsp:param value="15" name="watermarkImageXPos"/>
+	<jsp:param value="9" name="watermarkImageYPos"/>
+	<jsp:param value="20" name="watermarkImageTransparency"/>
+	<jsp:param value="../css/videos-low.css" name="stylesheet"/>
+</jsp:include>
+<!-- /c:if-->
+<c:if test="${language == 'en' }">
+<jsp:include page="qrious.jsp"/>
+</c:if>
+
+<h2 class="ttl">
+            <img src="${static_file_path}/stars/images/icon_ttl_middle_next.gif">
+            <span class="title_bg"><s:message code="label.quick_links" var="messageText"/><tti:textOrImage bgColor="#646464" fontColor="white" text="${messageText}" size="12" style="b"/></span>
+    </h2>
+
+
+
+<c:set var="m" value="${modules.QUICK_LINKS}" />
+<c:set var="mId" value="${moduleDescIds.TITLE_LINK}" />
+
+<c:if test="${fn:length(starmetadata.movies) > 0}">
+	<c:set var="url"
+		value="${bsbfn:encode(fn:toLowerCase(starmetadata.name))}/movies.html" />
+	<div class="listing-text">
+		<a
+			href="${bsbfn:createRdUrl(pageContext.request,header,pageId,uuid,circle,specId,m,mId,server,path,url)}"><s:message code="label.movies" var="messageText"/><tti:textOrImage text="${messageText}" />
+            <img src="${static_file_path}/stars/images/arrow2.png" width="4" align="right" />
+            </a>
+	</div>
+</c:if>
+<c:set var="url"
+	value="${bsbfn:encode(fn:toLowerCase(starmetadata.name))}/awards.html" />
+<div class="listing-text">
+	<a
+		href="${bsbfn:createRdUrl(pageContext.request,header,pageId,uuid,circle,specId,m,mId,server,path,url)}"><s:message code="label.awards" var="messageText"/>
+		<s:message code="label.nominations" var="messageText1"/><tti:textOrImage text="${messageText} & ${messageText1}" />
+        <img src="${static_file_path}/stars/images/arrow2.png" width="4" align="right" />
+        </a>
+</div>
+<c:set var="url"
+	value="${bsbfn:encode(fn:toLowerCase(starmetadata.name))}/gallery.html" />
+<div class="listing-text">
+	<a
+		href="${bsbfn:createRdUrl(pageContext.request,header,pageId,uuid,circle,specId,m,mId,server,path,url)}"><s:message code="label.photos" var="messageText"/>
+		<s:message code="label.videos" var="messageText1"/><tti:textOrImage text="${messageText} & ${messageText1}"/>
+        <img src="${static_file_path}/stars/images/arrow2.png" width="4" align="right" />
+        </a>
+</div>
+
+<jsp:include page="footer.jsp" />

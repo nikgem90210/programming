@@ -1,23 +1,19 @@
 package CSVJson;
 
 import java.io.BufferedReader;
+import java.io.ByteArrayInputStream;
 import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
-import java.net.URL;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.Date;
-
-import javax.xml.crypto.Data;
 
 import org.apache.http.HttpResponse;
 import org.apache.http.client.HttpClient;
 import org.apache.http.client.methods.HttpGet;
 import org.apache.http.impl.client.DefaultHttpClient;
-import org.fusesource.hawtbuf.ByteArrayInputStream;
-
 import au.com.bytecode.opencsv.CSVReader;
 
 public class Employee {
@@ -44,8 +40,7 @@ public class Employee {
 
 	}
 
-	private static EmployeeListMetaData populateMetaDataFromListData(
-			String[] listData) {
+	private static EmployeeListMetaData populateMetaDataFromListData(String[] listData) {
 
 		EmployeeListMetaData employeeData = new EmployeeListMetaData();
 		SimpleDateFormat sdf = new SimpleDateFormat("MM/dd/yyyy");
@@ -68,8 +63,7 @@ public class Employee {
 				Date date = sdf.parse(dateStr);
 				return date;
 			} catch (ParseException e) {
-				System.err
-						.println("Error while parsing date " + e.getMessage());
+				System.err.println("Error while parsing date " + e.getMessage());
 			}
 
 		}
@@ -86,8 +80,7 @@ public class Employee {
 			HttpResponse response = client.execute(httpGet);
 			if (response.getStatusLine().getStatusCode() == 200) {
 				InputStream inputStream = response.getEntity().getContent();
-				BufferedReader bufferedReader = new BufferedReader(
-						new InputStreamReader(inputStream));
+				BufferedReader bufferedReader = new BufferedReader(new InputStreamReader(inputStream));
 				while ((line = bufferedReader.readLine()) != null) {
 					content += line;
 					content += '\n';

@@ -49,7 +49,7 @@ public class MiriWebRequest {
 										String[] sarr = line.split(",");
 										Map<String,String> map = new HashMap<>();
 										for(String s:sarr){
-											if(s.indexOf(':')==-1){
+											if(s.indexOf(':') == -1){
 												continue;
 											}
 											String key = s.substring(0, s.indexOf(':'));

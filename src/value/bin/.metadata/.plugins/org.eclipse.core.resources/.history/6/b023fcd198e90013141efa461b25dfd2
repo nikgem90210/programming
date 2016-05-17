@@ -1,0 +1,45 @@
+package faltu;
+
+public class Time{
+	int hour , minute;
+	double second;
+	
+	public Time(){
+		this.hour=0;
+		this.minute=0;
+		this.second=0.0;
+	}
+	public Time(int hour, int minute, double second){
+		this.hour=hour;
+		this.minute=minute;
+		this.second=second;
+	}
+	
+	Time currentTime = new Time(9,14,30.0);
+	Time reqTime = new Time(3, 35, 28.0);
+	Time totTime = addTime(currentTime, reqTime);
+	
+	public static Time addTime(Time t1, Time t2){
+		Time sum = new Time();
+		sum.hour = t1.hour + t2.hour;
+		sum.minute = t1.minute + t2.minute;
+		sum.second = t1.second + t2.second;
+		if (sum.second >= 60.0){
+			sum.second -= 60.0;
+			sum.hour += 1;
+		}
+		if(sum.minute >= 60){
+			sum.minute -=60;
+			sum.minute += 1;
+		}
+		return sum;
+		
+	}
+	
+	
+	public static void printTime(Time m){
+		System.out.println(m.hour+":"+m.minute+":"+m.second);
+	}
+	
+}
+

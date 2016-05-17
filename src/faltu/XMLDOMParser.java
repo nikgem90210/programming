@@ -30,7 +30,6 @@ public class XMLDOMParser {
 		
 		String content = getContent(xmlUrl);
 		
-			ByteArrayInputStream is = new ByteArrayInputStream(content.getBytes("UTF-8"));
 			DocumentBuilder builder = DocumentBuilderFactory.newInstance().newDocumentBuilder();
 			Document doc = builder.parse("http://cricket.hosted.stats.com/static_data/xmls/tracker/1869_tracker.xml");
 			

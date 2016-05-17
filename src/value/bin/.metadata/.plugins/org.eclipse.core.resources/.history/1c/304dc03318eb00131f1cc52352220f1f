@@ -1,0 +1,8 @@
+package com.bsb.portal.fe.services;
+
+import org.springframework.stereotype.Service;
+
+@Service
+public class FifaService extends BaseService {
+	
+}

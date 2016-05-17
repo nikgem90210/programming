@@ -1,0 +1,163 @@
+mode=dev
+project=PROJECT_NAME
+al_redirect_url=http://ec2-107-20-10-109.compute-1.amazonaws.com/
+al_base_url=http://localhost/
+cdn_url=http://cdn.bsbportal.com/photos/
+ics_url=http://ic.bsbportal.com
+ics_url_charging=http://tbr.bsbportal.com
+useproxy=false
+text_image_cdn_url=http://bheem.bsbportal.com:8080/v1/tti
+#News Service
+
+
+news_detail_api=http://api.bsbportal.com:8080/v3/news/browse?id={0}
+news_category_api=http://api.bsbportal.com:8080/v3/news/category?cat={0}&n={1}&pos={2}
+category_list_api=http://api.bsbportal.com:8080/v3/news/category?lang={0}
+news_related_api=http://api.bsbportal.com:8080/v3/news/search?id={0}
+news_related_photo_api=http://api.bsbportal.com:8080/v3/news/related
+news_breaking_news_api=http://api.bsbportal.com:8080/v3/news/category?cat=60&n=1
+news_search_api=http://api.bsbportal.com:8080/v3/news/search?s={0}&lang={1}&n={2}&pos={3}
+news_base_api=http://api.bsbportal.com:8080/v3/news/
+#
+#news_detail_api=http://api.bsbportal.com:8080/v3/news/browse?id={0}
+#news_category_api=http://api.bsbportal.com:8080/v3/news/category?cat={0}&n={1}&pos={2}
+#category_list_api=http://api.bsbportal.com:8080/v3/news/category?lang={0}
+#news_related_api=http://api.bsbportal.com:8080/v3/news/search?id={0}
+#news_related_photo_api=http://api.bsbportal.com:8080/v3/news/related
+#news_breaking_news_api=http://api.bsbportal.com:8080/v3/news/category?cat=60&n=1
+#news_search_api=http://api.bsbportal.com:8080/v3/news/search?s={0}&lang={1}&n={2}&pos={3}
+#
+#news_base_api=http://api.bsbportal.com:8080/v3/news/
+
+#CMS Service
+cms_api=http://api.bsbportal.com:8080/v1/cms/module?
+
+#Category API
+category_api=http://api.bsbportal.com:8080/category/info?
+
+#Contest service
+contest_api=http://api.bsbportal.com:8080/v1/contest?
+
+#Contest Winner Service
+contest_winner_api=http://api.bsbportal.com:8080/v1/contest/winner?
+
+#Contest Participant Service
+contest_participant_api=http://api.bsbportal.com:8080/v1/contest/answer
+
+#Photo Service
+#photo_base_api=http://api.bsbportal.com:8080/v1/image
+photo_base_api=http://api.bsbportal.com:8080/v1/image
+photo_base_url=http://m.airtellive.com/photo/gallery
+photo_nginx_url=http://cdn.bsbportal.com/photos/
+
+#Video Service
+video_search_url=http://api.bsbportal.com:8080/v2/video/search
+video_detail_url=http://api.bsbportal.com:8080/v2/video/details
+video_related_url=http://api.bsbportal.com:8080/v2/video/related
+
+#VAS Service
+vas_api=http://api.bsbportal.com:8080/vas
+vas_solr_api=http://125.21.246.68:8080/solr/onebasket/select
+vas_pkg_api=http://stg-api.tnm.bsbportal.com/api/delivery
+vas_useproxy=true
+vas_packagerefreshtime=3600000
+vas_pkg_prop_file=http://img.bsbportal.com/mb/cfg/vas_packages.xml
+
+#device db
+devicedb.redis.host=54.221.199.32
+devicedb.redis.port=6379
+server.redis.host=127.0.0.1
+server.redis.port=6379
+
+#ibm 3g provisioning link
+3gstore.provisioninglink=http://www.airtellive.com/wps/portal/plan3g
+3gstore.testpackages=false
+3gstore.apiurl=http://103.15.227.46/api/delivery/3g/en/json/
+3gstore.solrurl=http://125.21.246.68:8080/solr/onebasket/select
+
+#cricket.apiUrl=http://ec2-54-251-211-111.ap-southeast-1.compute.amazonaws.com:8080/v1/cricket/
+#qrious.apiUrl=http://ec2-54-251-211-111.ap-southeast-1.compute.amazonaws.com:8080/v1/qrious/
+
+#cricket.apiUrl=http://ec2-50-17-8-247.compute-1.amazonaws.com:8181/v1/cricket/
+
+cricket.apiUrl=http://api.bsbportal.com:8080/v1/cricket/
+
+qrious.apiUrl=http://api.bsbportal.com:8080/v1/qrious/
+
+cricket.enableCachingService=false
+cricket.enableTicker=true
+rta.enable=true
+ms_xml_base = http://46.137.205.26/mb/cfg/
+rd_server_enabled=true
+rta.jms.client.enable=false
+
+#Star profile related
+starprofile_url=http://ec2-54-243-55-231.compute-1.amazonaws.com:8080/v2/star
+
+election.apiurl=http://ec2-54-243-55-231.compute-1.amazonaws.com:8080/election
+#http://192.168.106.190:8181/election
+
+#Microsite Service
+ms_api_base = http://api.bsbportal.com:8080/v2/microsite/
+ms_news_count = 100
+
+#Smartshop
+ss.search.url=http://api.bsbportal.com:8080/v2/smartshop/product/search
+ss.popular.searches.url=http://api.bsbportal.com:8080/v2/smartshop/popular_searches
+ss.popular.brands.url=http://api.bsbportal.com:8080/v2/smartshop/popular_brands
+ss.category.products.url=http://api.bsbportal.com:8080/v2/smartshop/product/category/list
+ss.categories.url=http://api.bsbportal.com:8080/v2/smartshop/categories
+ss.brands.url=http://api.bsbportal.com:8080/v2/smartshop/brands
+ss.most_viwed_categories.url=http://api.bsbportal.com:8080/v2/smartshop/most_viewed_categories
+ss.recently_viewed_categories.url=http://api.bsbportal.com:8080/v2/smartshop/recently_reviewed_categories
+ss.product_details.url=http://api.bsbportal.com:8080/v2/smartshop/product/details
+
+#Polls
+polls.api.base.url=http://ec2-54-243-55-231.compute-1.amazonaws.com:8080/v1/polls/
+
+###### TnM props ###########################
+vernac_languages=en,hi,ta,te,kn,mr,ml,bn,gu,pa
+base_path_delivery=http://batch.bsbportal.com:8080/file/delivery
+## staging file url , can be used alternatively if required
+#base_path_delivery=http://54.251.166.13:8080/file/delivery
+base_path_json=json
+base_path_static_json=json/static
+search_query_json=json/query.json
+top_news_ca_json=json/static/news_category.json
+
+base_domain=airtellive.com
+search_url=http://search.airtellive.com/
+cricket_live_score_url=http://m.airtellive.com/cricket/%s/live.html
+
+top_service_detail_url=http://54.254.97.237:4080/api/qa/getQuestionList?question_id=
+qrious_question_api_url=http://api.bsbportal.com:8080/v1/qrious/solr/search
+qrious_url=http://qrious.airtellive.com/
+astrology_api_url=http://api.bsbportal.in:8080/v1/astro/prediction
+query_ranking_url=/search/ranking
+photo_gallery_url=/photo/
+
+music_default_img=/images/music_thumb.gif
+music_default_img_lowb=/images/music_thumb_lowB.gif
+
+video_cat_url=http://api.bsbportal.com:8080/v2/video/categories?lang={0}
+video_by_cat_url=http://api.bsbportal.com:8080/v2/video/search?cat={0}&n={1}&pos={2}
+use_vas_detail=false
+smart_shop_url=http://m.airtellive.com/smartshop/index.html
+
+tti_disabled_url=|^/stars.*|^/star.*|^/cricket.*|^/movie.*|^/movies.*|^/microsites.*|^/astro.*|^/local.*|^/smartshop.*|^/elections.*
+rte_urls=|^/top.*|^/news.*|^/video.*|^/videos.*|^/servicelist.*|^/events.*
+vernac_message_bar_urls=|^/top.*|^/news.*|^/photo.*|^/photos.*|^/video.*|^/videos.*
+
+user_profile_enabled=true
+user_base_url=http://125.21.246.72/v1/operator/userinfo
+airtel_magic_api=http://125.21.246.72/v1/operator/datapack/provision
+airtel_re_api=http://125.21.246.72/v1/operator/datapack/recommend?getData=true
+airtel_use_free_data_consumed_api=true
+airtel_free_data_consumed_api=http://125.21.246.72/v1/operator/datapack/usage
+free_data_amount=25
+free_content_total_price=160
+
+#CDN url for files
+content_caching_url=http://localhost:8080/
+
+multi_view_tool_url=http://localhost:8080/top/index.html

@@ -1,0 +1,112 @@
+<%@ page contentType="text/html;charset=UTF-8" language="java" %>
+<%@ taglib uri="http://bsbportal.com/functions" prefix="bsbfn" %>
+<%-- <jsp:include page="../smart/gallerylisting.jsp"/>--%>
+<%@ page contentType="text/html;charset=UTF-8" language="java" %>
+<%@ taglib uri="http://java.sun.com/jsp/jstl/core" prefix="c" %>
+<%@ taglib uri="http://java.sun.com/jsp/jstl/fmt" prefix="fmt" %>
+<%@ taglib prefix="s" uri="http://www.springframework.org/tags" %>
+<%@ taglib uri="http://java.sun.com/jsp/jstl/functions" prefix="fn" %>
+<%@ taglib uri="http://bsbportal.com/functions" prefix="bsbfn" %>
+<%@ taglib uri="http://bsbportal.com/functions/tti" prefix="tti" %>
+<c:set var="showheadersearchbar" value="false" scope="request"/>
+<jsp:include page="header.jsp"></jsp:include>
+<c:set var="wordLimit" value="10" scope="request" />
+<c:set var="path" value="${pageContext.request.contextPath}/photo"/>
+<c:set var="m" value="${modules.BREADCUM}"/>
+<c:set var="mId" value="${moduleDescIds.LINK_BREADCUM_HOME}"/>
+<c:set var="catmId" value="${moduleDescIds.LINK_BREADCUM_CATEGORY}"/>
+<c:set var="catSource" value="category/${categoryid}.html"/>
+<c:set var="thisPageUrl" value="${pageContext.request.contextPath}/elections/gallery.html" scope="request"/>
+<c:set var="moduleId" value="${modules.PHOTOS_SLIDESHOW}" scope="request"/>
+
+<%-- <div class="breadcrumb">
+<a href="${bsbfn:createRdUrl(pageContext.request,header,pageId,uuid,circle,'1',m,mId,server,path,'index.html')}">
+<s:message code="top.menu.home" var="messageText"/><tti:textOrImage text="${messageText}" style="b" transparent="true" fontColor="white"/></a> &gt;  
+<a href="${bsbfn:createRdUrl(pageContext.request,header,pageId,uuid,circle,'1',m,catmId,server,path,catSource)}"><tti:textOrImage text="${category}" style="b" transparent="true" fontColor="white"/></a>
+   &gt; <a href="#"><s:message code="label.gallery" var="messageText"/><tti:textOrImage text="${messageText}" style="b" transparent="true" fontColor="white"/></a>
+</div> --%>
+
+<div>
+
+<div class="heading center">
+    <table width="100%" border="0" cellspacing="0" cellpadding="0">
+        <tr>
+            <td><tti:textOrImage text="${gallery.title}" style="b" transparent="true" fontColor="black"/></td>
+            <td><a href="${bsbfn:getSuperSmartDeviceUrl(pageContext.request,pageContext.response,true)}/photolist.jsp">All Galleries</a></td>
+        </tr>
+    </table>
+</div>
+
+
+<table width="100%" border="0" cellspacing="0" cellpadding="0"class="listing-grid">
+  <c:set var="m" value="${modules.PHOTO_THUMB_GALLERY}"/>
+  <c:set var="mId" value="${moduleDescIds.LINK_VIEW_PHOTO}"/>
+<c:if test="${numRows > 0}">
+<c:forEach var="rowIndex" begin="0" end="${numRows - 1}" step="1" varStatus ="status">
+  <c:set var="photo0" value="${photos[rowIndex*2]}"/>
+  <c:set var="photo1" value="${photos[rowIndex*2+1]}"/>
+  <c:set var="p0Source" value="gallery/${gallery.galleryId}/${photo0.id}.html"/>
+  <c:set var="p1Source" value="gallery/${gallery.galleryId}/${photo1.id}.html"/>
+    <tr>
+    <td width="50%" ><%-- <a href="${bsbfn:createRdUrl(pageContext.request,header,pageId,uuid,circle,'1',m,mId,server,path,p0Source)}">--%>
+    <div class="item">
+     <div class="photosBlock galleryThumb">
+        <a href="javascript:void(0)" onclick="galleryOpenWithPhotoIndex(this,'${gallery.galleryId }', ${wordLimit},${rowIndex*2})" class="gallery-zoom">
+        <c:if test="${rowIndex == 0 && AutoSwipe == true }">
+        <div class="loading"><div class="loader"></div></div>
+        </c:if>
+   <img src="${bsbfn:getDeviceSpecificThumbnailUrl(pageContext.request,pageContext.response,photo0.thumbnailUrl,false,true)}" alt="" width="87" height="60" />
+    </a>
+    </div>
+    </div>
+    </td>
+    <td width="50%"><%-- <a href="${bsbfn:createRdUrl(pageContext.request,header,pageId,uuid,circle,'1',m,mId,server,path,p1Source)}">--%>
+    
+    <div class="item">
+     <div class="photosBlock galleryThumb">
+        <a href="javascript:void(0)" onclick="galleryOpenWithPhotoIndex(this,'${gallery.galleryId }', ${wordLimit},${rowIndex*2+1})" class="gallery-zoom">
+    <img src="${bsbfn:getDeviceSpecificThumbnailUrl(pageContext.request,pageContext.response,photo1.thumbnailUrl,false,true)}" alt="" width="87" height="60" />
+    </a>
+    </div>
+    </div>
+    
+    </tr>
+</c:forEach>
+</c:if>
+
+</table>
+<div align="center">
+    <div class="pagination">
+        <c:set var="m" value="${modules.PAGINATION_BOTTOM}"/>
+	  <c:if test="${prevpageno != null }">
+		<c:set var="moreGallery" value="${pageContext.request.contextPath}/elections/gallery/${gallery.galleryId }.html?p=${prevpageno}"/>
+		<!-- s:message code="label.prev" var="messageText"/-->
+		<a href="${bsbfn:createRdUrl(pageContext.request,header,pageId,uuid,circle,'1',modules.LOAD_MORE,moduleDescIds.VIEW_MORE,server,'',moreGallery)}"><tti:textOrImage fontColor="#034364"  bgColor="#22bff0" text="${messageText}" size="14"/>
+		<img src="${static_file_path}/photo/images/photoPrevIcon.png" width="32" alt="Prev" />
+        </a>
+       </c:if>
+        &nbsp;
+		<c:if test="${nextpageno != null }">
+		<c:set var="moreGallery" value="${pageContext.request.contextPath}/elections/gallery/${gallery.galleryId }.html?p=${nextpageno}"/>
+		<!-- s:message code="label.next" var="messageText"/-->
+		<a href="${bsbfn:createRdUrl(pageContext.request,header,pageId,uuid,circle,'1',modules.LOAD_MORE,moduleDescIds.VIEW_MORE,server,'',moreGallery)}"><tti:textOrImage fontColor="#034364"  bgColor="#22bff0" text="${messageText}" size="14"/>
+		<img src="${static_file_path}/photo/images/photoNextIcon.png" width="32" alt="Next" />
+		</a>
+	   </c:if>
+</div>
+</div>
+</div>
+
+
+<jsp:include page="footer.jsp"/>
+
+<c:if test="${AutoSwipe == true}">
+<script type="text/javascript">
+	
+	galleryOpenWithPhotoIndex(this,'${gallery.galleryId }',${wordLimit},0);	
+	AutoSwipe=false;
+</script>
+</c:if>
+
+
+

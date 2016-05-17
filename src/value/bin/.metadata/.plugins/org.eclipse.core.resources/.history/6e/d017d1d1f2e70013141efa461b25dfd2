@@ -1,0 +1,562 @@
+<%@ page contentType="text/html;charset=UTF-8" language="java" %>
+<%@ taglib uri="http://java.sun.com/jsp/jstl/core" prefix="c" %>
+<%@ taglib uri="http://java.sun.com/jsp/jstl/fmt" prefix="fmt" %>
+<%@ taglib prefix="s" uri="http://www.springframework.org/tags" %>
+<%@ taglib uri="http://java.sun.com/jsp/jstl/functions" prefix="fn" %>
+<%@ taglib uri="http://bsbportal.com/functions" prefix="bsbfn" %>
+<%@ taglib uri="http://bsbportal.com/functions/tti" prefix="tti" %>
+
+<jsp:include page="header.jsp">
+	<jsp:param name="nexturl" value="${currentMatch}/score.html?_ap=1&inng=${currentInningNum }"/>
+    <jsp:param name="thisurl1" value="score"/>
+</jsp:include>
+<c:set var="viewFullScore" value="false" scope="request"/>
+<c:set var="viewLiveScore" value="true" scope="request"/>
+<jsp:include page="../smart/scorewidget.jsp">
+    <jsp:param name="thisurl1" value="score"/>
+    <jsp:param name="_ap" value="${_ap}"/>
+    <jsp:param name="inngurl" value="score"/>
+</jsp:include>
+<div class="grey-box">
+<jsp:include page="../../common/supersmart/banner.jsp"/>
+</div>
+
+<c:if test="${matchDetails.matchStatusCategory == 'FINISHED' and isTest != true}">
+
+<c:set var="count" value="0"/>
+<c:if test="${TossWinningId != null }">
+<div class="match-summary-header"><tti:textOrImage fontColor="#0579c6" text="${bsbfn:getTransliteratedText(pageContext.request,'Toss Status')}" size="12"/></div>
+<div class="match-summary-item">
+<c:choose>
+<c:when test="${ TossWinningId == matchDetails.innings[0].battingTeam.teamId }">
+<c:set var="tossStatus" value="${ matchDetails.innings[0].battingTeam.teamName} won the toss and elected to bat first"/>
+</c:when>
+<c:otherwise>
+<c:set var="tossStatus" value="${matchDetails.innings[0].bowlingTeam.teamName} won the toss and elected to bowl first"/>
+</c:otherwise>
+</c:choose>
+<tti:textOrImage fontColor="#0579c6" text="${bsbfn:getTranslatedText(pageContext.request,tossStatus)}" size="12"/>
+</div>
+</c:if>
+
+<c:forEach var="presentInning" items="${matchDetails.innings}">
+   <c:if test="${presentInning !=null}">
+  <c:set var="batInning" value="${presentInning}"/>
+  <c:set var="innglink" value="${server}${pageContext.request.contextPath}/cricket/${currentMatch}/score.html?inng=${presentInning.inningNum }&_ap=1"/>
+  <c:set var="url" value="${bsbfn:createRdUrlWithId(pageContext.request,pageId,modules.SCOREBOARD,moduleDescIds.INNING_STATS,innglink,'innglink' ,1,'innglink')}"/>
+  
+  <div class="match-summary-header"><a  href="${url}">${batInning.battingTeam.teamShortName}&nbsp;${batInning.currentRun }/${batInning.currentWicket}&nbsp;<tti:textOrImage text="${batInning.currentOver}" size="12"/> <s:message code="label.ovrs" var="messageText"/><tti:textOrImage text="${messageText}" size="12"/></a></div>
+  
+  <c:set var="bestBatsmanStrikeRate" value="0"/>
+  <c:set var="bestBatsman" value="${batInning.battingScore[0]}"/>
+  <c:forEach var="batsman" items="${batInning.battingScore}">
+      <c:choose>
+         <c:when test="${batsman.run > bestBatsman.run}">
+          
+          <c:set var="bestBatsmanStrikeRate" value="${(batsman.run/batsman.bowlpalyed)* 100}"/>
+           <c:set var="bestBatsman" value="${batsman }"/>
+         </c:when>
+         <c:otherwise>
+         <c:choose>
+         <c:when test="${batsman.run == bestBatsman.run and ((batsman.run/batsman.bowlpalyed)* 100) >= bestBatsmanStrikeRate}">
+          
+          <c:set var="bestBatsmanStrikeRate" value="${(batsman.run/batsman.bowlpalyed)* 100}"/>
+          <c:set var="bestBatsman" value="${batsman }"/>
+          
+         </c:when>
+         </c:choose>
+        </c:otherwise>
+       </c:choose>
+       
+  </c:forEach>
+  
+  <div class="match-summary-item"><tti:textOrImage fontColor="#0579c6" text="${bsbfn:getTransliteratedText(pageContext.request,bestBatsman.batsmanFullName)}" size="12"/>&nbsp;${bestBatsman.run} (${bestBatsman.bowlpalyed}) &nbsp;
+  
+    <c:if test="${bestBatsman.inningVideo != null}">
+	           <c:set var="imgUrl1" value="${server}${pageContext.request.contextPath}/cricket/images/video-play-icon.png"/>
+			   
+			   <c:set var="m" value="${modules.CRICKET_VIDEO}"/>
+	    	   <c:set var="videoLinkId" value="${moduleDescIds.SINGLE_VIDEO_LINK}"/>
+ 			   <a href="${bsbfn:createRdUrlWithId(pageContext.request,pageId,m,videoLinkId,bestBatsman.inningVideo.videoUrl,null,null,null)}">
+			   		<img src="${imgUrl1}" class="score-play-button"/>
+           	   </a>
+           	</c:if>
+           	
+   </div>
+   <c:set var="bowlInning" value="${matchDetails.innings[(count + 1 ) mod 2]}"/>
+   <c:set var="bestBowlerEconomyRate" value="1000000"/>
+  <c:set var="bestBowler" value="${bowlInning.bowlerScore[0]}"/>
+   <c:forEach var="bowler" items="${bowlInning.bowlerScore}">
+   <c:choose>
+         <c:when test="${bowler.wicket > bestBowler.wicket}">
+          
+          <c:set var="bestBowlerEconomyRate" value="${(bowler.run/(bowler.overBowled.overNum*6+bowler.overBowled.bowlNum))*6}"/>
+           <c:set var="bestBowler" value="${bowler}"/>
+         </c:when>
+         <c:otherwise>
+         <c:choose>
+         <c:when test="${bowler.wicket == bestBowler.wicket and ((bowler.run/(bowler.overBowled.overNum*6+bowler.overBowled.bowlNum))*6) <= bestBowlerEconomyRate}">
+          
+          <c:set var="bestBowlerEconomyRate" value="${(bowler.run/(bowler.overBowled.overNum*6+bowler.overBowled.bowlNum))*6}"/>
+           <c:set var="bestBowler" value="${bowler}"/>
+          
+         </c:when>
+         </c:choose>
+        </c:otherwise>
+       </c:choose>
+   
+   </c:forEach>
+   <div class="match-summary-item"> <tti:textOrImage fontColor="#0579c6" text="${bsbfn:getTransliteratedText(pageContext.request,bestBowler.bowlerFullName)}" size="12"/>&nbsp;${bestBowler.wicket}-${bestBowler.run} (${bestBowler.overBowled.overNum}) &nbsp;
+   
+   <c:if test="${bestBowler.inningVideo != null}">
+	           <c:set var="imgUrl1" value="${server}${pageContext.request.contextPath}/cricket/images/video-play-icon.png"/>
+			   
+			   <c:set var="m" value="${modules.CRICKET_VIDEO}"/>
+	    	   <c:set var="videoLinkId" value="${moduleDescIds.SINGLE_VIDEO_LINK}"/>
+ 			   <a href="${bsbfn:createRdUrlWithId(pageContext.request,pageId,m,videoLinkId,bestBowler.inningVideo.videoUrl,null,null,null)}">
+			   		<img src="${imgUrl1}" class="score-play-button"/>
+           	   </a>
+        </c:if>
+   
+   
+   </div>
+</c:if>
+<c:set var="count" value="${count+1}"/>
+</c:forEach>
+<div class="match-summary-header"> <tti:textOrImage fontColor="#0579c6" text="${bsbfn:getTransliteratedText(pageContext.request,'Match Status')}" size="12"/></div>
+
+<div class="match-summary-item"> <tti:textOrImage fontColor="#0579c6" text="${bsbfn:getTransliteratedText(pageContext.request,matchDetails.matchResultStr)}" size="12"/></div>
+	<c:if test="${momNames != null  }">
+		<div class="match-summary-header">
+			<tti:textOrImage fontColor="#0579c6"
+				text="${bsbfn:getTransliteratedText(pageContext.request,'Man Of The Match')}"
+				size="12" />
+		</div>
+		<c:forEach var="mom" items="${momNames}">
+			<c:if test="${mom.getDisplayName() != null }">
+				<div class="match-summary-item">
+					<tti:textOrImage fontColor="#0579c6"
+						text="${bsbfn:getTransliteratedText(pageContext.request,mom.getDisplayName())}"
+						size="12" />
+				</div>
+			</c:if>
+		</c:forEach>
+	</c:if>
+</c:if>
+<c:if test="${matchDetails.matchStatusCategory == null or matchDetails.matchStatusCategory =='NOT_STARTED'}">
+
+<c:if test="${matchDetails.seriesType =='INTERNATIONAL'}">
+  <c:if test="${matchDetails.matchType =='T20'}">
+  <table width="100%" cellpadding="0" cellspacing="0" style="border-collapse:collapse">
+  <tr >
+  
+  <c:set var="teamlink" value="${server}${pageContext.request.contextPath}/cricket/team/${bsbfn:urlEncode(firstTeamProfile.teamInfo.teamName)}.html"/>
+  <c:set var="teamUrl" value="${bsbfn:createRdUrlWithId(pageContext.request,pageId,modules.TEAM_LIST,moduleDescIds.TEAM_INFO,teamlink,'teamlink' ,1,'teamlink')}"/>
+  
+  <td width="33%" align="center" class="match-schedule-header"><a href="${teamUrl}"><s:message code="label.team.small.${fn:toLowerCase(firstTeamProfile.teamInfo.teamShortName)}" var="messageText"/><tti:textOrImage fontColor="#0579c6" text="${messageText}" size="12"/></a></td>
+  
+  <td width="33%" align="center" class="match-schedule-header">Vs</td>
+<c:set var="teamlink" value="${server}${pageContext.request.contextPath}/cricket/team/${bsbfn:urlEncode(secondTeamProfile.teamInfo.teamName)}.html"/>
+  <c:set var="teamUrl" value="${bsbfn:createRdUrlWithId(pageContext.request,pageId,modules.TEAM_LIST,moduleDescIds.TEAM_INFO,teamlink,'teamlink' ,1,'teamlink')}"/>
+  
+  <td width="33%" align="center" class="match-schedule-header"><a href="${teamUrl}"><s:message code="label.team.small.${fn:toLowerCase(secondTeamProfile.teamInfo.teamShortName)}" var="messageText"/><tti:textOrImage fontColor="#0579c6" text="${messageText}" size="12"/></a></td>  </tr>
+  <tr >
+  <td width="33%" align="center" class="match-schedule-item"><tti:textOrImage fontColor="#0579c6" text="${firstTeamProfile.t20MatchesPlayed}" size="12"/></td>
+  <td width="33%" align="center" class="match-schedule-header"><tti:textOrImage fontColor="#0579c6" text="${bsbfn:getTransliteratedText(pageContext.request,'Matches Played')}" size="12"/></td>
+  <td width="33%" align="center" class="match-schedule-item"><tti:textOrImage fontColor="#0579c6" text="${secondTeamProfile.t20MatchesPlayed}" size="12"/></td>
+  </tr>
+  <tr >
+  <td width="33%" align="center" class="match-schedule-item"><tti:textOrImage fontColor="#0579c6" text="${firstTeamProfile.t20MatchesWon}" size="12"/></td>
+  <td width="33%" align="center" class="match-schedule-header"><tti:textOrImage fontColor="#0579c6" text="${bsbfn:getTransliteratedText(pageContext.request,'Matches Won')}" size="12"/></td>
+  <td width="33%" align="center" class="match-schedule-item"><tti:textOrImage fontColor="#0579c6" text="${secondTeamProfile.t20MatchesWon}" size="12"/></td>
+  </tr>
+<tr >
+  <td width="33%" align="center" class="match-schedule-item"><tti:textOrImage fontColor="#0579c6" text="${firstTeamProfile.t20MatchesLost}" size="12"/></td>
+  <td width="33%" align="center" class="match-schedule-header"><tti:textOrImage fontColor="#0579c6" text="${bsbfn:getTransliteratedText(pageContext.request,'Matches lost')}" size="12"/></td>
+  <td width="33%" align="center" class="match-schedule-item"><tti:textOrImage fontColor="#0579c6" text="${secondTeamProfile.t20MatchesLost}" size="12"/></td>
+  </tr>
+  <tr >
+  <td width="33%" align="center" class="match-schedule-item"><tti:textOrImage fontColor="#0579c6" text="${firstTeamProfile.t20BestBatsman}" size="12"/></td>
+  <td width="33%" align="center" class="match-schedule-header"><tti:textOrImage fontColor="#0579c6" text="${bsbfn:getTransliteratedText(pageContext.request,'Top Batsman')}" size="12"/></td>
+  <td width="33%" align="center" class="match-schedule-item"><tti:textOrImage fontColor="#0579c6" text="${secondTeamProfile.t20BestBatsman}" size="12"/></td>
+  </tr>
+  <tr >
+  <td width="33%" align="center" class="match-schedule-item"><tti:textOrImage fontColor="#0579c6" text="${firstTeamProfile.t20BestBowler}" size="12"/></td>
+  <td width="33%" align="center" class="match-schedule-header"><tti:textOrImage fontColor="#0579c6" text="${bsbfn:getTransliteratedText(pageContext.request,'Top Bowler')}" size="12"/></td>
+  <td width="33%" align="center" class="match-schedule-item"><tti:textOrImage fontColor="#0579c6" text="${secondTeamProfile.t20BestBowler}" size="12"/></td>
+  </tr>
+  </table>
+  </c:if>
+  <c:if test="${matchDetails.matchType =='TEST'}">
+  <table width="100%" cellpadding="0" cellspacing="0" style="border-collapse:collapse">
+<tr >
+  
+  <c:set var="teamlink" value="${server}${pageContext.request.contextPath}/cricket/team/${bsbfn:urlEncode(firstTeamProfile.teamInfo.teamName)}.html"/>
+  <c:set var="teamUrl" value="${bsbfn:createRdUrlWithId(pageContext.request,pageId,modules.TEAM_LIST,moduleDescIds.TEAM_INFO,teamlink,'teamlink' ,1,'teamlink')}"/>
+  
+  <td width="33%" align="center" class="match-schedule-header"><a href="${teamUrl}"><s:message code="label.team.small.${fn:toLowerCase(firstTeamProfile.teamInfo.teamShortName)}" var="messageText"/><tti:textOrImage fontColor="#0579c6" text="${messageText}" size="12"/></a></td>
+  <td width="33%" align="center" class="match-schedule-header">Vs</td>
+<c:set var="teamlink" value="${server}${pageContext.request.contextPath}/cricket/team/${bsbfn:urlEncode(secondTeamProfile.teamInfo.teamName)}.html"/>
+  <c:set var="teamUrl" value="${bsbfn:createRdUrlWithId(pageContext.request,pageId,modules.TEAM_LIST,moduleDescIds.TEAM_INFO,teamlink,'teamlink' ,1,'teamlink')}"/>
+  
+  <td width="33%" align="center" class="match-schedule-header"><a href="${teamUrl}"><s:message code="label.team.small.${fn:toLowerCase(secondTeamProfile.teamInfo.teamShortName)}" var="messageText"/><tti:textOrImage fontColor="#0579c6" text="${messageText}" size="12"/></a></td>  </tr>
+<tr >
+  <td width="33%" align="center" class="match-schedule-item"><tti:textOrImage fontColor="#0579c6" text="${firstTeamProfile.testMatchesPlayed}" size="12"/></td>
+  <td width="33%" align="center" class="match-schedule-header"><tti:textOrImage fontColor="#0579c6" text="${bsbfn:getTransliteratedText(pageContext.request,'Matches Played')}" size="12"/></td>
+  <td width="33%" align="center" class="match-schedule-item"><tti:textOrImage fontColor="#0579c6" text="${secondTeamProfile.testMatchesPlayed}" size="12"/></td>
+  </tr>
+<tr >
+  <td width="33%" align="center" class="match-schedule-item"><tti:textOrImage fontColor="#0579c6" text="${firstTeamProfile.testMatchesWon}" size="12"/></td>
+  <td width="33%" align="center" class="match-schedule-header"><tti:textOrImage fontColor="#0579c6" text="${bsbfn:getTransliteratedText(pageContext.request,'Matches Won')}" size="12"/></td>
+  <td width="33%" align="center" class="match-schedule-item"><tti:textOrImage fontColor="#0579c6" text="${secondTeamProfile.testMatchesWon}" size="12"/></td>
+  </tr>
+<tr >
+  <td width="33%" align="center" class="match-schedule-item"><tti:textOrImage fontColor="#0579c6" text="${firstTeamProfile.testMatchesLost}" size="12"/></td>
+  <td width="33%" align="center" class="match-schedule-header"><tti:textOrImage fontColor="#0579c6" text="${bsbfn:getTransliteratedText(pageContext.request,'Matches lost')}" size="12"/></td>
+  <td width="33%" align="center" class="match-schedule-item"><tti:textOrImage fontColor="#0579c6" text="${secondTeamProfile.testMatchesLost}" size="12"/></td>
+  </tr>
+  <tr >
+  <td width="33%" align="center" class="match-schedule-item"><tti:textOrImage fontColor="#0579c6" text="${firstTeamProfile.testBestBatsman}" size="12"/></td>
+  <td width="33%" align="center" class="match-schedule-header"><tti:textOrImage fontColor="#0579c6" text="${bsbfn:getTransliteratedText(pageContext.request,'Top Batsman')}" size="12"/></td>
+  <td width="33%" align="center" class="match-schedule-item"><tti:textOrImage fontColor="#0579c6" text="${secondTeamProfile.testBestBatsman}" size="12"/></td>
+  </tr>
+  <tr >
+  <td width="33%" align="center" class="match-schedule-item"><tti:textOrImage fontColor="#0579c6" text="${firstTeamProfile.testBestBowler}" size="12"/></td>
+  <td width="33%" align="center" class="match-schedule-header"><tti:textOrImage fontColor="#0579c6" text="${bsbfn:getTransliteratedText(pageContext.request,'Top Bowler')}" size="12"/></td>
+  <td width="33%" align="center" class="match-schedule-item"><tti:textOrImage fontColor="#0579c6" text="${secondTeamProfile.testBestBowler}" size="12"/></td>
+  </tr>
+  </table>
+  </c:if>
+  <c:if test="${matchDetails.matchType =='ODI'}">
+  <table width="100%" cellpadding="0" cellspacing="0" style="border-collapse:collapse">
+<tr >
+  <c:set var="teamlink" value="${server}${pageContext.request.contextPath}/cricket/team/${bsbfn:urlEncode(firstTeamProfile.teamInfo.teamName)}.html"/>
+  <c:set var="teamUrl" value="${bsbfn:createRdUrlWithId(pageContext.request,pageId,modules.TEAM_LIST,moduleDescIds.TEAM_INFO,teamlink,'teamlink' ,1,'teamlink')}"/>
+  
+  <td width="33%" align="center" class="match-schedule-header"><a href="${teamUrl}"><s:message code="label.team.small.${fn:toLowerCase(firstTeamProfile.teamInfo.teamShortName)}" var="messageText"/><tti:textOrImage fontColor="#0579c6" text="${messageText}" size="12"/></a></td>
+  
+  <td width="33%" align="center" class="match-schedule-header">Vs</td>
+<c:set var="teamlink" value="${server}${pageContext.request.contextPath}/cricket/team/${bsbfn:urlEncode(secondTeamProfile.teamInfo.teamName)}.html"/>
+  <c:set var="teamUrl" value="${bsbfn:createRdUrlWithId(pageContext.request,pageId,modules.TEAM_LIST,moduleDescIds.TEAM_INFO,teamlink,'teamlink' ,1,'teamlink')}"/>
+  
+  <td width="33%" align="center" class="match-schedule-header"><a href="${teamUrl}"><s:message code="label.team.small.${fn:toLowerCase(secondTeamProfile.teamInfo.teamShortName)}" var="messageText"/><tti:textOrImage fontColor="#0579c6" text="${messageText}" size="12"/></a></td>  </tr>
+<tr >
+  <td width="33%" align="center" class="match-schedule-item"><tti:textOrImage fontColor="#0579c6" text="${firstTeamProfile.odiMatchesPlayed}" size="12"/></td>
+  <td width="33%" align="center" class="match-schedule-header"><tti:textOrImage fontColor="#0579c6" text="${bsbfn:getTransliteratedText(pageContext.request,'Matches Played')}" size="12"/></td>
+  <td width="33%" align="center" class="match-schedule-item"><tti:textOrImage fontColor="#0579c6" text="${secondTeamProfile.odiMatchesPlayed}" size="12"/></td>
+  </tr>
+<tr >
+  <td width="33%" align="center" class="match-schedule-item"><tti:textOrImage fontColor="#0579c6" text="${firstTeamProfile.odiMatchesWon}" size="12"/></td>
+  <td width="33%" align="center" class="match-schedule-header"><tti:textOrImage fontColor="#0579c6" text="${bsbfn:getTransliteratedText(pageContext.request,'Matches Won')}" size="12"/></td>
+  <td width="33%" align="center" class="match-schedule-item"><tti:textOrImage fontColor="#0579c6" text="${secondTeamProfile.odiMatchesWon}" size="12"/></td>
+  </tr>
+<tr >
+  <td width="33%" align="center" class="match-schedule-item"><tti:textOrImage fontColor="#0579c6" text="${firstTeamProfile.odiMatchesLost}" size="12"/></td>
+  <td width="33%" align="center" class="match-schedule-header"><tti:textOrImage fontColor="#0579c6" text="${bsbfn:getTransliteratedText(pageContext.request,'Matches lost')}" size="12"/></td>
+  <td width="33%" align="center" class="match-schedule-item"><tti:textOrImage fontColor="#0579c6" text="${secondTeamProfile.odiMatchesLost}" size="12"/></td>
+  </tr>
+  <tr >
+  <td width="33%" align="center" class="match-schedule-item"><tti:textOrImage fontColor="#0579c6" text="${firstTeamProfile.odiBestBatsman}" size="12"/></td>
+  <td width="33%" align="center" class="match-schedule-header"><tti:textOrImage fontColor="#0579c6" text="${bsbfn:getTransliteratedText(pageContext.request,'Top Batsman')}" size="12"/></td>
+  <td width="33%" align="center" class="match-schedule-item"><tti:textOrImage fontColor="#0579c6" text="${secondTeamProfile.odiBestBatsman}" size="12"/></td>
+  </tr>
+  <tr >
+  <td width="33%" align="center" class="match-schedule-item"><tti:textOrImage fontColor="#0579c6" text="${firstTeamProfile.odiBestBowler}" size="12"/></td>
+  <td width="33%" align="center" class="match-schedule-header"><tti:textOrImage fontColor="#0579c6" text="${bsbfn:getTransliteratedText(pageContext.request,'Top Bowler')}" size="12"/></td>
+  <td width="33%" align="center" class="match-schedule-item"><tti:textOrImage fontColor="#0579c6" text="${secondTeamProfile.odiBestBowler}" size="12"/></td>
+  </tr>
+  </table>
+  </c:if>
+</c:if>
+<c:if test="${matchDetails.seriesType == 'IPL' }">
+<table width="100%" cellpadding="0" cellspacing="0" style="border-collapse:collapse">
+  <tr >
+  <c:set var="teamlink" value="${server}${pageContext.request.contextPath}/cricket/team/${bsbfn:urlEncode(firstTeamProfile.teamInfo.teamName)}.html"/>
+  <c:set var="teamUrl" value="${bsbfn:createRdUrlWithId(pageContext.request,pageId,modules.TEAM_LIST,moduleDescIds.TEAM_INFO,teamlink,'teamlink' ,1,'teamlink')}"/>
+  <td width="33%" align="center" class="match-schedule-header"><a href="${teamUrl}"><s:message code="label.team.small.${fn:toLowerCase(firstTeamProfile.teamInfo.teamShortName)}" var="messageText"/><tti:textOrImage fontColor="#0579c6" text="${messageText}" size="12"/></a></td>
+  <td width="33%" align="center" class="match-schedule-header">Vs</td>
+  <c:set var="teamlink" value="${server}${pageContext.request.contextPath}/cricket/team/${bsbfn:urlEncode(secondTeamProfile.teamInfo.teamName)}.html"/>
+  <c:set var="teamUrl" value="${bsbfn:createRdUrlWithId(pageContext.request,pageId,modules.TEAM_LIST,moduleDescIds.TEAM_INFO,teamlink,'teamlink' ,1,'teamlink')}"/>
+  <td width="33%" align="center" class="match-schedule-header"><a href="${teamUrl}"><s:message code="label.team.small.${fn:toLowerCase(secondTeamProfile.teamInfo.teamShortName)}" var="messageText"/><tti:textOrImage fontColor="#0579c6" text="${messageText}" size="12"/></a></td>  </tr>
+  <tr >
+  <td width="33%" align="center" class="match-schedule-item"><tti:textOrImage fontColor="#0579c6" text="${firstTeamProfile.iplMatchesPlayed}" size="12"/></td>
+  <td width="33%" align="center" class="match-schedule-header"><tti:textOrImage fontColor="#0579c6" text="${bsbfn:getTransliteratedText(pageContext.request,'Matches Played')}" size="12"/></td>
+  <td width="33%" align="center" class="match-schedule-item"><tti:textOrImage fontColor="#0579c6" text="${secondTeamProfile.iplMatchesPlayed}" size="12"/></td>
+  </tr>
+  <tr>
+  <td width="33%" align="center" class="match-schedule-item"><tti:textOrImage fontColor="#0579c6" text="${firstTeamProfile.iplMatchesWon}" size="12"/></td>
+  <td width="33%" align="center" class="match-schedule-header"><tti:textOrImage fontColor="#0579c6" text="${bsbfn:getTransliteratedText(pageContext.request,'Matches Won')}" size="12"/></td>
+  <td width="33%" align="center" class="match-schedule-item"><tti:textOrImage fontColor="#0579c6" text="${secondTeamProfile.iplMatchesWon}" size="12"/></td>
+  </tr>
+  <tr >
+  <td width="33%" align="center" class="match-schedule-item"><tti:textOrImage fontColor="#0579c6" text="${firstTeamProfile.iplMatchesLost}" size="12"/></td>
+  <td width="33%" align="center" class="match-schedule-header"><tti:textOrImage fontColor="#0579c6" text="${bsbfn:getTransliteratedText(pageContext.request,'Matches lost')}" size="12"/></td>
+  <td width="33%" align="center" class="match-schedule-item"><tti:textOrImage fontColor="#0579c6" text="${secondTeamProfile.iplMatchesLost}" size="12"/></td>
+  </tr>
+  <tr >
+  <td width="33%" align="center" class="match-schedule-item"><tti:textOrImage fontColor="#0579c6" text="${firstTeamProfile.iplBestBatsman}" size="12"/></td>
+  <td width="33%" align="center" class="match-schedule-header"><tti:textOrImage fontColor="#0579c6" text="${bsbfn:getTransliteratedText(pageContext.request,'Top Batsman')}" size="12"/></td>
+  <td width="33%" align="center" class="match-schedule-item"><tti:textOrImage fontColor="#0579c6" text="${secondTeamProfile.iplBestBatsman}" size="12"/></td>
+  </tr>
+  <tr >
+  <td width="33%" align="center" class="match-schedule-item"><tti:textOrImage fontColor="#0579c6" text="${firstTeamProfile.iplBestBowler}" size="12"/></td>
+  <td width="33%" align="center" class="match-schedule-header"><tti:textOrImage fontColor="#0579c6" text="${bsbfn:getTransliteratedText(pageContext.request,'Top Bowler')}" size="12"/></td>
+  <td width="33%" align="center" class="match-schedule-item"><tti:textOrImage fontColor="#0579c6" text="${secondTeamProfile.iplBestBowler}" size="12"/></td>
+  </tr>
+  </table>
+</c:if>
+<br/>
+<div class="match-summary-header"><tti:textOrImage fontColor="#0579c6" text="${bsbfn:getTransliteratedText(pageContext.request,'Venue')}" size="12"/></div>
+ <div class="match-summary-item"> <tti:textOrImage fontColor="#0579c6" text="${bsbfn:getTransliteratedText(pageContext.request,matchDetails.venue)}" size="12"/></div>
+
+</c:if>
+
+<c:if test="${matchDetails.matchStatusCategory != null and matchDetails.matchStatusCategory != 'NOT_STARTED'}">
+
+<c:set var="m" value="${modules.SCOREBOARD}"/>
+<c:set var="liveLinkId" value="${moduleDescIds.LIVE_SCORE_LINK}"/>
+<c:set var="videoLinkId" value="${moduleDescIds.CRICKET_VIDEO_LINK}"/>
+<c:set var="commentaryLinkId" value="${moduleDescIds.COMMENTARY_LINK}"/>
+<c:set var="playerLinkId" value="${moduleDescIds.PLAYER_PROFILE}"/>
+
+<c:set var="livescorelink" value="${pageContext.request.contextPath}/cricket/${currentMatch}/live.html?_ap=1"/>
+<c:set var="videolink" value="${pageContext.request.contextPath}/cricket/${currentMatch}/allvideos.html?_ap=0"/>
+<c:set var="commentrylink" value="${pageContext.request.contextPath}/cricket/${currentMatch}/commentary.html?_ap=1"/>
+<c:set var="playerurl" value="${pageContext.request.contextPath}/cricket/player"/>
+
+
+<div class="tabs2">
+<table width="100%" border="0" cellspacing="0" cellpadding="0">
+  <tr>
+    <%--<td><a href="${bsbfn:createRdUrl(pageContext.request,header,pageId,uuid,circle,'1',m,liveLinkId,server,'',livescorelink)}"><s:message code="label.live" var="messageText"/><tti:textOrImage bgColor="#d2d2d2" text="${messageText}" size="12"/></a></td>--%>
+    <td class="active"><s:message code="label.fullscore" var="messageText"/><tti:textOrImage fontColor="red" text="${messageText}" size="12"/></td>
+    <c:if test="${matchDetails.allVideos != null && matchDetails.allVideos.size() > 0}">
+    	<td><a href="${bsbfn:createRdUrl(pageContext.request,header,pageId,uuid,circle,'1',m,videoLinkId,server,'',videolink)}"><s:message code="label.videos" var="messageText"/><tti:textOrImage bgColor="#d2d2d2" text="${messageText}" size="12"/></a></td>
+    </c:if>
+    <c:if test="${language == 'en'}">
+    	<td><a href="${bsbfn:createRdUrl(pageContext.request,header,pageId,uuid,circle,'1',m,commentaryLinkId,server,'',commentrylink)}"><s:message code="label.commentary" var="messageText"/><tti:textOrImage text="${messageText}" size="12"/></a></td>
+    </c:if>
+  </tr>
+</table>
+</div>
+<div class="grey-box">
+    <c:set var="m" value="${modules.DETAIL_SCORE_BODY}"/>
+   <div class="text-div">Click on <img src="${server}${pageContext.request.contextPath}/cricket/images/video-play-icon.png"/> to see video </div>
+
+<jsp:include page="inning-detail.jsp">
+    <jsp:param name="baseUrl" value="${server}${pageContext.request.contextPath}/cricket/${currentMatch}/score.html"/>
+</jsp:include>
+
+    <c:if test="${matchDetails.title != null}">
+    <div class="score-data">
+
+<table width="100%" border="0" cellspacing="0" cellpadding="0" class="score-data-table">
+  <tr >
+    <td width="70%" align="left"class="head"><span><s:message code="label.batting" var="messageText"/><tti:textOrImage bgColor="#999999" fontColor="white" style="b" text="${messageText}" size="12"/></span></td>
+    <td width="15%" align="center" class="head"><span>R</span></td>
+    <td align="center" class="head"><span>B</span></td>
+    <td width="15%" align="center" class="head"><span>4s</span></td>
+    <td width="15%" align="center" class="head"><span>6s</span></td>
+    <%-- <td width="15%" align="center" class="head"><span>SR</span></td>--%>
+  </tr>
+
+    <c:set var="counter" value="0" scope="page"/>
+    <c:forEach var="batsman" items="${currentInning.battingScore}">
+        <c:set var="count" value="${count + 1}" scope="page"/>
+        <c:if test="${count%2 == 0}">
+            <tr class="score-data-row">
+        </c:if>
+        <c:if test="${count%2 != 0}">
+            <tr>
+        </c:if>
+        <c:set var="playerlink" value="${playerurl}/${batsman.batsmenId}.html"/>
+        <td width="70%" align="left"><a href="${bsbfn:createRdUrl(pageContext.request,header,pageId,uuid,circle,'1',m,playerLinkId,server,'',playerlink)}">
+        
+        <tti:textOrImage fontColor="#0579c6" text="${bsbfn:getTransliteratedTextWithType(pageContext.request,batsman.batsmanFullName,5)}" size="12"/></a>
+
+            <c:if test="${batsman.outType != null}">
+                <br/><strong class="text">
+                
+                <tti:textOrImage fontColor="#999999" text="${bsbfn:getTransliteratedText(pageContext.request,batsman.outStatusStr)}" size="12" width="-200"/>
+                </strong>
+                <c:if test="${batsman.wicketVideo != null}">
+	                <c:set var="imgUrl1" value="${server}${pageContext.request.contextPath}/cricket/images/video-play-icon.png"/>
+			   
+			   <c:set var="m" value="${modules.CRICKET_VIDEO}"/>
+	    	   <c:set var="videoLinkId" value="${moduleDescIds.SINGLE_VIDEO_LINK}"/>
+ 			   <a href="${bsbfn:createRdUrlWithId(pageContext.request,pageId,m,videoLinkId,batsman.wicketVideo.videoUrl,null,null,null)}">
+			   		<img src="${imgUrl1}" class="score-play-button"/>
+                	</a>
+                </c:if>
+            </c:if>
+        </td>
+        <td width="15%" align="center">${batsman.run}
+             <c:if test="${batsman.inningVideo != null}">
+	           <c:set var="imgUrl1" value="${server}${pageContext.request.contextPath}/cricket/images/video-play-icon.png"/>
+			   
+			   <c:set var="m" value="${modules.CRICKET_VIDEO}"/>
+	    	   <c:set var="videoLinkId" value="${moduleDescIds.SINGLE_VIDEO_LINK}"/>
+ 			   <a href="${bsbfn:createRdUrlWithId(pageContext.request,pageId,m,videoLinkId,batsman.inningVideo.videoUrl,null,null,null)}">
+			   		<img src="${imgUrl1}" class="score-play-button"/>
+           	   </a>
+           	</c:if>
+        </td>
+        <td align="center">(${batsman.bowlpalyed})</td>
+        <td width="15%" align="center">${batsman.fours}</td>
+        <td width="15%" align="center">${batsman.sixers}</td>
+       <%-- <c:if test="${batsman.bowlpalyed > 0}">
+            <fmt:formatNumber var="rrate"
+                              value="${(batsman.run/batsman.bowlpalyed)* 100}"
+                              maxFractionDigits="0" />
+            <td width="15%" align="center">(${rrate})</td>
+        </c:if>
+        <c:if test="${batsman.bowlpalyed <= 0}">
+            <td width="15%" align="center">0</td>
+        </c:if>
+       --%>
+        </tr>
+    </c:forEach>
+</table>
+<table width="100%" border="0" cellspacing="0" cellpadding="0" class="score-data-table noborder">
+  <tr>
+    <td width="36%" align="left"><span><s:message code="label.extras" var="messageText"/><tti:textOrImage text="${messageText}" size="12"/></span></td>
+    <td width="64%" align="left">${currentInning.extraTotal}</td>
+    </tr>
+  <tr>
+    <td align="left"><s:message code="label.total" var="messageText"/><tti:textOrImage text="${messageText}" size="12"/></td>
+    <td align="left">
+     
+     <tti:textOrImage text="${bsbfn:getTransliteratedText(pageContext.request,currentInning.battingTeam.teamShortName)}  ${currentInning.currentRun}/${currentInning.currentWicket} (${currentInning.currentOver}" size="12"/>
+     <s:message code="label.ovrs" var="messageText"/> <tti:textOrImage text="${messageText}" size="12"/>
+     
+     <tti:textOrImage text=") RR ${currentInning.runrate}" size="12"/>  </td>
+  </tr>
+</table>
+
+</div>
+<div class="text-div"><s:message code="label.stb" var="messageText"/><tti:textOrImage style="b" bgColor="#e7e5e5" text="${messageText}" size="12"/>:
+    <c:forEach var="stb" items="${stillToBat}">
+       <c:set var="playerlink" value="${playerurl}/${stb.batsmenId}.html"/>
+        	<a href="${bsbfn:createRdUrl(pageContext.request,header,pageId,uuid,circle,'1',m,playerLinkId,server,'',playerlink)}">
+             
+            <tti:textOrImage bgColor="#e7e5e5" fontColor="#0579c6" text="${bsbfn:getTransliteratedTextWithType(pageContext.request,stb.batsmanFullName,5)}" size="12"/>
+            </a>,
+    </c:forEach>
+</div>
+
+<div class="text-div"><strong><s:message code="label.thisover" var="messageText"/><tti:textOrImage bgColor="#e7e5e5"  style="b" text="${messageText}" size="12"/>:</strong>
+            
+            <tti:textOrImage bgColor="#e7e5e5" text="${matchDetails.currentOverDetails}" size="12"/>
+</div>
+
+<div class="text-div"><strong><s:message code="label.fow" var="messageText"/><tti:textOrImage bgColor="#e7e5e5" style="b" text="${messageText}" size="12"/>:</strong> <c:forEach var="fow" items="${currentInning.fallOfWicketInfoList}">
+    	<c:set var="playerlink" value="${playerurl}/${fow.playerId}.html"/>
+       		<c:if test="${fn:length(fow.playerName) > 0}">
+       		<a href="${bsbfn:createRdUrl(pageContext.request,header,pageId,uuid,circle,'1',m,playerLinkId,server,'',playerlink)}">        		
+       		<tti:textOrImage bgColor="#e7e5e5" fontColor="#0579c6" text="${bsbfn:getTransliteratedTextWithType(pageContext.request,fow.playerName,5)}" size="12"/>
+       		</a>
+       			
+       			<tti:textOrImage bgColor="#e7e5e5" text="${fow.score} (${fow.over})," size="12"/>&nbsp;
+       		</c:if>
+  </c:forEach>
+</div>
+
+
+<div class="score-data">
+<table width="100%" cellpadding="0" cellspacing="0" class="score-data-table">
+  <tbody>
+    <tr>
+      <td class="head"><span><s:message code="label.bowling" var="messageText"/><tti:textOrImage bgColor="#999999" fontColor="white" style="b" text="${messageText}" size="12"/></span></td>
+      <td align="center" class="head"><span>O</span></td>
+      <td align="center" class="head"><span>M</span></td>
+      <td align="center" class="head"><span>R</span></td>
+      <td align="center" class="head"><span>W</span></td>
+      <td align="center" class="head"><span>ER</span></td>
+    </tr>
+    <c:set var="counter" value="0" scope="page"/>
+    <c:forEach var="bowler" items="${currentInning.bowlerScore}">
+        <c:set var="count" value="${count + 1}" scope="page"/>
+        <c:if test="${count%2 == 0}">
+            <tr class="score-data-row">
+        </c:if>
+        <c:if test="${count%2 != 0}">
+            <tr>
+        </c:if>
+	    <c:set var="playerlink" value="${playerurl}/${bowler.bowlerId}.html?type=bowl"/>
+        <td><a href="${bsbfn:createRdUrl(pageContext.request,header,pageId,uuid,circle,'1',m,playerLinkId,server,'',playerlink)}">
+        
+        <tti:textOrImage fontColor="#0579c6" text="${bsbfn:getTransliteratedTextWithType(pageContext.request,bowler.bowlerFullName,5 )}" size="12"/>
+        </a>
+        <c:if test="${bowler.inningVideo != null}">
+	           <c:set var="imgUrl1" value="${server}${pageContext.request.contextPath}/cricket/images/video-play-icon.png"/>
+			   
+			   <c:set var="m" value="${modules.CRICKET_VIDEO}"/>
+	    	   <c:set var="videoLinkId" value="${moduleDescIds.SINGLE_VIDEO_LINK}"/>
+ 			   <a href="${bsbfn:createRdUrlWithId(pageContext.request,pageId,m,videoLinkId,bowler.inningVideo.videoUrl,null,null,null)}">
+			   		<img src="${imgUrl1}" class="score-play-button"/>
+           	   </a>
+        </c:if>
+        </td>
+        <td align="center">${bowler.overBowled}</td>
+        <td align="center">${bowler.maiden}</td>
+        <td align="center">${bowler.run}</td>
+        <td align="center">${bowler.wicket}</td>
+        <fmt:formatNumber var="erate"
+                          value="${(bowler.run/(bowler.overBowled.overNum*6+bowler.overBowled.bowlNum))*6}"
+                          maxFractionDigits="1" />
+        <td align="center">${erate}</td>
+        </tr>
+    </c:forEach>
+  </tbody>
+</table>
+</div>
+<br />
+<%-- <div class="heading" style="margin-bottom:5px;" ><s:message code="label.graphs" var="messageText"/><tti:textOrImage style="b" bgColor="#e7e5e5" fontColor="#666" text="${messageText}" size="14"/></div>
+<div class="graphic">
+<%--<table width="100%" border="0" cellspacing="0" cellpadding="0"  class="tabs">--%>
+  <%--<tr>--%>
+    <%--<td width="33%" style="border-right:1px solid #cbcaca;" class="active-left" >Wagon Wheel</td>--%>
+     <%--<td width="33%" style="border-right:1px solid #cbcaca;" ><a href="#">Worm</a></td>--%>
+    <%--<td width="33%"><a href="must-watch3.html">bar</a></td>--%>
+  <%--</tr>--%>
+<%--</table>--%>
+<%-- <img src="${config.icsBaseUrl}${bsbfn:getResizedImageUrl(graph,229,243)}"/>
+</div>--%>
+</c:if>
+
+</div>
+
+<div class="grey-box-bottom"></div>
+
+<%-- <c:if test="${language == 'en'}">
+<div class="quick-links">
+	<jsp:include page="commentary-body.jsp"/>
+    <c:set var="m" value="${modules.COMMENTARY}"/>
+    <c:set var="commentaryLinkId" value="${moduleDescIds.COMMENTARY_LINK}"/>
+    <div class="link"><a href="${bsbfn:createRdUrl(pageContext.request,header,pageId,uuid,circle,'1',m,commentaryLinkId,server,'',commentrylink)}"><s:message code="label.viewfullcommentary" var="messageText"/></a></div>
+</div>
+</c:if>--%>
+
+<jsp:include page="socialwidget.jsp">
+    <jsp:param name="thispagetitle" value="View Live score : ${team1.teamShortName} vs ${team2.teamShortName}"/>
+    <jsp:param name="thispageurl" value="http://m.airtellive.com${pageContext.request.contextPath}/cricket/${currentMatch}/score.html"/>
+</jsp:include>
+</c:if>
+<jsp:include page="../banner.jsp"/>
+<jsp:include page="imagegallery.jsp" />
+<jsp:include page="../../videos/smart/related.jsp">
+    <jsp:param value="${relatedVideos}" name="videos"/>
+    <jsp:param value="2" name="nCols"/>
+    <jsp:param value="1" name="maxRows"/>
+    <jsp:param value="" name="urlPart"/>
+    <jsp:param value="120" name="thumbnailWidth"/>
+    <jsp:param value="90" name="thumbnailHeight"/>
+    <jsp:param value="${config.watermarkImageUrl}" name="watermarkImage"/>
+    <jsp:param value="50" name="watermarkImageXPos"/>
+    <jsp:param value="35" name="watermarkImageYPos"/>
+    <jsp:param value="20" name="watermarkImageTransparency"/>
+    <jsp:param value="/cricket/css/style_ssmart20140425.css" name="stylesheet"/>
+</jsp:include>
+<jsp:include page="vasmodule.jsp" />
+<jsp:include page="quickinkswidget.jsp"/>
+<jsp:include page="footer.jsp"/>

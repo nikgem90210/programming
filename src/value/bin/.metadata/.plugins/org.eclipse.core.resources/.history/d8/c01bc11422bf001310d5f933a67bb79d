@@ -1,0 +1,108 @@
+<%@ page contentType="text/html;charset=UTF-8" language="java"%>
+<%@ taglib uri="http://java.sun.com/jsp/jstl/core" prefix="c"%>
+<%@ taglib uri="http://java.sun.com/jsp/jstl/fmt" prefix="fmt"%>
+<%@ taglib prefix="s" uri="http://www.springframework.org/tags"%>
+<%@ taglib uri="http://java.sun.com/jsp/jstl/functions" prefix="fn"%>
+<%@ taglib uri="http://bsbportal.com/functions" prefix="bsbfn"%>
+<%@ taglib uri="http://bsbportal.com/functions/tti" prefix="tti" %>
+
+<jsp:include page="header.jsp" />
+
+<c:set var="path" value="${pageContext.request.contextPath}/elections" />
+<c:set var="specId" value="1" />
+<c:set var="m" value="${modules.VIDEO}" />
+<c:set var="mId" value="${moduleDescIds.VIDEO_LINK}" />
+<c:set var="mId2" value="${moduleDescIds.VIDEO_TITLE_LINK}" />
+
+
+<s:message code="label.videos" var="videos"/>
+
+<%-- <% request.setCharacterEncoding("utf-8"); %>
+<jsp:include page="../../videos/smart/related.jsp">
+    <jsp:param value="${videos}(${fn:length(relatedVideos)})" name="title"/>
+	<jsp:param value="${relatedVideos}" name="videos"/>
+	<jsp:param value="3" name="nCols"/>
+	<jsp:param value="5" name="maxRows"/>
+	<jsp:param value="${path}" name="urlPart"/>
+	<jsp:param value="80" name="thumbnailWidth"/>
+	<jsp:param value="60" name="thumbnailHeight"/>
+	<jsp:param value="${config.watermarkImageUrl}" name="watermarkImage"/>
+	<jsp:param value="30" name="watermarkImageXPos"/>
+	<jsp:param value="20" name="watermarkImageYPos"/>
+	<jsp:param value="20" name="watermarkImageTransparency"/>
+	<jsp:param value="true" name="viewAllEnabled"/>
+	<jsp:param value="../css/video-detail-smart20140220.css" name="stylesheet"/>
+</jsp:include> --%>
+
+
+<div class="item-header"><s:message code="label.videos" var="messageText"/><tti:textOrImage bgColor="#e5e5e5" fontColor="black"  text="${messageText}" size="14"/></div>
+    <c:forEach var="video" items="${relatedVideos}">
+    
+    
+    <div class="videoList">
+        	<ul>
+            	<li>
+                	<a href="${ bsbfn:createRdUrl(pageContext.request,header,pageId,uuid,circle,specId,m,mId,server,path,videoDetailUrl)}">
+                    	<div class="videoThumb">
+                        	<c:set var="thumbUrl"
+										value="${config.icsBaseUrl}${bsbfn:getWatermarkedImageUrl(video.getThumbnailImageUrl(),80,60,config.watermarkImageUrl,30,20,20)}" />
+									<img src="${thumbUrl}" alt="-" />
+                            <div class="overlayBar">
+                                <img src="images/videoIcon2.png" alt="" class="videoIcon">
+                                <div class="videoDuration"><tti:textOrImage text="${video.durationMin} ${bsbfn:getTranslatedText(pageContext.request,'minutes')}" size="12"/></div>
+                            </div>
+                        </div>
+                        <div class="videoDetails">
+                            <strong><tti:textOrImage fontColor="#0688d7" text="${video.title}" width="-100"/></strong>
+                        </div>
+                    </a>
+                </li>
+            </ul>
+        </div>
+    
+    <%-- <div class="photolisting">
+    	<table width="100%" border="0" cellspacing="0" cellpadding="0">
+    		<tr>
+    			<td width="95" align="left">
+    			<div class="overlay">
+    			<span class="galleryIcon"></span>
+    			<div class="galleryTxt">
+    				<c:set var="videoDetailUrl" value="video.html?id=${video.getId()}"/>
+        
+        			<a href="">
+        				<c:set var="thumbUrl"
+										value="${config.icsBaseUrl}${bsbfn:getWatermarkedImageUrl(video.getThumbnailImageUrl(),80,60,config.watermarkImageUrl,30,20,20)}" />
+									<img src="${thumbUrl}" alt="-" />
+									<br>
+        				 
+					</a>
+				</div>
+				</div>
+				</td>
+				<td align="left" valign="top">
+					<a href="${ bsbfn:createRdUrl(pageContext.request,header,pageId,uuid,circle,specId,m,mId2,server,path,videoDetailUrl)}">
+        				
+        				
+         			</a>
+        		</td> 
+        	</tr>
+        </table>
+    </div> --%>
+    </c:forEach>
+<div align="center">
+	<div class="pagination">
+		<c:if test="${pager.hasPrevPage}">
+			<c:set var="moreGallery" value="${pageContext.request.contextPath}/elections/videos.html?p=${pager.previousPageNumber}"/>
+			<a href="${bsbfn:createRdUrl(pageContext.request,header,pageId,uuid,circle,'5',modules.PAGINATION_BOTTOM,moduleDescIds.PAGINATION_PREV,server,'',moreGallery)}">
+				<img src="${static_file_path}/photo/images/photoPrevIcon.png" width="32" alt="Prev" />  </a></div>
+		</c:if>
+		<c:if test="${pager.hasNextPage}">
+			<c:set var="moreGallery" value="${pageContext.request.contextPath}/elections/videos.html?p=${pager.nextPageNumber}"/>
+			<a href="${bsbfn:createRdUrl(pageContext.request,header,pageId,uuid,circle,'5',modules.PAGINATION_BOTTOM,moduleDescIds.PAGINATION_NEXT,server,'',moreGallery)}">
+				<img src="${static_file_path}/photo/images/photoNextIcon.png" width="32" alt="Next" />  
+			</a>
+		</c:if>
+	</div>
+</div>
+
+<jsp:include page="footer.jsp"/> 

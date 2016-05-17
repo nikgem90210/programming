@@ -18,16 +18,19 @@ public class FindDuplicateCharacter {
 		BufferedReader br = new BufferedReader(new InputStreamReader(System.in));
 		System.out.println("Enter the String in which you want to find the Duplicate character");
 		str = br.readLine();
-		char[] charArray = str.toCharArray();
-		for (int i = 0; i < charArray.length; i++) {
-			if (hashMap.containsKey(charArray[i])) {
-				count = hashMap.get(charArray[i]);
-				count++;
-				hashMap.put(charArray[i], count);
-			} else {
-				hashMap.put(charArray[i], 1);
+		if(str != null){
+			char[] charArray = str.toCharArray();
+			for (int i = 0; i < charArray.length; i++) {
+				if (hashMap.containsKey(charArray[i])) {
+					count = hashMap.get(charArray[i]);
+					count++;
+					hashMap.put(charArray[i], count);
+				} else {
+					hashMap.put(charArray[i], 1);
+				}
 			}
 		}
+		
 		Iterator<Map.Entry<Character, Integer>> iterator = hashMap.entrySet().iterator();
 		while (iterator.hasNext()) {
 			Entry<Character, Integer> entry = iterator.next();

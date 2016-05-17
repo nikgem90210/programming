@@ -1,0 +1,58 @@
+package com.bsb.portal.fe.services;
+
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.HashMap;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Map;
+import java.util.Set;
+
+import org.springframework.stereotype.Service;
+
+import com.bsb.portal.context.PortalContext;
+import com.bsb.portal.dto.PhotoAlbum;
+
+@Service
+public class FifaService extends BaseService {
+	
+	private Map<String,List<PhotoAlbum>> galleriesMap = new HashMap<String,List<PhotoAlbum>>();
+	private static final String [] langs = {"en"};
+	
+	
+	public void loadPhotos() {
+		for(String lang : langs){
+			List<PhotoAlbum> galleries = null;
+			if(lang.equalsIgnoreCase("hi")){
+				galleries = loadGalleries("",PHOTOS_SEARCH_HI_CATEGORY,200,lang);
+			}
+			else{
+				galleries = loadGalleries("", PHOTOS_SEARCH_EN_CATEGORY,200,lang);
+
+			}
+			Set<PhotoAlbum> albumsSet = new HashSet<>();
+			albumsSet.addAll(galleries);
+			galleries = new ArrayList(albumsSet) ;
+			Collections.sort(galleries, new PhotoAlbumComparator());
+			galleriesMap.put(lang, galleries);
+
+		}
+	}
+	
+	
+	
+	public List<PhotoAlbum> getGalleries(){
+		String lang = PortalContext.getI18nContext().getLang();
+		List<PhotoAlbum> galleriesLangSpecific = null;
+
+		if(galleriesMap == null || galleriesMap.size()==0)
+			return null;
+
+		galleriesLangSpecific = galleriesMap.get(lang);
+
+		return galleriesLangSpecific;
+	}
+	
+	
+	
+}

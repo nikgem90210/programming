@@ -1,0 +1,4 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<session version="1.0">
+<refactoring comment="Rename resource &apos;portal-bheem-fe/web/wtynd/images/youngGirlStudent.jpg&apos; to &apos;youngGirlStudent.png&apos;" description="Rename resource &apos;youngGirlStudent.jpg&apos;" flags="7" id="org.eclipse.ltk.core.refactoring.rename.resource" input="web/wtynd/images/youngGirlStudent.jpg" name="youngGirlStudent.png" stamp="1400484764394" updateReferences="true"/>
+</session>

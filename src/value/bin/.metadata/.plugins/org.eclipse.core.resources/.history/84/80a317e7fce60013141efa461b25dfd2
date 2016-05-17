@@ -1,0 +1,93 @@
+<%@ page contentType="text/html;charset=UTF-8" language="java" %>
+<%@ taglib uri="http://java.sun.com/jsp/jstl/core" prefix="c" %>
+<%@ taglib uri="http://java.sun.com/jsp/jstl/fmt" prefix="fmt" %>
+<%@ taglib prefix="s" uri="http://www.springframework.org/tags" %>
+<%@ taglib uri="http://java.sun.com/jsp/jstl/functions" prefix="fn" %>
+<%@ taglib uri="http://bsbportal.com/functions" prefix="bsbfn" %>
+<%@ taglib uri="http://bsbportal.com/functions/tti" prefix="tti" %>
+<c:set var="mlink" value="${server}${pageContext.request.contextPath}/cricket/${match.matchId}/score.html"/>
+		<c:set var="murl" value="${bsbfn:createRdUrlWithId(pageContext.request,pageId,modules.RESULTS_TABLE,moduleDescIds.LIVE_SCORE_LINK,mlink,'Matchlink' ,1,'Matchlink')}"/>
+    	<div class="results-item" style="padding-left : 10px"><a href="${murl}" style="display : block">
+    		<span class="results-header"><s:message code="label.team.small.${fn:toLowerCase(match.team1.shortName)}" var="messageText"/>
+    		<tti:textOrImage style="b" fontColor="#297abf" text="${messageText}" size="12"/> <s:message code="label.vs" var="messageText"/>
+    		<tti:textOrImage style="b" fontColor="#297abf" text="${messageText}" size="12"/> <s:message code="label.team.small.${fn:toLowerCase(match.team2.shortName)}" var="messageText"/>
+    		<tti:textOrImage style="b" fontColor="#297abf" text="${messageText}" size="12"/>
+    		</span>
+    		<br>
+    		<span class="match-details">
+	        
+	        <tti:textOrImage text="${bsbfn:getTranslatedText(pageContext.request,match.matchNumber)}, ${bsbfn:getTranslatedTextAfterSplitting(pageContext.request,match.seriesName,\",\")}" width="-50"/>
+	        </span>
+	        <br>
+	        <c:if test="${fn:length(match.matchResultStr) > 0}">
+	        
+	        	<span class="news-info">
+	        <c:choose>
+				<c:when test="${fn:length(match.winningTeamId) > 0}">
+            		<c:choose>
+							<c:when test="${language == 'en'}">
+            					<s:message code="label.team.${fn:toLowerCase(bsbfn:getFirstWordFromStr(match.matchResultStr))}"/> <s:message code="label.wintext"/> ${bsbfn:getTransliteratedText(pageContext.request,match.winningStatus)} 
+            				</c:when>
+            				<c:otherwise>
+            					<s:message code="label.team.${fn:toLowerCase(bsbfn:getFirstWordFromStr(match.matchResultStr))}" var="messageText"/><tti:textOrImage fontColor="#878787" text="${messageText}" size="12"/>  <tti:textOrImage fontColor="#878787" text="${bsbfn:getTransliteratedText(pageContext.request,match.winningStatus)}" size="12"/> <s:message code="label.wintext" var="messageText"/><tti:textOrImage fontColor="#878787" text="${messageText}" size="12"/>
+            				</c:otherwise>
+            			</c:choose>
+            		
+            	</c:when>
+            	<c:otherwise>
+            		
+            		<tti:textOrImage fontColor="#878787" text="${bsbfn:getTransliteratedText(pageContext.request,match.matchResultStr)}"/>
+            	</c:otherwise>
+            </c:choose>
+	        	
+	        	
+	        	</span>
+	        </c:if>
+	        </a>
+    	</div>
+    	<div class="grey-box">
+    <c:forEach items="${matchDetails.allVideos }" varStatus="loopStatus">
+    	<c:set var="index" value="${loopStatus.index }"/>
+     <div class="match_video_listing">
+                 <table width="100%" border="0" cellspacing="0" cellpadding="0">
+                <tr>
+                    <td width="110" align="left">
+			   <c:set var="m" value="${modules.CRICKET_VIDEO}"/>
+	    	   <c:set var="videoLinkId" value="${moduleDescIds.SINGLE_VIDEO_LINK}"/>
+ 			   <a href="${bsbfn:createRdUrlWithId(pageContext.request,pageId,m,videoLinkId,matchDetails.allVideos[index].videoUrl,null,null,null)}">
+ 			   
+ 			   			<c:set var="thumbUrl"
+										value="${config.icsBaseUrl}${bsbfn:getWatermarkedImageUrl(matchDetails.allVideos[index].thumbnailUrl,100,75,config.watermarkImageUrl,40,30,20)}" />
+                            <c:choose>
+                            <c:when test="${matchDetails.allVideos[index].source == 's3r'}">
+                            <img src="${matchDetails.allVideos[index].thumbnailUrl}" width="100" height="75"/>
+                            </c:when>
+                            <c:otherwise>
+                            <img src="${thumbUrl}" alt=""/>
+                            </c:otherwise>
+                            </c:choose>
+                        </a></td>
+                    <td align="left" valign="top">
+                        <c:if test="${language == 'en'}">
+	                        <a href="${bsbfn:createRdUrlWithId(pageContext.request,pageId,m,videoLinkId,matchDetails.allVideos[index].videoUrl,null,null,null)}">
+	                            <strong><tti:textOrImage fontColor="black" text="${matchDetails.allVideos[index].title}" width="-140"/></strong></a>
+                        </c:if>
+                       <br /><br/>
+                        <strong>
+                            	<a href="${bsbfn:createRdUrlWithId(pageContext.request,pageId,m,videoLinkId,matchDetails.allVideos[index].videoUrl,null,null,null)}" class="red-btn-carousal"><tti:textOrImage bgColor="#ff462d" fontColor="white" text="Rs. ${matchDetails.allVideos[index].price} /-" size="12"/></a>
+                        </strong>
+                    </td>
+                </tr>
+
+            </table>
+        </div>
+    </c:forEach>
+    </div>
+    
+           
+    	<!-- <table width="100%" cellpadding="0" cellspacing="0" border="0" class="results-item">
+	    <tbody>
+	    	<tr><td align="left"></td></tr>
+	        <tr><td></td></tr>
+	        
+	        </tbody></table> -->

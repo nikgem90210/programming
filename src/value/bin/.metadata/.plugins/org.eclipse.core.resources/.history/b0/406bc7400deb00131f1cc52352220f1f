@@ -1,0 +1,25 @@
+package com.bsb.portal.fe.controller;
+
+import org.springframework.stereotype.Controller;
+import org.springframework.web.bind.annotation.RequestMapping;
+
+import com.bsb.portal.constants.AnalyticsConstants;
+
+
+
+
+@Controller
+@RequestMapping(value = "/fifa")
+public class FifaController extends BasePhotoController{
+
+	@Override
+	protected String getSiteId() {
+		
+		return AnalyticsConstants.CATEGORY_FIFA;
+	}
+
+}
+
+
+	@RequestMapping(value = {"","/","/index","/main"})
+	

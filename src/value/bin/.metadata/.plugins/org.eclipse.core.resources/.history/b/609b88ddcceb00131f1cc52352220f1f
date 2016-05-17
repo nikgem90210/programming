@@ -1,0 +1,251 @@
+package com.bsb.portal.fe.controller;
+
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Map;
+
+import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpServletResponse;
+
+import org.apache.commons.lang3.StringUtils;
+import org.json.simple.JSONObject;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Controller;
+import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestMethod;
+import org.springframework.web.bind.annotation.ResponseBody;
+import org.springframework.web.servlet.ModelAndView;
+
+import com.bsb.portal.common.Device.DeviceGroup;
+import com.bsb.portal.constants.AnalyticsConstants;
+import com.bsb.portal.constants.ScreenConstants;
+import com.bsb.portal.context.PortalContext;
+import com.bsb.portal.dto.Category;
+import com.bsb.portal.dto.GalleryData;
+import com.bsb.portal.dto.Pager;
+import com.bsb.portal.dto.PhotoAlbum;
+import com.bsb.portal.dto.PhotoMetaData;
+import com.bsb.portal.fe.services.FifaService;
+import com.bsb.portal.fe.services.PhotoService;
+import com.bsb.portal.dto.Article;
+import com.bsb.portal.dto.Pager;
+import com.bsb.portal.dto.PhotoAlbum;
+import com.bsb.portal.fe.analytics.ElectionAnalytics;
+import com.bsb.portal.fe.analytics.ElectionAnalytics.ElectionSourcePage;
+import com.bsb.portal.fe.delivery.model.NewsItemModel;
+import com.bsb.portal.fe.delivery.util.DeliveryUtil;
+import com.bsb.portal.fe.services.FifaService;
+import com.bsb.portal.fe.services.NewsServiceNew;
+import com.bsb.portal.fe.utils.PagingUtils;
+import com.bsb.portal.fe.utils.Screen;
+import com.bsb.portal.utils.ResponseWrapper;
+import com.bsb.portal.utils.api.RequestUtils;
+
+
+@Controller
+@RequestMapping(value = "/fifa")
+public class FifaController extends BasePhotoController{
+
+	@Autowired
+	private FifaService     		fifaService;
+
+	@Autowired
+	private PhotoService        	photoService;
+
+
+
+	@Autowired
+	private NewsServiceNew newsService;
+
+	private static final String    NEWS_SEARCH_QUERY_STRING 		    = 			"\"fifa\"\"world cup brazil\"";
+	private static final int   	   NUMB_GALLERY_PER_PAGE  				= 			8;
+	private static final int       NUMB_NEWS_PER_PAGE    				= 			20;
+	private static final int       NUMB_GALLERY_TOP_PAGE       		    = 			 2;
+	
+	
+	
+	
+	@Override
+	protected String getSiteId() {
+
+		return AnalyticsConstants.CATEGORY_FIFA;
+	}
+
+	@Screen(name=ScreenConstants.ROUTE_FIFA_INDEX)
+	@RequestMapping(value = {"","/","/index","/main"})
+	public ModelAndView getFifaData(HttpServletRequest request) {
+		ModelAndView view = null;
+		Map<String, Object> model = getModel(request);
+		DeviceGroup deviceGroup = PortalContext.getDeviceContext().getDeviceGroup();
+		List<PhotoAlbum> albumList = new ArrayList<PhotoAlbum>();
+		albumList = fifaService.getGalleries();
+		if (albumList != null && albumList.size()> 0){
+			model.put("galleries", albumList);
+		}
+		List<Article> newslist = new ArrayList<Article>();
+		newslist=fifaService.getRelatedNews();
+		if(newslist != null && newslist.size()>0){
+			model.put("newslist", newslist);
+		}
+		
+		if(deviceGroup.getGroupId() != DeviceGroup.SUPER_SMART.getGroupId()){
+			albumList = albumList.size()>=NUMB_GALLERY_TOP_PAGE ? albumList.subList(0, NUMB_GALLERY_TOP_PAGE) : albumList;
+		}
+		
+		
+		
+		
+		
+		
+//		ElectionAnalytics.ElectionSourcePage pageId = ElectionAnalytics.ElectionSourcePage.TTP;
+//		addAnalytics(request, model, pageId);
+		
+		return new ModelAndView("fifa/"+deviceGroup.getGroupName()+"/index",model);
+
+
+	}
+
+	@RequestMapping("/newslist")
+	public ModelAndView getNewsList(HttpServletRequest request) {
+
+		Map<String, Object> model = getModel(request);
+		model.put("pgeid", "newslist");
+
+		//        ElectionSourcePage pageId = ElectionAnalytics.ElectionSourcePage.NWL;
+		//        addAnalytics(request, model, pageId);
+
+		String pageNoParam = request.getParameter("p");
+		String lang = PortalContext.getI18nContext().getLang();
+		ResponseWrapper<List<NewsItemModel>> responseWrapper = null;
+		int offset = PagingUtils.getOffset(pageNoParam, NUMB_NEWS_PER_PAGE).intValue();
+		responseWrapper = newsService.search(NEWS_SEARCH_QUERY_STRING , 0, NUMB_NEWS_PER_PAGE, offset, null, null, null, DeliveryUtil.getLocalNewsSite(), lang);
+		List<NewsItemModel> newsItemModelList = responseWrapper.getResult();
+		List<Article> newsList = Article.getArticles(newsItemModelList);
+		Pager pager = PagingUtils.getPager(responseWrapper, offset, NUMB_NEWS_PER_PAGE);
+		if(pager.isHasNextPage()) {
+			model.put("nextpageno", pager.getNextPageNumber());
+		}
+		if(pager.isHasPrevPage()) {
+			model.put("prevpageno", pager.getPreviousPageNumber());
+		}
+		model.put("newslist", newsList);
+		DeviceGroup deviceGroup = PortalContext.getDeviceContext().getDeviceGroup();
+		return new ModelAndView("fifa/"+deviceGroup.getGroupName()+"/news-list", model);
+	}
+
+	@RequestMapping("/news/{newsid}")
+	public ModelAndView getNewsDetails(@PathVariable("newsid") String newsid, HttpServletRequest request) {
+		Map<String, Object> model = getModel(request);
+		Article newsMetadata = Article.getArticle(newsService.getDetail(newsid, DeliveryUtil.getLocalNewsSite(), false).getResult());
+		model.put("news", newsMetadata);
+		model.put("pgeid", "news");
+		// insertGallery(null, model, true);
+		//	        ElectionSourcePage pageId = ElectionAnalytics.ElectionSourcePage.NWD;
+		//	        addAnalytics(request, model, pageId);
+		DeviceGroup deviceGroup = PortalContext.getDeviceContext().getDeviceGroup();
+		return new ModelAndView("fifa/"+deviceGroup.getGroupName()+"/news", model);
+	}
+
+	@RequestMapping("/galleries")
+	public ModelAndView getGalleries(HttpServletRequest request) {
+
+		Map<String, Object> model = getModel(request);
+		String pageNoParam = request.getParameter("p");
+
+		List<PhotoAlbum> fifaGalleries = null;
+		fifaGalleries = fifaService.getGalleries();
+		int offset = (PagingUtils.getOffset(pageNoParam, NUMB_GALLERY_PER_PAGE)).intValue();
+		Pager pager = PagingUtils.getPager(fifaGalleries, offset, NUMB_GALLERY_PER_PAGE);
+		if(pager.isHasNextPage()) {
+			model.put("nextpageno", pager.getNextPageNumber());
+		}
+		if(pager.isHasPrevPage()) {
+			model.put("prevpageno", pager.getPreviousPageNumber());
+		}
+		// List<PhotoAlbum> itemsForPage = getItemsForPage(electionGalleries,
+		// pageNoParam, NUMB_GALLERY_PER_PAGE, model);
+
+		model.put("galleries", fifaGalleries.subList(pager.getStartIndex(), pager.getEndIndex() + 1));
+
+		model.put("pgeid", "galleries");
+
+		//	        ElectionSourcePage pageId = ElectionAnalytics.ElectionSourcePage.GLST;
+		//	        addAnalytics(request, model, pageId);
+		DeviceGroup deviceGroup = PortalContext.getDeviceContext().getDeviceGroup();
+		return new ModelAndView("fifa/"+deviceGroup.getGroupName()+"/photolist", model);
+	}
+
+	@RequestMapping(value = "/fetch/{galleryid}/gallery", method = RequestMethod.GET)
+	@ResponseBody
+	public String getAllGalleryPhotos(
+
+		@PathVariable("galleryid") String galleryId, HttpServletRequest request) throws Exception {
+
+		int count = 0, ResolutionSize = setImageResolution(request);
+		PhotoAlbum gallery = photoService.getGalleryData().getGalleries().get(galleryId);
+		if(gallery == null)
+			gallery = photoService.getGalleryData().getCategoryGalleryMap().get("9");
+		if(gallery == null) {
+			gallery = photoService.getGalleryData("en").getGalleries().get(galleryId);
+		}
+		List<JSONObject> photos = new ArrayList<JSONObject>();
+		if(gallery.getPhotos() == null) {
+			photoService.populateGalleryDetails(gallery);
+		}
+		List<PhotoMetaData> photosList = gallery.getPhotos();
+		for(int index = 0; index < photosList.size(); index++) {
+			PhotoMetaData currentPhotoMD = null;
+			String resizedUrl = null;
+			currentPhotoMD = photosList.get(index);
+			if(currentPhotoMD.getThumbnailUrl().indexOf("ic.bsbportal.com/") < 0)
+			{
+				if(!StringUtils.isBlank(currentPhotoMD.getUrl())) {
+					resizedUrl = RequestUtils.getFullResizedImageUrl(true, currentPhotoMD.getUrl(), ResolutionSize, 0);
+				}
+				else {
+					resizedUrl = RequestUtils.getFullResizedImageUrl(true, currentPhotoMD.getThumbnailUrl(), ResolutionSize, 0);
+				}
+				currentPhotoMD.setResizedUrl(resizedUrl);
+				gallery.setResizedUrl(resizedUrl);
+			}
+			photos.add(currentPhotoMD.toJsonObject());
+		}
+		JSONObject result = new JSONObject();
+		result.put("photos", photos);
+		return result.toJSONString();
+	}
+
+
+
+
+
+	@RequestMapping("/swipe")
+	@ResponseBody
+	public String registerRdforSwipeStars(HttpServletRequest request, HttpServletResponse response) {
+		return registerRdforSwipe(request, response);
+	}
+
+}
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+

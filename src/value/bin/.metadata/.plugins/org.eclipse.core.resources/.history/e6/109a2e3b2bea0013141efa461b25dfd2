@@ -1,0 +1,151 @@
+<%@ page contentType="text/html;charset=UTF-8" language="java" %>
+<%@ taglib uri="http://java.sun.com/jsp/jstl/core" prefix="c" %>
+<%@ taglib uri="http://java.sun.com/jsp/jstl/fmt" prefix="fmt" %>
+<%@ taglib prefix="s" uri="http://www.springframework.org/tags" %>
+<%@ taglib uri="http://java.sun.com/jsp/jstl/functions" prefix="fn" %>
+<%@ taglib uri="http://bsbportal.com/functions" prefix="bsbfn" %>
+<%@ taglib uri="http://bsbportal.com/functions/tti" prefix="tti" %>
+
+<c:set var="thisurl1" value="index"/>
+<c:set var="_ap" value="0" scope="session"/>
+<jsp:include page="header.jsp">
+    <jsp:param name="thisurl1" value="index"/>
+    <jsp:param name="_ap" value="0"/>
+</jsp:include>
+
+
+
+<jsp:include page="scorewidget.jsp">
+    <jsp:param name="thisurl1" value="index"/>
+    <jsp:param name="_ap" value="0"/>
+    <jsp:param name="autorefresh" value="0"/>
+    <jsp:param name="inngurl" value="score"/>
+</jsp:include>
+
+<c:set var="setMargin" value="true" scope="request"/>
+
+<jsp:include page="../banner.jsp"/>
+<c:set var="setMargin" value="false" scope="request"/>
+<jsp:include page="imagegallery.jsp" />
+
+<jsp:include page="../../videos/smart/related.jsp">
+    <jsp:param value="${relatedVideos}" name="videos"/>
+    <jsp:param value="2" name="nCols"/>
+    <jsp:param value="1" name="maxRows"/>
+    <jsp:param value="" name="urlPart"/>
+    <jsp:param value="120" name="thumbnailWidth"/>
+    <jsp:param value="90" name="thumbnailHeight"/>
+    <jsp:param value="${config.watermarkImageUrl}" name="watermarkImage"/>
+    <jsp:param value="50" name="watermarkImageXPos"/>
+    <jsp:param value="35" name="watermarkImageYPos"/>
+    <jsp:param value="20" name="watermarkImageTransparency"/>
+    <jsp:param value="/cricket/css/style_ssmart20140425.css" name="stylesheet"/>
+</jsp:include>
+
+<c:set var="match" value="${matchList}"/>
+	<c:if test="${match != null }">
+	<div class="rv_thumb">
+		<div class="item-header">
+		<c:set var="mlink" value="${server}${pageContext.request.contextPath}/cricket/${match.matchId}/allvideos.html"/>
+		<c:set var="murl" value="${bsbfn:createRdUrlWithId(pageContext.request,pageId,modules.RESULTS_TABLE,moduleDescIds.LIVE_SCORE_LINK,mlink,'Matchlink' ,1,'Matchlink')}"/>
+		
+			<a href="${murl}"><s:message code="label.team.small.${fn:toLowerCase(match.team1.shortName)}" var="messageText"/><tti:textOrImage style="b" fontColor="#297abf" text="${messageText}" size="12"/> <s:message code="label.vs" var="messageText"/><tti:textOrImage style="b" fontColor="#297abf" text="${messageText}" size="12"/> <s:message code="label.team.small.${fn:toLowerCase(match.team2.shortName)}" var="messageText"/><tti:textOrImage style="b" fontColor="#297abf" text="${messageText}" size="12"/></a>
+		</div>
+		<br/>
+		<div style="text-align: center; font-weight: bold">
+		<tti:textOrImage text="${bsbfn:getTranslatedText(pageContext.request,match.matchNumber)}, ${bsbfn:getTranslatedTextAfterSplitting(pageContext.request,match.seriesName,\",\")}" width="-50" size="8"/>
+		</div>
+		
+				
+		<table width="100%" border="0" cellspacing="0" cellpadding="0">
+		<tr><td align="left"></td></tr>
+		<tr>
+		<c:if test="${ match.allVideos[0] !=null}">
+        	<td class="categories-td" width="50%" align="left">
+			   <c:set var="m" value="${modules.CRICKET_VIDEO}"/>
+			   <c:set var="m" value="${modules.CRICKET_VIDEO}"/>
+	    	   <c:set var="videoLinkId" value="${moduleDescIds.SINGLE_VIDEO_LINK}"/>
+ 			   <a href="${bsbfn:createRdUrlWithId(pageContext.request,pageId,m,videoLinkId,match.allVideos[0].videoUrl,null,null,null)}">
+ 			   		<c:set var="thumbUrl" value="${config.icsBaseUrl}${bsbfn:getWatermarkedImageUrl(match.allVideos[0].thumbnailUrl,80,60,config.watermarkImageUrl,30,20,20)}" />
+			   		<img src="${thumbUrl}" alt="" width="140" height="100" />
+               </a>
+               <br>
+                <c:if test="${ match.allVideos[0] !=null}">
+                <c:if test="${language == 'en'}">
+	            	<a href="${bsbfn:createRdUrlWithId(pageContext.request,pageId,m,videoLinkId,match.allVideos[0].videoUrl,null,null,null)}">
+	                   <span><tti:textOrImage fontColor="black" text="${match.allVideos[0].title}" width="-140"/></span></a>
+                </c:if>
+                <br /><br/>
+                <strong>
+                    <a href="${bsbfn:createRdUrlWithId(pageContext.request,pageId,m,videoLinkId,match.allVideos[0].videoUrl,null,null,null)}" class="red-btn-carousal"><tti:textOrImage bgColor="#ff462d" fontColor="white" text="Rs. ${match.allVideos[0].price} /-" size="12"/></a>
+                </strong>
+            </c:if>
+            </td>
+            </c:if>
+            <c:if test="${ match.allVideos[1] !=null}">
+            <td class="categories-td" width="50%" align="left">
+			   <c:set var="m" value="${modules.CRICKET_VIDEO}"/>
+			   <c:set var="m" value="${modules.CRICKET_VIDEO}"/>
+	    	   <c:set var="videoLinkId" value="${moduleDescIds.SINGLE_VIDEO_LINK}"/>
+ 			   <a href="${bsbfn:createRdUrlWithId(pageContext.request,pageId,m,videoLinkId,match.allVideos[1].videoUrl,null,null,null)}">
+ 			   		<c:set var="thumbUrl" value="${config.icsBaseUrl}${bsbfn:getWatermarkedImageUrl(match.allVideos[1].thumbnailUrl,80,60,config.watermarkImageUrl,30,20,20)}" />
+			   		<img src="${thumbUrl}" alt="" width="140" height="100" />
+               </a>
+               <br>
+               <c:if test="${ match.allVideos[1] !=null}">
+                <c:if test="${language == 'en'}">
+	            	<a href="${bsbfn:createRdUrlWithId(pageContext.request,pageId,m,videoLinkId,match.allVideos[1].videoUrl,null,null,null)}">
+	                   <span><tti:textOrImage fontColor="black" text="${match.allVideos[1].title}" width="-140"/></span></a>
+                </c:if>
+                <br /><br/>
+                <strong>
+                    <a href="${bsbfn:createRdUrlWithId(pageContext.request,pageId,m,videoLinkId,match.allVideos[1].videoUrl,null,null,null)}" class="red-btn-carousal"><tti:textOrImage bgColor="#ff462d" fontColor="white" text="Rs. ${match.allVideos[1].price} /-" size="12"/></a>
+                </strong>
+            </c:if>
+            </td>
+            </c:if>
+         </tr>
+         <tr>
+         
+           
+        </tr>
+            
+ 		</table>
+ 		<br>
+	</div>
+	
+	<div class="view-all">
+
+	<c:set var="m" value="${modules.VIEW_ALL}" />
+	<c:set var="mId" value="${moduleDescIds.VIDEO_VIEW_ALL_LINK}" />
+	<c:set var="rurl" value="${match.matchId}/allvideos.html" />
+	
+			<a
+				href="${bsbfn:createRdUrl(pageContext.request,header,pageId,uuid,circle,specId,m,mId,server,path,rurl)}"
+				class="rv_light_grey_btn">
+				<s:message code="top.view_all" var="messageText"/><tti:textOrImage text="${messageText} >>" style="b" transparent="true" fontColor="black"/>
+			</a>
+	
+
+</div>
+	
+ 	</c:if>		  
+
+
+<jsp:include page="newsModule.jsp" />
+
+<c:set var="seriesId" value="all" scope="request"/>
+<jsp:include page="resultschedulemodule.jsp" >
+	<jsp:param value="abc" name="abc"/>
+
+</jsp:include>
+
+<jsp:include page="topPlayers.jsp" />
+<jsp:include page="topImageModule.jsp" />
+<c:if test="${language == 'en'}">
+	<jsp:include page="qriousModule.jsp" />
+</c:if>
+<jsp:include page="vasmodule.jsp" />
+<jsp:include page="quickinkswidget.jsp"/>
+<div class="grey-box-bottom"></div>
+<jsp:include page="footer.jsp"/>

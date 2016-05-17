@@ -1,0 +1,338 @@
+<%@ page contentType="text/html;charset=UTF-8" language="java"%>
+<%@ taglib uri="http://java.sun.com/jsp/jstl/core" prefix="c"%>
+<%@ taglib uri="http://java.sun.com/jsp/jstl/fmt" prefix="fmt"%>
+<%@ taglib prefix="s" uri="http://www.springframework.org/tags"%>
+<%@ taglib uri="http://java.sun.com/jsp/jstl/functions" prefix="fn"%>
+<%@ taglib uri="http://bsbportal.com/functions" prefix="bsbfn"%>
+<%@ taglib uri="http://bsbportal.com/functions/tti" prefix="tti" %>
+
+<jsp:include page="header.jsp"></jsp:include>
+
+<c:set var="path" value="${pageContext.request.contextPath}/stars" />
+<c:set var="specId" value="3" />
+<c:set var="m" value="${modules.TOP_INFO}" />
+<c:set var="gal" value="${moduleDescIds.GALLERY_LINK}" />
+<c:set var="movie" value="${moduleDescIds.MOVIES_LINK}" />
+<c:set var="star" value="${moduleDescIds.STARNAME_LINK}" />
+<c:set var="about" value="${moduleDescIds.ABOUTME_LINK}" />
+<c:set var="follo" value="${moduleDescIds.FOLLO_LINK}" />
+<c:set var="mydownloads" value="${moduleDescIds.MYDOWNLOADS_LINK}" />
+<c:set var="format" value="dd MMM yyyy" />
+
+<table width="100%" border="0" cellspacing="0">
+    <tr>
+        <c:set var="url"
+               value="${bsbfn:encode(fn:toLowerCase(starmetadata.name))}/photo.html?i=0&_ap=1" />
+        <td width="13%" align="left" valign="top" class="module"><a
+                href="${bsbfn:createRdUrl(pageContext.request,header,pageId,uuid,circle,specId,m,gal,server,path,url)}"><img
+        		src="${config.icsBaseUrl}${bsbfn:getResizedImageUrl(starmetadata.profilePhoto,41,54)}" /><br/>
+        </a></td>
+        <c:set var="url" value="${bsbfn:encode(fn:toLowerCase(starmetadata.name))}/about.html"/>
+        <td width="90%" align="left" valign="top" class="module"><a
+                href="${bsbfn:createRdUrl(pageContext.request,header,pageId,uuid,circle,specId,m,star,server,path,url)}">
+            <strong><tti:textOrImage text="${bsbfn:getTransliteratedTextWithType(pageContext.request,starmetadata.name,2)}" size="12" style="b" /></strong></a><br/>
+            <span class="small-text"><c:if test="${starmetadata.dob != null}"> <tti:textOrImage text="${bsbfn:getTranslatedText(pageContext.request,starmetadata.dob)}. ${bsbfn:getTransliteratedText(pageContext.request,starmetadata.placeOfBirth)}" width="-50"/>.</c:if> </span><br/><br/><br/>
+<c:if test="${starmetadata.partnerId == '7'}">
+            <c:set var="urlf" value="http://follo.co.in"/>
+            <div class="infotime pb0 pt0">powered by <a href="${bsbfn:createRdUrl(pageContext.request,header,pageId,uuid,circle,specId,m,follo,urlf,'','')}"><img width="40px" height="16px" src="${pageContext.request.contextPath}/stars/images/follo_logosmall.jpg"/></a></div>
+</c:if>
+        </td>
+    </tr>
+</table>
+<table width="100%" border="0" cellspacing="1" cellpadding="2">
+	<tr>
+		<td width="33%" class="dark-grey-btn"><a
+			href="${bsbfn:createRdUrl(pageContext.request,header,pageId,uuid,circle,specId,m,about,server,path,url)}"
+			style="color: #fff;"><s:message code="label.aboutme" var="messageText"/><tti:textOrImage bgColor="#646464" fontColor="white" text="${messageText}" size="10"/></a></td>
+		<c:if test="${fn:length(starmetadata.movies) > 0}">
+			<c:set var="url"
+				value="${bsbfn:encode(fn:toLowerCase(starmetadata.name))}/movies.html" />
+			<td width="33%" class="dark-grey-btn"><a
+				href="${bsbfn:createRdUrl(pageContext.request,header,pageId,uuid,circle,specId,m,movie,server,path,url)}"
+				style="color: #fff;"><s:message code="label.my_movies" var="messageText"/><tti:textOrImage bgColor="#646464" fontColor="white" text="${messageText}" size="10"/></a></td>
+		</c:if>
+
+	</tr>
+</table>
+<table width="100%" border="0" cellspacing="1" cellpadding="2">
+	<tr>
+		<c:set var="vassearchurl"
+			value="http://search.airtellive.com/vas?p=${bsbfn:urlEncode(starmetadata.name)}&fr=airtel&sg=${bsbfn:getSearchSignature()}" />
+		<td width="33%" class="dark-grey-btn"><a
+			href="${bsbfn:createRdUrl(pageContext.request,header,pageId,uuid,circle,specId,m,mydownloads,vassearchurl,'','')}"><s:message code="label.download" var="messageText"/><tti:textOrImage bgColor="#646464" fontColor="white" text="${messageText}" size="10" /></a>
+		</td>
+	</tr>
+</table>
+		
+<c:set var="bio" value="${fullBio}" />
+<c:if test="${bio != null && fn:length(bio) > 0}">
+<c:choose>
+<c:when test="${language == 'en' }">
+
+<h2 class="ttl">
+    	<img src="http://54.197.253.14:8080/stars/images/icon_ttl_middle_next.gif">
+        <span class="title_bg"> <s:message code="label.about" var="messageText"/> <tti:textOrImage bgColor="#e7e7e7" text="${messageText} ${bsbfn:getTransliteratedTextWithType(pageContext.request,starmetadata.name,2)}" size="12" style="b" /></span>
+</h2>
+</c:when>
+<c:otherwise>
+<h2 class="ttl">
+    	<img src="http://54.197.253.14:8080/stars/images/icon_ttl_middle_next.gif">
+        <span class="title_bg"><s:message code="label.about" var="messageText"/> <tti:textOrImage bgColor="#e7e7e7" text="${bsbfn:getTransliteratedTextWithType(pageContext.request,starmetadata.name,2)} ${messageText}" size="12" style="b" /></span>
+</h2>
+
+
+</c:otherwise>
+</c:choose>
+<c:set var="m" value="${modules.ABOUT_TEXT}" />
+<c:set var="mId" value="${moduleDescIds.READMORE_LINK}" />
+<c:set var="url"
+       value="${bsbfn:encode(fn:toLowerCase(starmetadata.name))}/about.html" />
+<div class="image-list">
+	<c:choose>
+		<c:when test="${language == 'en' }">
+    		<tti:textOrImage text="${starmetadata.summary}..."/>
+    	</c:when>
+    	<c:otherwise>
+    			<c:set var="bio" value="${fullBio}" />
+    			
+    			<c:set var="bio2" value="${bsbfn:getSubstringBeforeNewLine(bio)}" />
+    			<tti:textOrImage text="${bio2}..." />
+    	</c:otherwise>
+    </c:choose>
+    
+    <a
+        href="${bsbfn:createRdUrl(pageContext.request,header,pageId,uuid,circle,specId,m,mId,server,path,url)}"
+        class="link"><br/><s:message code="label.seeMore" var="messageText"/><tti:textOrImage fontColor="#0066cc" text="${messageText}" /></a>
+</div>
+</c:if>
+
+
+<h2 class="ttl">
+    	<img src="http://54.197.253.14:8080/stars/images/icon_ttl_middle_next.gif">
+        <span class="title_bg"><s:message code="label.photos" var="messageText"/><tti:textOrImage text="${messageText}" size="12" style="b"/></span>
+</h2>
+<div class="photo-module">
+	<c:set var="m" value="${modules.GALLERY}" />
+	<c:set var="mId" value="${moduleDescIds.IMAGE_LINK}" />
+	<%--<a href="#" class="small-text">(17 photos | 24 videos)</a>--%>
+	<table width="100%" border="0" cellspacing="0" cellpadding="0">
+		<tr>
+			<c:set var="url"
+				value="${bsbfn:encode(fn:toLowerCase(starmetadata.name))}/photo.html?i=1&_ap=1" />
+			<td width="33%" align="center"><a
+				href="${bsbfn:createRdUrl(pageContext.request,header,pageId,uuid,circle,specId,m,mId,server,path,url)}">
+					<img
+					src="${config.icsBaseUrl}${bsbfn:getResizedImageUrl(starmetadata.photos[1],50,50)}" />
+			</a></td>
+			<c:set var="url"
+				value="${bsbfn:encode(fn:toLowerCase(starmetadata.name))}/photo.html?i=0&_ap=1" />
+			<td width="33%" align="center"><a
+				href="${bsbfn:createRdUrl(pageContext.request,header,pageId,uuid,circle,specId,m,mId,server,path,url)}">
+					<img
+					src="${config.icsBaseUrl}${bsbfn:getResizedImageUrl(starmetadata.photos[0],50,50)}" />
+			</a></td>
+		</tr>
+	</table>
+</div>
+<c:set var="mId" value="${moduleDescIds.VIEWALL_LINK}" />
+<c:set var="url"
+	value="${bsbfn:encode(fn:toLowerCase(starmetadata.name))}/gallery.html" />
+<div class="view-all-photo">
+	<a
+		href="${bsbfn:createRdUrl(pageContext.request,header,pageId,uuid,circle,specId,m,mId,server,path,url)}"
+		class="light-grey-btn"><s:message code="label.viewall" var="messageText"/><tti:textOrImage bgColor="#e7e7e7" text="${messageText}" /></a>
+</div>
+
+<!--c:if test="${language == 'en' }"-->
+<jsp:include page="../../videos/low/related.jsp">
+	<jsp:param value="${relatedVideos}" name="videos"/>
+	<jsp:param value="2" name="nCols"/>
+	<jsp:param value="1" name="maxRows"/>
+	<jsp:param value="${path}/${bsbfn:encode(fn:toLowerCase(starmetadata.name))}" name="urlPart"/>
+	<jsp:param value="50" name="thumbnailWidth"/>
+	<jsp:param value="38" name="thumbnailHeight"/>
+	<jsp:param value="${config.watermarkImageUrl}" name="watermarkImage"/>
+	<jsp:param value="15" name="watermarkImageXPos"/>
+	<jsp:param value="9" name="watermarkImageYPos"/>
+	<jsp:param value="20" name="watermarkImageTransparency"/>
+	<jsp:param value="css/videos-low.css" name="stylesheet"/>
+</jsp:include>
+<!-- /c:if-->
+<!--c:if test="${language == 'en' }"-->
+<!-- Related News -->
+		<c:if test="${not empty starmetadata.relatedNews}">
+			
+			<c:set var="lnva" value="${modules.LATEST_NEWS_VIEW_ALL}" />
+			<c:set var="lnvalnk" value="${moduleDescIds.LATEST_NEWS_VIEW_ALL_LINK}" />
+
+			<c:set var="lni" value="${modules.LATEST_NEWS}" />
+			<c:set var="lnilnk" value="${moduleDescIds.LATEST_NEWS_ITEM}" />
+            
+            
+            <h2 class="ttl">
+                    <img src="http://54.197.253.14:8080/stars/images/icon_ttl_middle_next.gif">
+                    <span class="title_bg"><s:message code="label.star_updates" var="messageText"/><tti:textOrImage text="${messageText}" size="12" style="b"/></span>
+            </h2>
+			
+			
+			
+	        <c:if test="${not empty starmetadata.relatedNews[0]}">
+				<div class="news_ttl" style="cursor: pointer; border-bottom:1px solid #E5E5E5">
+					<table width="100%">
+						<tbody>
+							<tr>
+<%-- 								<td class="ph">
+									<img src="${starmetadata.relatedNews[0].thumbnailUrl}" alt="-">
+								</td>
+ --%>								
+								<td class="newstext" valign="top">
+									<c:set var="rurl" value="${starmetadata.name}/news/detail/${starmetadata.relatedNews[0].id}.html" />
+									<a href="${bsbfn:createRdUrl(pageContext.request,header,pageId,uuid,circle,'1',lni,lnilnk,server,path,rurl)}">
+										<tti:textOrImage text="${starmetadata.relatedNews[0].title}"/>
+									</a>
+								</td>
+							</tr>
+							
+							<tr align="left"><td>
+                				<span class="newscp"><tti:textOrImage text="${starmetadata.relatedNews[0].partner}"/></span>
+							</td></tr>
+							
+							<tr align="left"><td>
+               					<span class="infotime"><tti:textOrImage text="${bsbfn:getTranslatedText(pageContext.request,bsbfn:formatDate(starmetadata.relatedNews[0].lastUpdated))}"/></span>	
+							</td></tr>
+						</tbody>
+					</table>
+				</div>
+	        </c:if>
+	        
+	        <c:if test="${not empty starmetadata.relatedNews[1]}">
+				<div class="news_ttl" style="cursor: pointer; border-bottom:1px solid #E5E5E5">
+					<table width="100%">
+						<tbody>
+							<tr>
+<%-- 								<td class="ph">
+									<img src="${starmetadata.relatedNews[1].thumbnailUrl}" alt="-">
+								</td>
+ --%>								
+								<td class="newstext" valign="top">
+									<c:set var="rurl" value="${starmetadata.name}/news/detail/${starmetadata.relatedNews[1].id}.html" />
+									<a href="${bsbfn:createRdUrl(pageContext.request,header,pageId,uuid,circle,'1',lni,lnilnk,server,path,rurl)}">
+										<tti:textOrImage text="${starmetadata.relatedNews[1].title}"/>
+									</a>
+								</td>
+							</tr>
+							
+							<tr align="left"><td>
+	               				<span class="newscp"><tti:textOrImage text="${starmetadata.relatedNews[1].partner}"/></span>
+							</td></tr>
+							
+							<tr align="left"><td>
+              					<span class="infotime"><tti:textOrImage text="${bsbfn:getTranslatedText(pageContext.request,bsbfn:formatDate(starmetadata.relatedNews[1].lastUpdated))}"/></span>	
+							</td></tr>
+							
+						</tbody>
+					</table>
+				</div>
+	        </c:if>
+	        
+			<c:if test="${fn:length(starmetadata.relatedNews) > 2}">
+				<div align="right" class="subttl">
+					<c:set var="rurl" value="${starmetadata.name}/news/1.html" />
+					<a href="${bsbfn:createRdUrl(pageContext.request,header,pageId,uuid,circle,'1',lnva,lnvalnk,server,path,rurl)}" >
+						<s:message code="label.viewall" var="messageText"/><tti:textOrImage text="${messageText}" bgColor="#e7e7e7" />
+					</a>
+				</div>
+			</c:if>
+        </c:if>
+<!--/c:if-->
+<!-- Related News -->
+
+<c:if test="${language == 'en' }">
+<jsp:include page="qrious.jsp"/>
+</c:if>
+
+<h2 class="ttl">
+        <img src="http://54.197.253.14:8080/stars/images/icon_ttl_middle_next.gif">
+        <span class="title_bg"><s:message code="star.find" var="messageText"/>
+		<s:message code="star.on" var="messageText1"/><tti:textOrImage text="${messageText} ${bsbfn:getTransliteratedTextWithType(pageContext.request,starmetadata.name,2)} ${messageText1}" size="12" style="b"/></span>
+</h2>
+
+<div class="social-module">
+	<c:set var="m" value="${modules.FIND_RELATED_LINKS}" />
+	<c:set var="mId" value="${moduleDescIds.BUTTON_LINK}" />
+	<table width="100%" border="0" cellspacing="0" cellpadding="5">
+		<c:if test="${starmetadata.facebookUrl != null && fn:length(starmetadata.facebookUrl) > 0}">
+			<c:set var="url" value="${starmetadata.facebookUrl}" />
+			<tr>
+				<td align="left" width="90%"><a
+					href="${bsbfn:createRdUrl(pageContext.request,header,pageId,uuid,circle,specId,m,mId,url,'','')}"><s:message code="social.facebook" var="messageText"/><tti:textOrImage text="${messageText}" fontColor="#0032D0" /></a></td>
+                    <td width="10%"><img src="http://54.197.253.14:8080/stars/images/arrow2.png" width="4" /></td>
+			</tr>
+		</c:if>
+		<c:if test="${starmetadata.twitterUrl != null && fn:length(starmetadata.twitterUrl) > 0}">
+			<c:set var="url" value="${starmetadata.twitterUrl}" />
+			<tr>
+				<td align="left" width="90%"><a
+					href="${bsbfn:createRdUrl(pageContext.request,header,pageId,uuid,circle,specId,m,mId,url,'','')}"><s:message code="social.twitter" var="messageText"/><tti:textOrImage text="${messageText}" fontColor="#0032D0"/></a></td>
+                    <td width="10%"><img src="http://54.197.253.14:8080/stars/images/arrow2.png" width="4" /></td>
+			</tr>
+		</c:if>
+		
+		<c:set var="wiki" value="${wikiUrl}" />
+		<c:if test="${wiki != null && fn:length(wiki) > 0}">
+	    	<c:set var="url" value="${wikiUrl}" />
+
+			<tr>
+				<td align="left" width="90%"><a
+					href="${bsbfn:createRdUrl(pageContext.request,header,pageId,uuid,circle,specId,m,mId,url,'','')}"><s:message code="social.wikipedia" var="messageText"/><tti:textOrImage text="${messageText}" fontColor="#0032D0"/></a></td>
+                    <td width="10%"><img src="http://54.197.253.14:8080/stars/images/arrow2.png" width="4" /></td>
+			</tr>
+		</c:if>
+		<c:if
+			test="${starmetadata.blogUrl != null && fn:length(starmetadata.blogUrl) > 0}">
+			<c:set var="url" value="${starmetadata.blogUrl}" />
+			<tr>
+				<td align="left"></td>
+			</tr>
+		</c:if>
+
+	</table>
+</div>
+<c:if test="${music != null && music.size() > 0}">
+
+
+<h2 class="ttl">
+        <img src="http://54.197.253.14:8080/stars/images/icon_ttl_middle_next.gif">
+        <span class="title_bg"><tti:textOrImage text="${bsbfn:getTranslatedText(pageContext.request,'Download Songs @ (Rs. 20)')}" bgColor="#e7e7e7" size="12" style="b"/></span>
+</h2>
+
+<div class="photo-module">
+    
+    <jsp:include page="../../common/low/music.jsp" />
+    <c:if test="${vas.size() > 3}">
+	    <c:set var="url" value="${server }${path }/vas/list/music.html?starname=${starmetadata.name }" />
+		<c:set var="rdUrl" value="${bsbfn:createRdUrlWithId(pageContext.request,pageId,modules.MUSIC_DOWNLOAD,moduleDescIds.VIEWALL_LINK,url,null,null,null)}" />
+		<div class="view-all-photo">
+			<a href="${rdUrl}" class="light-grey-btn"><s:message code="label.viewall" var="messageText"/><tti:textOrImage text="${messageText}" bgColor="#e7e7e7"/></a>
+		</div>
+	</c:if>
+</div>
+</c:if>
+<c:if test="${vas != null && vas.size() > 0}">
+<h2 class="ttl">
+            <img src="http://54.197.253.14:8080/stars/images/icon_ttl_middle_next.gif">
+            <span class="title_bg"><s:message code="vas.downloads" var="messageText"/><tti:textOrImage text="${messageText}" bgColor="#e7e7e7" size="12" style="b"/></span>
+    </h2>
+<div class="photo-module">
+
+    <jsp:include page="../../common/low/popular.jsp" />
+    <c:if test="${vas.size() > 3}">
+	    <c:set var="url" value="${server }${path }/vas/all.html?starname=${starmetadata.name }" />
+		<c:set var="rdUrl" value="${bsbfn:createRdUrlWithId(pageContext.request,pageId,modules.POPULAR_DOWNLOAD,moduleDescIds.VIEWALL_LINK,url,null,null,null)}" />
+		<div class="view-all-photo">
+			<a href="${rdUrl}" class="light-grey-btn"><s:message code="label.viewall" var="messageText"/><tti:textOrImage text="${messageText}" bgColor="#e7e7e7" /></a>
+		</div>
+	</c:if>
+</div> 
+</c:if>
+<jsp:include page="footer.jsp" />

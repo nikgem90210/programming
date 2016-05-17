@@ -8,7 +8,7 @@ import org.json.simple.JSONObject;
 
 public class JsonCreate {
 	
-		private static final String fileName = "/Users/nishant/Desktop/parse.json";
+		private static final String fileName = "/Users/nishant/Desktop/parse.txt";
 	
 	 	@SuppressWarnings("unchecked")
 		public static void  main(String[] args) {
@@ -16,7 +16,7 @@ public class JsonCreate {
 	 		JSONObject jsonObject = new JSONObject();
 	 		
 	 		jsonObject.put("Name", "Nishant Pant");
-	 		jsonObject.put("Comapany", "Bharti SoftBank");
+	 		jsonObject.put("Company", "Bharti SoftBank");
 	 		jsonObject.put("URL", "http://www.nik.com/");
 	 		jsonObject.put("Site Name", "Nishant");
 	 		jsonObject.put("Members", 3);
